@@ -1,23 +1,26 @@
 #include <map>   
-#include "EventHandler.hpp" 
-#include <iostream>       
+#include "IEventHandler.hpp" 
+#include <iostream>         
+#include <sys/epoll.h>
+
 class Reactor 
 {  
     public :  
         static Reactor& getInstance()      ;  
         Reactor(Reactor &copy  )  ;  
         Reactor& operator=(Reactor &copy ) ;      
-    //----------->to define params ----------------------------->
-        int Run()   ;  
-    //two concret classes thts inherit from EventHandler (Accepthandle  /  Clienthandle) note thts fd after connection changes from fd_server to fd_client 
-    //client handle should handle  Read and write event inside it !  
-    //
-        int registre(int  fd ,  EventHandler  * e  )    ;   
-        int unregistre(int fd )   ;    
+        void   Run()   ;  
+        void    registre(epoll_event  ev ,  IEventHandler  * e  )    ;   
+        void    unregistre(epoll_event ev)  ;
         int Dispatch()  ;     
-        void test(){ std::cout<<"single tone"<<std::endl   ;   } 
-    private:  
-        Reactor(){} ;  
-        ~Reactor(){} ; 
-        std::map<int , EventHandler *   >  registred   ;       
+        void test(){ std::cout<<"single tone"<<std::endl   ;   }  
+        void notify(epoll_event  event ) ;     
+        int   getFd()   ;     
+    private: 
+        Reactor();  
+        ~Reactor();
+    private: 
+
+        int _epoll_fd;
+        std::map<int , IEventHandler *   >  _registred   ;       
 }   ;  

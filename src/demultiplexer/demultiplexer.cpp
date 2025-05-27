@@ -12,6 +12,7 @@ class DemultiplexerException : public std::exception {
         DemultiplexerException(const std::string &reason) : _reason("[DemultiplexerException]: " + reason) {  
            
         }
+        ~DemultiplexerException() throw() {}
         virtual char const *what() const throw() {
              return _reason.c_str();
         }

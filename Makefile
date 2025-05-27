@@ -1,10 +1,10 @@
 # Makefile to find all .cpp files and include a folder for includes
 
-SRC_FILES := $(shell find . -name "*.cpp")
+SRC_FILES := $(shell find ./src -name "*.cpp")
 INCLUDE_DIR := -I./include
 OBJ_FILES := $(SRC_FILES:.cpp=.o)
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++17 $(INCLUDE_DIR)
+CXXFLAGS := -Wall -Wextra -std=c++98 $(INCLUDE_DIR)
 
 # Target to build the executable
 TARGET := app

@@ -10,8 +10,10 @@ class ReactorException : public std::exception {
      
      public:
      ReactorException(const std::string &reason) : _reason("[ReactorException]: " + reason) {  
-          
      }
+     ~ReactorException() throw() {
+
+     } 
      virtual char const *what() const throw() {
           return _reason.c_str();
      }
@@ -84,5 +86,5 @@ void Reactor::notify(epoll_event   ev   )
      std::map<int  , IEventHandler *>::iterator it = _registred.find(ev.data.fd  ) ;    
      if (it  == _registred.end())
           throw ReactorException("Fd not Registred") ;    
-     (*it).second->handle_event() ; 
+     (*it).second->handle_event(ev) ; 
 }

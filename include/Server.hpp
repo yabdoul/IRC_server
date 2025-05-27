@@ -17,7 +17,7 @@ class  Server: public IEventHandler
           int listen_fd ;     
           Server() ;  
           Server(Server & copy  )  ;   
-          virtual void handle_event()  ;      
+          virtual void handle_event(epoll_event   ev)  ;      
      public  :    
           static Server&  getInstance() ;   
           ~Server() ;    

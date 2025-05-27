@@ -2,6 +2,7 @@
 #include "IEventHandler.hpp" 
 #include <iostream>         
 #include <sys/epoll.h>
+#include <exception>
 
 class Reactor 
 {  

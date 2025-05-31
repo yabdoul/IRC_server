@@ -1,6 +1,6 @@
 #include "IrcCommandFactory.hpp" 
 
- 
+
 IrcCommandFactory IrcCommandFactory::getInstance() 
 {  
         static IrcCommandFactory instance  ; 

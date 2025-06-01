@@ -10,6 +10,7 @@
 #include <string.h>          
 #include "IEventHandler.hpp"  
 #include <vector>
+#include "Channel.hpp" 
 
 class  Server: public IEventHandler   
 {       
@@ -17,10 +18,14 @@ class  Server: public IEventHandler
           int listen_fd ;     
           Server() ;  
           Server(Server & copy  )  ;   
-          virtual void handle_event(epoll_event   ev)  ;      
+          virtual void handle_event(epoll_event   ev)  ;  
+          std::map <std::string , Channel  >  ChannelList ;       
      public  :    
           static Server&  getInstance() ;   
           ~Server() ;    
-            Server&  operator=(Server &copy  ) ;  
-          int getListenFd() ;              
-}   ;         
+          Server&  operator=(Server &copy  ) ;  
+          int getListenFd()  ;          
+          Channel  IsChannelExist(Channel ch  ) ;   
+          void AddChannel(std::string  ChName )   ;  
+          void UnsubscribeChannel (const Channel& target)  ;         
+}  ;          

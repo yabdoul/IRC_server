@@ -62,3 +62,15 @@ Server &Server::getInstance()
 	static Server instance;
 	return instance;
 }
+  
+void Server::AddChannel(std::string  CnName  ) 
+{    
+		 Channel ch ;   
+		this->ChannelList.insert(std::make_pair(CnName, ch));
+}  
+ 
+// Channel Server::IsChannelExist(std::string name  )  
+// { 
+	
+// }  
+//  ;  

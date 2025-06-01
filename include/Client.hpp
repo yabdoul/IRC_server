@@ -3,6 +3,7 @@
 #include "IOstream.hpp"
 #include <sys/socket.h>
 #include <vector>
+#pragma once 
 
 class Client : public IEventHandler {
 private:

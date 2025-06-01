@@ -5,9 +5,9 @@
 class  IrcCommandFactory
 {  
     private :  
-        IrcCommandFactory() ;   
+        IrcCommandFactory()  ;   
     public :   
-        ~IrcCommandFactory() ;   
+        ~IrcCommandFactory()    ;   
         static IrcCommandFactory  getInstance() ;   
         Command * createJoinCmd() ;   
         Command * createKickCmd() ;   

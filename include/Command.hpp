@@ -1,6 +1,8 @@
+#pragma once  
+ 
 class Command { 
         public :  
-            virtual  void execute() ;   
+            virtual  void execute() =0  ;   
              Command(){} ;   
 }  ;     
  

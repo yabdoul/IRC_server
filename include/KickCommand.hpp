@@ -3,7 +3,7 @@
 class KickCommand :  public  Command  
  { 
     public : 
-        KickCommand() ;   
-        ~KickCommand() ;  
-        virtual void execute()   ;  
+        KickCommand()   ;   
+        ~KickCommand(){} ;  
+        virtual void execute()  {};  
 } ;  

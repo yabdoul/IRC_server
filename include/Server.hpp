@@ -11,7 +11,22 @@
 #include "IEventHandler.hpp"  
 #include <vector>
 #include "Channel.hpp" 
+#include <exception>    
 
+class ServerException : public std::exception
+{
+private:
+     const std::string _reason;
+public:
+    ServerException(const std::string &reason) : _reason("[ServerException]: " + reason)
+    {
+    }
+    ~ServerException() throw() {}
+    virtual char const *what() const throw()
+    {
+        return _reason.c_str();
+    }
+}  ;   
 class  Server: public IEventHandler   
 {       
      private :  
@@ -25,7 +40,8 @@ class  Server: public IEventHandler
           ~Server() ;    
           Server&  operator=(Server &copy  ) ;  
           int getListenFd()  ;          
-          Channel  IsChannelExist(Channel ch  ) ;   
-          void AddChannel(std::string  ChName )   ;  
-          void UnsubscribeChannel (const Channel& target)  ;         
+          Channel *  IsChannelExist(std::string &ChName   ) ;      
+          void AddChannel(std::string  &ChName )   ;  
+          void UnsubscribeChannel (std::string &CName) ;   
+     //--->ac         
 }  ;          

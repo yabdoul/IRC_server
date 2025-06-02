@@ -3,6 +3,22 @@
 #include "Reactor.hpp"
 #include "IEventHandler.hpp"
 #include "Client.hpp"
+/**
+ * @brief Constructor for the Server class.
+ * 
+ * Initializes a server socket, binds it to a specified address and port, 
+ * and sets it to listen for incoming connections. Additionally, registers 
+ * the socket with the Reactor for event handling.
+ * 
+ * @details
+ * - Creates a socket using the `socket` function.
+ * - Binds the socket to `INADDR_ANY` and port 4444.
+ * - Sets the socket to listen with a backlog of 100 connections.
+ * - Registers the socket with the Reactor for EPOLLIN events.
+ * - Handles exceptions during registration with the Reactor.
+ * 
+ * @throws std::exception If an error occurs during registration with the Reactor.
+ */
 Server::Server() : IEventHandler()
 {
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,6 +51,19 @@ Server::~Server()
 	// close listening Here ---- & destory socket
 }
 
+/**
+ * @brief Handles an incoming event on the server's listening socket.
+ * 
+ * This function is responsible for accepting a new client connection,
+ * creating a Client object for the connection, and registering the client
+ * with the Reactor for event handling.
+ * 
+ * @param ev The epoll_event structure containing information about the event.
+ *           Currently unused in this implementation.
+ * 
+ * @throws std::runtime_error If the accept() system call fails.
+ * @throws std::exception If an error occurs during client registration with the Reactor.
+ */
 void Server::handle_event(epoll_event ev)
 {
 	(void)ev;
@@ -63,14 +92,61 @@ Server &Server::getInstance()
 	return instance;
 }
   
-void Server::AddChannel(std::string  CnName  ) 
+/**
+ * @brief Adds a new channel to the server's channel list.
+ * 
+ * This function creates a new channel and associates it with the given
+ * channel name. The channel is then added to the server's ChannelList.
+ * 
+ * @param CnName Reference to the name of the channel to be added.
+ *               This name will be used as the key in the ChannelList map.
+ */
+void Server::AddChannel(std::string  &CnName  ) 
 {    
-		 Channel ch ;   
-		this->ChannelList.insert(std::make_pair(CnName, ch));
+	Channel ch ;   
+	this->ChannelList.insert(std::make_pair(CnName, ch));
 }  
- 
-// Channel Server::IsChannelExist(std::string name  )  
-// { 
-	
-// }  
-//  ;  
+
+/**
+ * @brief Checks if a channel exists in the server's channel list.
+ * 
+ * This function searches for a channel by its name in the server's channel list.
+ * If the channel exists, it returns a pointer to the channel object. If the channel
+ * does not exist, it throws a ServerException and logs the error message to the standard error stream.
+ * 
+ * @param ChName The name of the channel to search for.
+ * @return Channel* Pointer to the channel object if found, otherwise NULL.
+ * 
+ * @throws ServerException If the channel is not found in the channel list.
+ */
+Channel *  Server::IsChannelExist(std::string &ChName   )  
+{  
+	std::map <std::string , Channel>::iterator it =   this->ChannelList.find(ChName);   
+	try {  
+		 if( it  !=  ChannelList.end() )  
+				return &it->second ;   
+		else 
+			throw ServerException("Channel Not Found") ;   
+	} 
+	catch(ServerException &e )
+	{ 
+			std::cerr<<e.what()  ;    
+			return NULL ;   
+	}
+} 
+
+/**
+ * @brief Unsubscribes the server from a specified channel by removing it from the channel list.
+ * 
+ * @param CName A reference to the name of the channel to unsubscribe from.
+ * 
+ * This function checks if the specified channel exists in the server's channel list.
+ * If the channel exists, it removes the channel from the list.
+ */
+void  Server::UnsubscribeChannel(std::string &CName)   
+{  
+	    if(IsChannelExist(CName))
+		{  
+			 this->ChannelList.erase(CName) ;  
+		} 
+}  

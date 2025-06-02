@@ -19,6 +19,16 @@ class DemultiplexerException : public std::exception {
 };
 
 
+/**
+ * @brief Constructor for the Demultiplexer class.
+ * 
+ * This constructor initializes the Demultiplexer by waiting for events using epoll.
+ * It retrieves the file descriptor from the Reactor singleton instance and waits
+ * for events using epoll_wait. If epoll_wait fails, it throws a DemultiplexerException.
+ * For each event received, it notifies the Reactor instance to handle the event.
+ * 
+ * @throws DemultiplexerException If epoll_wait fails.
+ */
 Demultiplexer::Demultiplexer() 
 {     
    struct epoll_event events[MAX_EVENTS];

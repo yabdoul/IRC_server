@@ -26,9 +26,9 @@ Server::Server() : IEventHandler()
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(4444); // port 8080
+	address.sin_port = htons(6667); // port 8080
 	bind(listen_fd, (struct sockaddr *)&address, sizeof(address));
-	listen(listen_fd, 100);
+	listen(listen_fd, 100) ;
 	try
 	{
 		struct epoll_event ev;

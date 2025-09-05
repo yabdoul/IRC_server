@@ -12,6 +12,7 @@
 #include <vector>
 #include "Channel.hpp" 
 #include <exception>    
+#include <map>   
 
 class ServerException : public std::exception
 {

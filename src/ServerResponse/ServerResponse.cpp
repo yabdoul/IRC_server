@@ -1,5 +1,7 @@
 #include "serverResponse.hpp"   
+#include "numericRepliesParser.hpp"  
 
+serverResponse* serverResponse::_instance = NULL ;   
 serverResponse*  serverResponse::getInstance()
 { 
       if(!_instance)  
@@ -8,9 +10,13 @@ serverResponse*  serverResponse::getInstance()
 }   ;    
     
 
-void  serverResponse::respond(Client&receiver,int code) 
-{   
+void  serverResponse::respond(int code ,  std::string &Msg  )  
+{     
+     (void) code  ;  
+     (void) Msg  ;    
+     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt") ;    
+     std::cout<<NumericTemplateParser::getInstance()->getTemplate(code) ;   
      /*   
              TODO here goes the logic of responding  to  Client !  
-    */
+     */
 }  ;   

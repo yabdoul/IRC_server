@@ -2,8 +2,8 @@
 
 class Iclient{  
       public :  
-        Iclient() ;  
-        virtual ~Iclient() ;   
-        virtual void rcvMsg(std::string&  Msg)  =0 ;    
+        Iclient() {} ;  
+        virtual ~Iclient(){} ;   
+        virtual void rcvMsg(std::string&  Msg)  const  =0 ;    
 
     } ;   

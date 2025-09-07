@@ -49,7 +49,7 @@ void Channel::handleInvite(Client  & sender ,  Client &target )
       if(_inviteList[sender]  == "OP")
       {  
          if(_inviteList.count(target)   != 0  )  
-            throw std::runtime_error("[INVITE] Already HERE ! "  ) ;    
+         {   throw std::runtime_error("[INVITE] Already HERE ! "  ) ;    }
             _online.push_back(target)  ;   
             /* 
             [TODO invite Response]      

@@ -4,14 +4,15 @@
 typedef std::string (*ReplyFunc)(const Client&, const std::string&);    
 class serverResponse { 
     private:  
-        serverResponse() ;      
-        std::map<int ,  ReplyFunc * >  _responses ;    
-        static  serverResponse *  _instance   ;          
+        serverResponse() {};      
+        std::map<int ,  ReplyFunc * >  _responses ;         
+        static  serverResponse *  _instance   ;      
+
         /* 
-            [TODO] : Implement function response for each numeric  replie  !  
+            [TODO] : Implement function response for each numeric  replies   !  
              
         */     
     public:  
-        serverResponse*  getInstance() ;        
-        void  respond(Client&receiver,int code) ;     
+        static serverResponse*  getInstance() ;        
+        void  respond( int code ,  std::string &Msg )   ;      
     }  ;    

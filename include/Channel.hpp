@@ -6,19 +6,6 @@
 #include <algorithm>  
 #include <exception>        
 
-class channelException:  public std::exception { 
-        private :  
-                std::string _reason ;     
-        public :
-                channelException(std::string reason  )  { 
-                        _reason = "[CHANNEL EXCPETION]" + reason ;   
-                }  ;     
-                ~channelException(){} ;    
-                const char*  what() const  noexcept {  
-                        return _reason.c_str() ;  
-                } ;   
-
-}  ;  
 class Channel :  public Ichannel {  
         private :  
                  std::map<Client  , std::string   >    _inviteList  ;    

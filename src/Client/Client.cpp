@@ -36,7 +36,7 @@ Client::~Client()
 {   if(_client_fd) close(_client_fd);
 }
 
-Client::Client(const Client &other) 
+Client::Client(const Client &other):IEventHandler(other)
 {  
      _Nick =  other._Nick ;   
      _Pass = other._Pass ;     
@@ -49,7 +49,6 @@ void Client::rcvMsg(std::string &Msg  )  const
     */  
     if(send(_client_fd ,  Msg.c_str()  , Msg.size() ,MSG_DONTWAIT ) < 0)  
         std::cout << "Problem in Sending Msg" << std::endl;   
-    else  
                 
     ;   
 }  ;   

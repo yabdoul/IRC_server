@@ -8,7 +8,6 @@ void  serverResponseFactory::respond(int code ,  std::string &Msg  )
      (void) Msg  ;      
      NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt")  ;         
      std::cout<<NumericTemplateParser::getInstance()->getTemplate(code)   ;   
-        
      /*   
              TODO here goes the logic of responding  to  Client !  
      */

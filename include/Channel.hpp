@@ -17,7 +17,7 @@ class Channel :  public Ichannel {
                 void ExecuteCommand(Command  *  cmd  , Client Client  )  ;    
                 void handleKick(Client& sender,  std::string& targetNick, const std::string& reason)  ;   
                 void handleJoin(Client& sender )  ;        
-                void rcvMsg(std::string  &msg  ) ;    
+                void rcvMsg(std::string  &msg  )  ;    
                 void handleInvite(Client& sender, Client& target)  ;   
                 // void handleTopic(Client& sender, const std::string& newTopic = "");
                 // void handleMode(Client& sender , const std::string& mode, const std::string& param = "") ; 

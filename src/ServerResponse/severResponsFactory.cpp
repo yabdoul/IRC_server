@@ -1,17 +1,8 @@
 #include "severResponsFactory.hpp"   
 #include "numericRepliesParser.hpp"  
+#include <map>   
 
 
-void  serverResponseFactory::respond(int code ,  std::string &Msg  )  
-{     
-     (void) code  ;  
-     (void) Msg  ;      
-     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt")  ;         
-     std::cout<<NumericTemplateParser::getInstance()->getTemplate(code)   ;   
-     /*   
-             TODO here goes the logic of responding  to  Client !  
-     */
-}  ;   
 
 std::string serverResponseFactory::replacePlaceholders(const std::string& tmpl,const std::map<std::string, std::string>& values) 
 { 
@@ -27,4 +18,18 @@ std::string serverResponseFactory::replacePlaceholders(const std::string& tmpl,c
         }
     }
     return result;
-}
+}  
+
+void  serverResponseFactory::respond(int code  ,   Client & cl  )   
+{     
+    NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt")  ;          
+    std::cout<<replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code)  ,  cl.userData()  )<<std::endl  ;      
+    // std::map<std::string , std::string >::iterator  it  = cl.userData().begin()    ;   
+    // while(it !=   cl.userData().end()  )  
+    // {    
+    //      std::cout<<it->first<<"="<<it->second<<std::endl;   
+    //      it++ ;  
+    // }   
+    // if(send(cl)) 
+
+}  ;   

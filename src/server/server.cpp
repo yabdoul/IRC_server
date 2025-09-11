@@ -20,7 +20,8 @@
  * @throws std::exception If an error occurs during registration with the Reactor.
  */
 Server::Server() : IEventHandler()
-{
+{   
+	_serverName= SERVER_NAME ;   
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
 	struct sockaddr_in address;

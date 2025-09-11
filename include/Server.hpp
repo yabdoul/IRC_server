@@ -14,11 +14,13 @@
 #include <exception>    
 #include <map>   
 
+#define SERVER_NAME "irc_server_ysf"   
+
 class ServerException : public std::exception
 {
 private:
      const std::string _reason;
-public:
+public:   
     ServerException(const std::string &reason) : _reason("[ServerException]: " + reason)
     {
     }
@@ -31,8 +33,9 @@ public:
 class  Server: public IEventHandler   
 {       
      private :  
-          int listen_fd ;     
-          Server() ;  
+          int listen_fd ;       
+          std::string  _serverName ;      
+          Server() ;   
           Server(Server & copy  )  ;   
           virtual void handle_event(epoll_event   ev)  ;  
           std::map <std::string , Channel  >  ChannelList ;       

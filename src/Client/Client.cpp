@@ -2,6 +2,12 @@
 #include <fcntl.h>
 #include <unistd.h>  
 #include "Parser.hpp"  
+#include <cstdlib>  
+#include <sstream>
+
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+  
 
 class ClientException : public std::exception
 {
@@ -20,9 +26,8 @@ public:
 };  
 
 
-Client::Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass, IOstream* IO)
-    {  
-         _IO = IO ;  
+Client::Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass)
+    {    
          _client_fd = client_fd ;  
          _Nick =  Nick ;  
          _User = User  ;  
@@ -53,6 +58,15 @@ void Client::rcvMsg(std::string &Msg  )  const
     ;   
 }  ;   
 
+std::map<std::string ,  std::string> Client::userData () const   
+{
+        std::map<std::string ,  std::string> result ;   
+        result["_client_fd"] = SSTR(_client_fd).c_str()      ;    
+        result["nick"]   = _Nick ;    
+        result["user"] =  _User ;    
+        result["server"] = "ascasc" ;   
+        return result  ;   
+}  ;  
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {

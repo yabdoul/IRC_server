@@ -1,6 +1,8 @@
 #include "Channel.hpp"  
 
-Channel::Channel(){}  
+Channel::Channel(){  
+      _invitOnly = false  ;  
+}  
 Channel::~Channel(){}   
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
 
@@ -9,7 +11,9 @@ Channel& Channel::operator=(Channel &c )
 {  
       _inviteList  = c._inviteList  ;  
       return *this ;   
-}  
+}     
+
+
 
 void Channel::handleKick(Client& sender,  std::string& targetNick, const std::string& reason)  
 {        
@@ -22,18 +26,29 @@ void Channel::handleKick(Client& sender,  std::string& targetNick, const std::st
             std::cout<<"NO Privilege"  ;       
 
 }       
+void  Channel::lockChannel(Client & sender)  
+{     
+      (void) sender  ;    
+      if(!_invitOnly)
+            _invitOnly = true  ;     
+      else 
+            throw std::runtime_error("[Channel] : Already Invite Only") ;    
+} ;   
+
 void  Channel::handleJoin(Client &sender  )  
 {     
-      if(_inviteList.count(sender) !=  0 )  
-      { 
-             _online.push_back(sender)  ;   
-             /* 
-             [TOOD]:       
-                  Response , Join  Command echo Goes Here !   
-             */
-      }  
+      if(_invitOnly)  
+      {     
+            (_inviteList.count(sender) != 0 )? 
+            (
+                  std::cout<<"In invite list logic  goes here"<<std::endl   
+            ):
+            (std::cout<<"Not in invite List"<<std::endl) ;  
+      }   
       else  
-            throw std::runtime_error("[JOIN] CLIENT not in invite List" ) ;    
+      {   
+         std::cout<<"Join Logic"<<std::endl  ;   
+      }
 }
 
 void Channel::rcvMsg(std::string &msg )  

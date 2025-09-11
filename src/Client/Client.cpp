@@ -66,7 +66,9 @@ std::map<std::string ,  std::string> Client::userData () const
         result["user"] =  _User ;    
         result["server"] = "ascasc" ;   
         return result  ;   
-}  ;  
+}  ;     
+
+
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {

@@ -58,5 +58,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "fstream": "cpp"
-    }
+    },
+    "github.copilot.chat.codeGeneration.instructions": [
+        
+    ]
 }

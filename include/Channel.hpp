@@ -9,7 +9,7 @@
 class Channel :  public Ichannel {  
         private :  
                  std::map<Client  , std::string   >    _inviteList ;    
-                 std::vector<Client> _online ;         
+                 std::vector<Client> _online  ;         
                  bool _invitOnly ;   
         public :   
                 Channel() ;   

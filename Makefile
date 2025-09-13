@@ -4,7 +4,7 @@ SRC_FILES := $(shell find ./src -name "*.cpp")
 INCLUDE_DIR := -I./include
 OBJ_FILES := $(SRC_FILES:.cpp=.o)
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++98  -g -fsanitize=address $(INCLUDE_DIR)
+CXXFLAGS := -Wall -Wextra -Werror -std=c++98  -g -fsanitize=address $(INCLUDE_DIR)
 
 # Target to build the executable
 TARGET := app

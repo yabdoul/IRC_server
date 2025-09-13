@@ -5,7 +5,7 @@ class middleWare{
     private:
         middleWare() ;   
         std::map<std::string  ,std::string> _perms  ;  
-        middleWare * _instance = NULL  ;    
+        middleWare * _instance    ;    
     public :
         ~middleWare()  ;      
         void addPerm(std::string cmd ,  std::string perms ) ;  

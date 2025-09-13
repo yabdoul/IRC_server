@@ -36,5 +36,9 @@ public:
     } ;     
     virtual void handle_event(epoll_event   ev);      
     std::map<std::string ,  std::string> userData() const  ;   
-    void rcvMsg(std::string&  Msg)  const  ;   
+    void rcvMsg(std::string&  Msg)  const  ;  
+    /* 
+        Parser Should Send a map of Params any way ;    
+    */     
+    void userCommand(Command *  cmd , std::vector<std::string>  params  )  ;    
 };

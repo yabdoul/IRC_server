@@ -1,13 +1,18 @@
 #include "Parser.hpp"   
 
-Parser::Parser(){}   ;  
-Parser::~Parser(){} ;   
+Parser* Parser::instance = 0;
 
+Parser::Parser(){}   
+Parser::~Parser(){}   
 
-void Parser::Parse(std::string  msg ) {      
-     (void ) msg  ;  
-    /*
-        TO Parse User Msg Here 
-    */
-    
+Parser& Parser::getInstance() {
+    if (!instance)
+        instance = new Parser();
+    return *instance;
+}
+
+void Parser::Parse(const std::string& msg) {
+    // TODO: Implement message parsing logic here   
+
+    (void)msg;
 }

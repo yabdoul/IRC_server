@@ -1,8 +1,9 @@
 #include "JoinCommand.hpp"  
   
-
-JoinCommand::JoinCommand() 
+/* 
+    Implement an Execute Command in  Channel Class 
+*/
+void JoinCommand::execute()  
 {  
-
-} 
-
+     
+} ;   

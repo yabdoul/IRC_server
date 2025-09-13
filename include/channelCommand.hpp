@@ -5,5 +5,5 @@ class ChannelCommand{
     public :   
         ChannelCommand() ;  
         ~ChannelCommand() ;   
-        void exeChannel(Client &c , Channel &c  )    ;   
+        virtual void exeChannel(Client &cl , Channel &ch  ) =0  ;   
 } ;  

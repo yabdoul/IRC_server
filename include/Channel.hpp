@@ -17,7 +17,7 @@ class Channel :  public Ichannel {
                 Channel& operator=(Channel &c )    ;   
                 void rcvMsg(std::string  &msg  )  ; 
                 void lockChannel(Client & sender )  ;        
-                void ExecuteCommand(Command  *  cmd  , Client Client  ,  std::vector<std::string> _params  )   ;      ;    
+                void ExecuteCommand(Command  *  cmd  , Client Client  , std::map<std::string , std::string>  params  )   ;      ;    
                 // void handleTopic(Client& sender, const std::string& newTopic = "");
                 // void handleMode(Client& sender , const std::string& mode, const std::string& param = "") ; 
                 // void IsSubscribed(Client &C  )  const    ;   

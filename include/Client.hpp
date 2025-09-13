@@ -3,6 +3,7 @@
 #include "IOstream.hpp"
 #include <sys/socket.h>
 #include <vector>
+#include "Command.hpp"  
 #include "Iclient.hpp"  
 #include <map>   
 #pragma once 

@@ -5,8 +5,8 @@
 #include "Ichannel.hpp"  
 #include <algorithm>  
 #include <exception>        
-
-class Channel :  public Ichannel {  
+#pragma once  
+class Channel  {  
         private :  
                  std::map<Client  , std::string   >    _inviteList ;    
                  std::vector<Client> _online  ;         
@@ -15,9 +15,12 @@ class Channel :  public Ichannel {
                 Channel() ;   
                 ~Channel();         
                 Channel& operator=(Channel &c )    ;   
+                bool isOp(Client &sender )   ;      
                 void rcvMsg(std::string  &msg  )  ; 
                 void lockChannel(Client & sender )  ;        
-                void ExecuteCommand(Command  *  cmd  , Client Client  , std::map<std::string , std::string>  params  )   ;      ;    
+                void ExecuteCommand(Command  *  cmd  , Client Client  , std::map<std::string , std::string>  params  )   ;     
+                void inviteUser(Client &sender ,  Client &target )  ;      
+                void  enterChannel(Client &cl  ) ;       
                 // void handleTopic(Client& sender, const std::string& newTopic = "");
                 // void handleMode(Client& sender , const std::string& mode, const std::string& param = "") ; 
                 // void IsSubscribed(Client &C  )  const    ;   

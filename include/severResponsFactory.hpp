@@ -1,6 +1,6 @@
 #include "Client.hpp"  
 #include <map>   
-
+#pragma once 
 typedef std::string (*ReplyFunc)(const Client&, const std::string&);    
 class serverResponseFactory { 
      public:  

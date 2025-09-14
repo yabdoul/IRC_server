@@ -75,7 +75,10 @@ void Client::handle_event(epoll_event e)
         std::vector<char> buffer(1024, '\0');
         ssize_t n = recv(_client_fd, buffer.data(), buffer.size(), 0);
         if (n > 0) {
-            std::cout << std::string(buffer.begin(), buffer.begin() + n) << std::endl;   
+            std::cout << std::string(buffer.begin(), buffer.begin() + n) << std::endl;     
+            /* 
+        [14-09 todo] --------> needed search  user with nickname in invite command  , ask the server for Client object using getClient functiion 
+            */
             /*
                 Call An Parser Instance Here , i think We need An Abstract factory of Move !  
                 note: Parser function Should Return Command * !    

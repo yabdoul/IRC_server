@@ -10,9 +10,14 @@ void  inviteCommand::exeChannel(Client &cl , Channel &ch  , std::map<std::string
 { 
      if(ch.isOp(cl))  
      { 
-            try{  
-                ch.inviteUser()
+            try{    
+                
+                ch.inviteUser(sender ,  target )   ;  
+            }  
+            catch(std::exception &e)  
+            { 
+                  
             }
      }  
-     throw std::runtime_error("[INVITE] : User is Not an Operator") ;   
+     throw std::runtime_error("[INVITE] : User is Not an Operator") ;      
 } ;   

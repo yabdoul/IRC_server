@@ -3,6 +3,8 @@
 #include "Reactor.hpp"
 #include "IEventHandler.hpp"
 #include "Client.hpp"
+#include <algorithm>  
+
 /**
  * @brief Constructor for the Server class.
  * 
@@ -41,6 +43,14 @@ Server::Server() : IEventHandler()
 	{
 		std::cerr << e.what() << std::endl;
 	}
+}  
+
+void Server::saveUser(Client &C )  
+{ 
+	if(std::find(_clientList.begin() , _clientList.end() ,  C )   ==  _clientList.end( ) )  
+		_clientList.push_back(C) ;    
+	else 
+		throw std::runtime_error("Client Already Registred" ) ;   	
 }
 
 int Server::getListenFd()
@@ -82,11 +92,22 @@ void Server::handle_event(epoll_event ev)
 		struct epoll_event ev;
 		ev.events = EPOLLIN | EPOLLOUT;
 		ev.data.fd = client_fd;
-		Reactor::getInstance().registre(ev, client);
+		Reactor::getInstance().registre(ev, client);  
+		saveUser(*client) ;     
 	} catch (std::exception &e) {
 		throw e;
 	}
-}
+}  
+
+const  Client& Server::getUser(std::string nickname ) const  
+{  
+	for(std::vector<Client>::const_iterator it =  _clientList.begin() ;  it  !=  _clientList.end() ;  it++)  
+	{ 
+		  if((it)->userData()["nick"]  ==   nickname  )  
+		  	 return  (*it)    ;   
+	}  ;      
+	throw std::runtime_error("User Not found") ;   
+} 
 Server &Server::getInstance()
 {
 	static Server instance;

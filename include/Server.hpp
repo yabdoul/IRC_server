@@ -34,18 +34,21 @@ class  Server: public IEventHandler
 {       
      private :  
           int listen_fd ;       
-          std::string  _serverName ;      
+          std::string  _serverName ;     
           Server() ;   
           Server(Server & copy  )  ;   
           virtual void handle_event(epoll_event   ev)  ;  
-          std::map <std::string , Channel  >  ChannelList ;       
+          std::map <std::string , Channel  >  ChannelList ;    
+          std::vector<Client>  _clientList  ;          
      public  :    
           static Server&  getInstance() ;   
           ~Server() ;    
           Server&  operator=(Server &copy  ) ;  
-          int getListenFd()  ;          
+          int getListenFd()  ;  
+          const Client&  getUser(std::string nickname ) const  ;    
           Channel *  IsChannelExist(std::string &ChName   ) ;      
           void AddChannel(std::string  &ChName )   ;  
-          void UnsubscribeChannel (std::string &CName) ;   
+          void UnsubscribeChannel (std::string &CName) ;     
+          void saveUser(Client &c  ) ;     
      //--->ac         
 }  ;          

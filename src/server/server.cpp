@@ -99,11 +99,11 @@ void Server::handle_event(epoll_event ev)
 	}
 }  
 
-const  Client& Server::getUser(std::string nickname ) const  
+  Client&  Server::getUser(std::string nickname )   
 {  
-	for(std::vector<Client>::const_iterator it =  _clientList.begin() ;  it  !=  _clientList.end() ;  it++)  
+	for(std::vector<Client>::iterator it =  _clientList.begin() ;  it  !=  _clientList.end() ;  it++)  
 	{ 
-		  if((it)->userData()["nick"]  ==   nickname  )  
+		  if((it)->userData()["nickname"]  ==   nickname  )  
 		  	 return  (*it)    ;   
 	}  ;      
 	throw std::runtime_error("User Not found") ;   

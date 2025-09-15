@@ -7,7 +7,11 @@ Channel::Channel(){
 }  
 Channel::~Channel(){}   
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
-
+Channel::Channel(Client & owner) 
+{ 
+      _inviteList[owner] = "OP" ;   
+      _online.push_back(owner) ;     
+}
 Channel& Channel::operator=(Channel &c )  
 {  
       _inviteList  = c._inviteList  ;  
@@ -25,7 +29,7 @@ void Channel::ExecuteCommand(Command * cmd  ,  Client client   ,  std::map<std::
       if(dynamic_cast<ChannelCommand *> (cmd) )  
       { 
             ChannelCommand * tmp =  dynamic_cast<ChannelCommand *>  (cmd) ;    
-            tmp->exeChannel(client ,  *this) ;   
+            tmp->exeChannel(client ,  *this , params) ;   
       }   
       else {  
             cmd->execute() ;    
@@ -47,6 +51,10 @@ void Channel::inviteUser(Client &sender ,  Client  &target )
       throw std::runtime_error("[JOIN] : You are  Not An OPP ") ;   
 }  ;   
  
+void Channel::lockChannel(Client &sender)  
+{ 
+      _invitOnly = ((isOp(sender))?true:false)  ;  
+}
 void Channel::enterChannel(Client &cl  ) 
 {    
       if(_inviteList.count(cl) == 0 )   

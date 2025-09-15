@@ -9,4 +9,4 @@ class inviteCommand : public Command  , public ChannelCommand  {
             inviteCommand() {} ;  
             ~inviteCommand(){} ;   
             void exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)   ;   
-}
+}  ;   

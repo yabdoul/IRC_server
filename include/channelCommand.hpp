@@ -1,6 +1,7 @@
 #include "Client.hpp"  
 #include  "Channel.hpp"  
-#include <map>   
+#include <map>     
+#pragma once 
 static std::map<std::string, std::string> g_emptyMap;   
 
 class ChannelCommand{   

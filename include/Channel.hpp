@@ -12,7 +12,8 @@ class Channel  {
                  std::vector<Client> _online  ;         
                  bool _invitOnly ;   
         public :   
-                Channel() ;   
+                Channel() ;  
+                Channel(Client & owner)  ;     
                 ~Channel();         
                 Channel& operator=(Channel &c )    ;   
                 bool isOp(Client &sender )   ;      

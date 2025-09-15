@@ -45,7 +45,7 @@ class  Server: public IEventHandler
           ~Server() ;    
           Server&  operator=(Server &copy  ) ;  
           int getListenFd()  ;  
-          const Client&  getUser(std::string nickname ) const  ;    
+           Client&  getUser(std::string nickname )   ;    
           Channel *  IsChannelExist(std::string &ChName   ) ;      
           void AddChannel(std::string  &ChName )   ;  
           void UnsubscribeChannel (std::string &CName) ;     

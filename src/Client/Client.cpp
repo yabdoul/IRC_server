@@ -62,7 +62,7 @@ std::map<std::string ,  std::string> Client::userData () const
 {
         std::map<std::string ,  std::string> result ;   
         result["_client_fd"] = SSTR(_client_fd).c_str()      ;    
-        result["nick"]   = _Nick ;    
+        result["nickname"]   = _Nick ;    
         result["user"] =  _User ;    
         result["server"] = "ascasc" ;   
         return result  ;   

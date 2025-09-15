@@ -10,7 +10,7 @@ int main()
 {       
         Client u(1 ,  "ascasc" , "sacaseic" , "ascasc"  ) ;        
         Server::getInstance().saveUser(u) ;   
-        Channel ch(u) ;         
+        Channel ch("ascasc" ,  u) ;         
         ch.lockChannel(u)  ;  
         Client c(2  ,  "youssef" ,  "ascasc "  , "ascasc") ;         
         Server::getInstance().saveUser(c) ;   

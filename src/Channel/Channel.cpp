@@ -1,22 +1,19 @@
 #include  "Channel.hpp"
 #include "channelCommand.hpp"  
 #include <algorithm>  
+#include "Client.hpp"  
 
 Channel::Channel(){  
       _invitOnly = false  ;  
 }  
 Channel::~Channel(){}   
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
-Channel::Channel(Client & owner) 
+Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channelName)
 { 
       _inviteList[owner] = "OP" ;   
       _online.push_back(owner) ;     
 }
-Channel& Channel::operator=(Channel &c )  
-{  
-      _inviteList  = c._inviteList  ;  
-      return *this ;   
-}     
+
 
 void Channel::ExecuteCommand(Command * cmd  ,  Client client   ,  std::map<std::string  , std::string>params  )     
 {       

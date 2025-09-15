@@ -3,7 +3,8 @@
 #include <unistd.h>  
 #include "Parser.hpp"  
 #include <cstdlib>  
-#include <sstream>
+#include <sstream> 
+#include "Channel.hpp"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -67,6 +68,15 @@ std::map<std::string ,  std::string> Client::userData () const
         result["server"] = "ascasc" ;   
         return result  ;   
 }  ;     
+ 
+
+void Client::subscribe2channel(Channel &ch )  
+{   
+    if(std::find(_subscribed2Channel.begin() ,  _subscribed2Channel.end()  ,  ch) == _subscribed2Channel.end() )
+      _subscribed2Channel.push_back(ch) ;    
+    else 
+        throw std::runtime_error("[Already in The Channel]") ;   
+} ;   
 
 
 void Client::handle_event(epoll_event e)

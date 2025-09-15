@@ -1,21 +1,28 @@
 #include <map>  
-#include  "Client.hpp" 
 #include "Command.hpp"    
 #include <algorithm>  
 #include "Ichannel.hpp"  
 #include <algorithm>  
-#include <exception>        
-#pragma once  
+#include <exception>          
+#ifndef   CHANNEL_HPP  
+#define CHANNEL_HPP 
+#pragma once    
+class Client ;   
 class Channel  {  
         private :  
                  std::map<Client  , std::string   >    _inviteList ;    
-                 std::vector<Client> _online  ;         
-                 bool _invitOnly ;   
+                 std::vector<Client> _online  ; 
+                 std::string _channelName ;            
+                 bool _invitOnly ;     
         public :   
                 Channel() ;  
-                Channel(Client & owner)  ;     
+                Channel(std::string channelName  ,  Client & owner)  ;     
                 ~Channel();         
-                Channel& operator=(Channel &c )    ;   
+                Channel& operator=(Channel &c )    ;     
+                bool  operator==(const  Channel &other ) const 
+                {    
+                    return((_channelName == other._channelName)?(true):(false)) ;   
+                }
                 bool isOp(Client &sender )   ;      
                 void rcvMsg(std::string  &msg  )  ; 
                 void lockChannel(Client & sender )  ;        
@@ -25,4 +32,5 @@ class Channel  {
                 // void handleTopic(Client& sender, const std::string& newTopic = "");
                 // void handleMode(Client& sender , const std::string& mode, const std::string& param = "") ; 
                 // void IsSubscribed(Client &C  )  const    ;   
-} ;   
+} ;    
+#endif  

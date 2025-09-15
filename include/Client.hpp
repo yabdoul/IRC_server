@@ -4,17 +4,23 @@
 #include <sys/socket.h>
 #include <vector>
 #include "Command.hpp"  
-#include "Iclient.hpp"  
-#include <map>   
+#include "Iclient.hpp"   
+
+#include <map>  
+#ifndef   CLIENT_HPP  
+#define CLINET_HPP  
 #pragma once 
 
+class Channel ;     
+ 
 class Client : public IEventHandler  ,  Iclient   {
 private:
     // IOstream* _IO;
     int   _client_fd;
     std::string _Nick;
     std::string _Pass;
-    std::string _User;
+    std::string _User;  
+    std::vector<Channel *  >  _subscribed2Channel ;  
 public:
     ~Client();       
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
@@ -37,9 +43,12 @@ public:
     } ;     
     virtual void handle_event(epoll_event   ev);      
     std::map<std::string ,  std::string> userData() const  ;   
-    void rcvMsg(std::string&  Msg)  const  ;  
+    void rcvMsg(std::string&  Msg)  const  ;     
+    void subscribe2channel(Channel &ch  )   ;    
     /* 
         Parser Should Send a map of Params any way ;    
     */     
     void userCommand(Command *  cmd , std::vector<std::string>  params  )  ;    
 };
+
+#endif

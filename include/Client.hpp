@@ -42,7 +42,7 @@ public:
         return( (C._Nick ==   _Nick )?(true):(false)) ;    
     } ;     
     virtual void handle_event(epoll_event   ev);      
-    std::map<std::string ,  std::string> userData() const  ;   
+     std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;    
     /* 

@@ -6,9 +6,13 @@
 #include <sstream> 
 #include "Channel.hpp"
 
-#define SSTR( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
-  
+inline std::string SSTR(int x) {
+    std::ostringstream oss;
+    oss << std::dec << x;
+    return oss.str();
+}
+
+
 
 class ClientException : public std::exception
 {
@@ -59,21 +63,21 @@ void Client::rcvMsg(std::string &Msg  )  const
     ;   
 }  ;   
 
-std::map<std::string ,  std::string> Client::userData () const   
+  std::map<std::string ,  std::string> Client::userData () const   
 {
         std::map<std::string ,  std::string> result ;   
         result["_client_fd"] = SSTR(_client_fd).c_str()      ;    
         result["nickname"]   = _Nick ;    
         result["user"] =  _User ;    
         result["server"] = "ascasc" ;   
-        return result  ;   
+        return  result  ;   
 }  ;     
  
 
 void Client::subscribe2channel(Channel &ch )  
 {   
-    if(std::find(_subscribed2Channel.begin() ,  _subscribed2Channel.end()  ,  ch) == _subscribed2Channel.end() )
-      _subscribed2Channel.push_back(ch) ;    
+    if(std::find(_subscribed2Channel.begin() ,  _subscribed2Channel.end()  ,  &ch) == _subscribed2Channel.end() )
+      _subscribed2Channel.push_back(&ch) ;    
     else 
         throw std::runtime_error("[Already in The Channel]") ;   
 } ;   

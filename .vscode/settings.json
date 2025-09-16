@@ -57,7 +57,8 @@
         "text_encoding": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "set": "cpp"
     },
     "github.copilot.chat.codeGeneration.instructions": [
         

@@ -12,8 +12,8 @@ void JoinCommand::exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string
 {          
     (void)  params  ;   
     try{  
-        ch.enterChannel(cl) ;  
-        serverResponseFactory::respond(101 , cl) ;   
+        ch.enterChannel(cl) ;       
+        
         /*
             [Implement th Server Response Here ! ,  serverResponse factory ]
         */

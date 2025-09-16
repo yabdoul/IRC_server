@@ -10,8 +10,8 @@ private:
     static NumericTemplateParser* _instance;
     std::map<int, std::string> _templates;
     NumericTemplateParser() {}
-    NumericTemplateParser(const NumericTemplateParser&);
-    NumericTemplateParser& operator=(const NumericTemplateParser&);
+    NumericTemplateParser( NumericTemplateParser&);
+    NumericTemplateParser& operator=( NumericTemplateParser&);
 
 public:
     static NumericTemplateParser* getInstance()
@@ -22,7 +22,7 @@ public:
     }
 
     bool loadFile(const std::string& filePath);
-    std::string getTemplate(int code) const;
+    std::string getTemplate(int code) ;
 };
 
 #endif

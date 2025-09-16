@@ -38,7 +38,7 @@ bool NumericTemplateParser::loadFile(const std::string& filePath)
     return true;
 }
 
-std::string NumericTemplateParser::getTemplate(int code) const
+std::string NumericTemplateParser::getTemplate(int code) 
 {
     std::map<int, std::string>::const_iterator it = _templates.find(code);
     if (it != _templates.end())

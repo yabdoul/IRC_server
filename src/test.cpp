@@ -22,6 +22,13 @@ int main()
         // serverResponseFactory::respond(001 ,  u) ;        
         //  tor::getInstance().Run() ;      
         // serverResponseFactory::respond(001 ,  data )   ;       
-        // serverResponse::getInstanece()->respond(001 , test) ;   
+        // serverResponse::getInstanece()->respond(001 , test) ;        
+        try{   
+                Reactor::getInstance().Run() ;   
+        }  
+        catch(std::exception &e )  
+        { 
+                std::cerr<<e.what( )<<std::endl ;    
+        }
 }
 

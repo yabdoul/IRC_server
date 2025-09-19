@@ -49,6 +49,7 @@ class  Server: public IEventHandler
           Channel *  IsChannelExist(std::string &ChName   ) ;      
           void AddChannel(std::string  &ChName )   ;  
           void UnsubscribeChannel (std::string &CName) ;     
-          void saveUser(Client &c  ) ;     
+          void saveUser(Client &c  ) ;  
+          void Respond2User(int Client_fd ,  std::string resp )  ;      
      //--->ac         
 }  ;          

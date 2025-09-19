@@ -1,13 +1,23 @@
 #include <vector>   
 #include "severResponsFactory.hpp"
-class response
+class Response
 {
 private:
-
+    Response* _instance ;   
+    Response() ;    
 public:
-    response(std::vector<int>& resps ,  Client&c ) ;    
-    void sendResp2Server(std::string resp  ,   Client & cl  ) ;    
-    ~response(){};
+    void sendResp2Server(std::string resp , unsigned int Client_fd )  ;    
+    Response& getInstance() 
+    {  
+          if(!_instance)   
+                _instance  = new Response() ;  
+          return  *_instance ;    
+
+    }  
+    ~Response(){ 
+         delete _instance ;  
+    }  ;  
+    
 };
 
 

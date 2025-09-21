@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 class Parser {
 private:
@@ -12,6 +13,7 @@ private:
     Parser();
     Parser(const Parser&);
     Parser& operator=(const Parser&);
+    void mapCommandParameters(const std::string& cmd, const std::vector<std::string>& parameters);
 public:
     static Parser& getInstance();
     void parse(const std::string& rawCommand);

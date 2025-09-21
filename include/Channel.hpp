@@ -10,8 +10,7 @@
 class Client ;   
 class Channel  {  
         private :  
-                 std::map<Client  , std::string   >    _inviteList ;    
-                 std::vector<Client> _online  ; 
+                 std::map<Client  , int   >    _inviteList ;    
                  std::string _channelName ;            
                  bool _invitOnly ;     
         public :   

@@ -24,12 +24,14 @@
 Server::Server() : IEventHandler()
 {   
 	_serverName= SERVER_NAME ;   
-	listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
 	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(6697); // port 8080
+	address.sin_port = htons(6667); // port 8080  
+	int opt =1  ;  
+	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	bind(listen_fd, (struct sockaddr *)&address, sizeof(address));
 	listen(listen_fd, 100) ;
 	try
@@ -94,8 +96,7 @@ void Server::handle_event(epoll_event ev)
 		ev.data.fd = client_fd;
 		Reactor::getInstance().registre(ev, client);  
 		saveUser(*client) ;      
-		std::cout<<"im here\n" ;    
-		std::string bu = " :MyServer 001 TestUser :Welcome to the IRC network, TestUser\r\n";     
+		std::string bu = " :MyServer 001 TestUser :Welcome to the IRC network, TestUser\r\n";      
 		if(send(client_fd , (void * )bu.c_str() ,bu.size() ,  0  )  == -1 ) 
 		{ 
 			   throw std::runtime_error("Problem in send function") ;    

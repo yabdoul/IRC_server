@@ -86,27 +86,21 @@ void Client::subscribe2channel(Channel &ch )
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
-        // std::vector<char> buffer(1024, '\0');
-        std::string buffer ;   
-        ssize_t n = recv(_client_fd, (void * )buffer.c_str(), buffer.size(), 0);
-        if (n > 0) {
-            // std::cout << std::string(buffer.begin(), buffer.begin() + n) << std::endl;        
-            Parser::getInstance().parse(buffer) ;     
-            Parser::getInstance().getCommand() ;   
-            /*  
-        [14-09 todo] --------> needed search  user with nickname in invite command  , ask the server for Client object using getClient functiion 
-            */
-            /*
-                Call An Parser Instance Here , i think We need An Abstract factory of Move !  
-                note: Parser function Should Return Command * !    
-            */    
-           
-           
+        std::vector<char> buffer(1024, '\0')  ;  
+        ssize_t n = recv(_client_fd, (void * )buffer.data(), buffer.size(), 0);
+        if (n > 0) {  
+            std::cout<<"RAW string"<<buffer.data()<<std::endl ;  
+            // Parser::getInstance().parse(buffer.data()) ;             
+            // std::map<std::string , std::string> parsingMap  =  Parser::getInstance().getParams()  ;    
+            // for(std::map<std::string  , std::string>::iterator it  =   parsingMap.begin() ;   it !=  parsingMap.end() ;  it++   ) 
+            // { 
+            //      std::cout<<it->first<<"  "<<it->second<<std::endl ;      
+            // } ; 
+            // std::cout<<"i've recieved Something"<<std::endl ;   
 
         }
     
     } else if (e.events & EPOLLOUT) {
         ;
-        // std::cout << "Hello Output\n";
     }
 }

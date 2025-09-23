@@ -6,6 +6,8 @@
 #include <sstream> 
 #include "Channel.hpp"
 #include "Server.hpp"
+#include <errno.h>
+#include <cstring>
 
 inline std::string SSTR(int x) {
     std::ostringstream oss;
@@ -54,15 +56,24 @@ Client::Client(const Client &other):IEventHandler(other)
      _Pass = other._Pass ;     
 }  
 
-void Client::rcvMsg(std::string &Msg  )  const  
+void Client::rcvMsg(std::string &Msg) const  
 { 
-    /*
-    :  Send MSG via Socket to user fd ,  To complet   
-    */  
-    if(send(_client_fd ,  Msg.c_str()  , Msg.size() ,MSG_DONTWAIT ) < 0)  
-        std::cout << "Problem in Sending Msg" << std::endl;   
-                
-    ;   
+
+    if (_client_fd == -1) {
+        return;
+    }
+    
+    ssize_t bytes_sent = send(_client_fd, Msg.c_str(), Msg.size(), MSG_DONTWAIT);
+    
+    if (bytes_sent < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            std::cout << "Send buffer full for client " << _Nick << std::endl;
+        } else {
+            std::cout << "Send error for client " << _Nick << ": " << strerror(errno) << std::endl;
+        }
+    } else if (bytes_sent < static_cast<ssize_t>(Msg.size())) {
+        std::cout << "Partial send for client " << _Nick << ": " << bytes_sent << "/" << Msg.size() << " bytes" << std::endl;
+    }
 }  ;   
 
   std::map<std::string ,  std::string> Client::userData () const   
@@ -88,10 +99,11 @@ void Client::subscribe2channel(Channel &ch )
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
-        std::vector<char> buffer(1024, '\0')  ;  
-        ssize_t n = recv(_client_fd, (void * )buffer.data(), buffer.size(), 0);
+        std::vector<char> buffer(1024, '\0');  
+        ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);
+        
         if (n > 0) {  
-            std::cout<<"RAW string"<<buffer.data()<<std::endl ;
+            std::cout << "RAW string: " << std::string(buffer.data(), n) << std::endl;
             
             _messageBuffer.append(buffer.data(), n);
             
@@ -104,10 +116,25 @@ void Client::handle_event(epoll_event e)
                     processCommand(command);
                 }
             }
+        } else if (n == 0) {
+            std::cout << "Client " << _Nick << " disconnected" << std::endl;
+            close(_client_fd);
+            _client_fd = -1;
+            return;
+        } else {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return;
+            } else {
+                std::cerr << "recv() error for client " << _Nick << ": " << strerror(errno) << std::endl;
+                close(_client_fd);
+                _client_fd = -1;
+                return;
+            }
         }
     
     } else if (e.events & EPOLLOUT) {
-        ;
+        // TODO: Implement send buffer handling for better performance
+        // For now, basic implementation
     }
 }
 

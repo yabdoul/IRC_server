@@ -14,14 +14,14 @@
  * 
  * @details
  * - Creates a socket using the `socket` function.
- * - Binds the socket to `INADDR_ANY` and port 4444.
+ * - Binds the socket to `INADDR_ANY` and the configured port.
  * - Sets the socket to listen with a backlog of 100 connections.
  * - Registers the socket with the Reactor for EPOLLIN events.
  * - Handles exceptions during registration with the Reactor.
  * 
  * @throws std::exception If an error occurs during registration with the Reactor.
  */
-Server::Server() : IEventHandler()
+Server::Server() : IEventHandler(), _port(6667), _password("")
 {   
 	_serverName= SERVER_NAME ;   
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
@@ -29,11 +29,17 @@ Server::Server() : IEventHandler()
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(6667); // port 8080  
+	address.sin_port = htons(_port);
 	int opt =1  ;  
 	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-	bind(listen_fd, (struct sockaddr *)&address, sizeof(address));
-	listen(listen_fd, 100) ;
+	if (bind(listen_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
+		close(listen_fd);
+		throw std::runtime_error("Failed to bind socket");
+	}
+	if (listen(listen_fd, 100) == -1) {
+		close(listen_fd);
+		throw std::runtime_error("Failed to listen on socket");
+	}
 	try
 	{
 		struct epoll_event ev;
@@ -43,8 +49,20 @@ Server::Server() : IEventHandler()
 	}
 	catch (std::exception &e)
 	{
+		close(listen_fd);
 		std::cerr << e.what() << std::endl;
+		throw;
 	}
+}  
+
+void Server::initServer(int port, const std::string& password) {
+	Server& server = getInstance();
+	server._port = port;
+	server._password = password;
+}
+
+const std::string& Server::getPassword() const {
+	return _password;
 }  
 
 void Server::saveUser(Client &C )  
@@ -95,12 +113,8 @@ void Server::handle_event(epoll_event ev)
 		ev.events = EPOLLIN | EPOLLOUT;
 		ev.data.fd = client_fd;
 		Reactor::getInstance().registre(ev, client);  
-		saveUser(*client) ;      
-		std::string bu = " :MyServer 001 TestUser :Welcome to the IRC network, TestUser\r\n";      
-		if(send(client_fd , (void * )bu.c_str() ,bu.size() ,  0  )  == -1 ) 
-		{ 
-			   throw std::runtime_error("Problem in send function") ;    
-		}  
+		saveUser(*client) ;
+		std::cout << "New client connected on fd: " << client_fd << std::endl;
 	} catch (std::exception &e) {
 		throw e;
 	}
@@ -182,13 +196,9 @@ void  Server::UnsubscribeChannel(std::string &CName)
 
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        
-		size_t len =  0 ;   
-	    if(send(Client_fd ,resp.c_str() ,len ,   0 ) == -1)
+		size_t len = resp.length();   
+	    if(send(Client_fd, resp.c_str(), len, 0) == -1)
 	    { 
 			throw std::runtime_error("[Response] :  Problem in send mechanisme") ;   
 		}  
-		/* 
-		  
-			[todo]  Implement  send logic here
-		*/
 } ;  

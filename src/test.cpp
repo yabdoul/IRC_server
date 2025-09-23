@@ -6,29 +6,37 @@
 #include "JoinCommand.hpp"  
 #include "inviteCommand.hpp"  
 #include "Parser.hpp"
-int main() 
+#include <cstdlib>
+
+int main(int argc, char **argv) 
 {         
-        // Client u(1 ,  "ascasc" , "sacaseic" , "ascasc"  ) ;        
-        // Server::getInstance().saveUser(u) ;   
-        // Channel ch("ascasc" ,  u) ;            
-        // ch.lockChannel(u)  ;  
-        // Client c(2  ,  "youssef" ,  "ascasc "  , "ascasc") ;   
-        // c.subscribe2channel(ch) ;          
-        // Server::getInstance().saveUser(c) ;   
-        // std::map<std::string ,  std::string> params ;  
-        // params["nickname"]  =  "youssef" ;   
-        // ch.ExecuteCommand ( new  inviteCommand() ,  u , params)   ;
-        // ch.ExecuteCommand(new  JoinCommand() ,  c , params )  ;     
-        // serverResponseFactory::respond(001 ,  u) ;        
-        //  tor::getInstance().Run() ;      
-        // serverResponseFactory::respond(001 ,  data )   ;       
-        // serverResponse::getInstanece()->respond(001 , test) ;        
-        try{   
-                Reactor::getInstance().Run() ;   
-        }  
-        catch(std::exception &e )  
-        { 
-                std::cerr<<e.what( )<<std::endl ;    
+        if (argc != 3) {
+                std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
+                return 1;
         }
+
+        int port = std::atoi(argv[1]);
+        if (port <= 0 || port > 65535) {
+                std::cerr << "Error: Invalid port number. Must be between 1-65535" << std::endl;
+                return 1;
+        }
+
+        std::string password = argv[2];
+        if (password.empty()) {
+                std::cerr << "Error: Password cannot be empty" << std::endl;
+                return 1;
+        }
+
+        try {
+                std::cout << "Starting IRC server on port " << port << std::endl;
+                Server::initServer(port, password);
+                Reactor::getInstance().Run();   
+        }  
+        catch(std::exception &e) {
+                std::cerr << "Fatal error: " << e.what() << std::endl;
+                return 1;
+        }
+
+        return 0;
 }
 

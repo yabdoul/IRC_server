@@ -35,13 +35,16 @@ class  Server: public IEventHandler
      private :  
           int listen_fd ;       
           std::string  _serverName ;     
+          int _port;
+          std::string _password;
           Server() ;   
           Server(Server & copy  )  ;   
           virtual void handle_event(epoll_event   ev)  ;  
           std::map <std::string , Channel  >  ChannelList ;    
           std::vector<Client>  _clientList  ;          
      public  :    
-          static Server&  getInstance() ;   
+          static Server&  getInstance() ;
+          static void initServer(int port, const std::string& password);   
           ~Server() ;    
           Server&  operator=(Server &copy  ) ;  
           int getListenFd()  ;  
@@ -50,6 +53,7 @@ class  Server: public IEventHandler
           void AddChannel(std::string  &ChName )   ;  
           void UnsubscribeChannel (std::string &CName) ;     
           void saveUser(Client &c  ) ;  
-          void Respond2User(int Client_fd ,  std::string resp )  ;      
+          void Respond2User(int Client_fd ,  std::string resp )  ;
+          const std::string& getPassword() const;      
      //--->ac         
 }  ;          

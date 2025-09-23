@@ -232,14 +232,21 @@ void Client::handleNickCommand(const std::string& nickname) {
         // Not found, good
     }
     
+    std::string oldNick = _Nick;
     _Nick = nickname;
+    
     if (_state == PASSWORD_SET) {
         _state = NICK_SET;
-    }
-    
-    if (_state == REGISTERED) {
-        // Valid to change
-        std::string msg = ":" + _Nick + " NICK " + nickname + "\r\n";
+    } else if (_state == REGISTERED) {
+        std::string msg = ":" + oldNick + "!" + _User + "@" + _hostname + 
+                         " NICK " + nickname + "\r\n";
+        
+        // Send to all channels user is in
+        for (std::vector<Channel*>::iterator it = _subscribed2Channel.begin();
+             it != _subscribed2Channel.end(); ++it) {
+            (*it)->broadcastMessage(msg);
+        }
+        
         rcvMsg(msg);
     }
 }
@@ -631,16 +638,21 @@ void Client::handlePartCommand(const std::map<std::string, std::string>& params)
     }
     
     std::string channelName = ch_it->second;
+    // Normalize channel name
+    if (!channelName.empty() && channelName[0] != '#') {
+        channelName = "#" + channelName;
+    }
+    
     Channel* channel = Server::getInstance().IsChannelExist(channelName);
     
     if (!channel) {
-        std::string error = ":server 403 " + _Nick + " #" + channelName + " :No such channel\r\n";
+        std::string error = ":server 403 " + _Nick + " " + channelName + " :No such channel\r\n";
         rcvMsg(error);
         return;
     }
     
     if (!channel->isUserInChannel(*this)) {
-        std::string error = ":server 442 " + _Nick + " #" + channelName + " :You're not on that channel\r\n";
+        std::string error = ":server 442 " + _Nick + " " + channelName + " :You're not on that channel\r\n";
         rcvMsg(error);
         return;
     }
@@ -652,7 +664,8 @@ void Client::handlePartCommand(const std::map<std::string, std::string>& params)
     }
     
     std::string broadcastMsg = ":" + _Nick + "!" + _User + "@" + _hostname + 
-                              " PART #" + channelName + " :" + partMsg + "\r\n";
+                              " PART " + channelName + " :" + partMsg + "\r\n";
+    
     channel->broadcastMessage(broadcastMsg);
     
     channel->removeUser(*this);
@@ -665,5 +678,5 @@ void Client::handlePartCommand(const std::map<std::string, std::string>& params)
         }
     }
     
-    std::cout << _Nick << " left channel #" + channelName << std::endl;
+    std::cout << _Nick << " left channel " + channelName << std::endl;
 }

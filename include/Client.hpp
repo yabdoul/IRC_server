@@ -13,12 +13,23 @@ class Channel ;
 class Command;
 
 class Client : public IEventHandler  ,  Iclient   {
+public:
+    enum ClientState {
+        CONNECTING,     // Connected, needs PASS
+        PASSWORD_SET,   // PASS, needs NICK
+        NICK_SET,       // NICK, needs USER
+        REGISTERED      // Fully authenticated
+    };
+    
 private:
-    // IOstream* _IO;
     int   _client_fd;
     std::string _Nick;
     std::string _Pass;
-    std::string _User;  
+    std::string _User;
+    std::string _realName;
+    std::string _hostname;
+    ClientState _state;
+    std::string _messageBuffer;  // For partial message case
     std::vector<Channel *  >  _subscribed2Channel ;  
 public:
     ~Client();       
@@ -47,7 +58,29 @@ public:
     /* 
         Parser Should Send a map of Params any way ;    
     */     
-    void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;    
+    void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
+    
+    bool isRegistered() const;
+    ClientState getState() const;
+    void setState(ClientState state);
+    const std::string& getNickname() const;
+    const std::string& getUsername() const;
+    const std::string& getRealName() const;
+    int getClientFd() const;
+    
+    void processCommand(const std::string& command);
+    void handlePassCommand(const std::string& password);
+    void handleNickCommand(const std::string& nickname);
+    void handleUserCommand(const std::string& username, const std::string& hostname, 
+                          const std::string& servername, const std::string& realname);
+    void sendWelcomeSequence();
+    void handlePrivmsgCommand(const std::map<std::string, std::string>& params);
+    void handleJoinCommand(const std::map<std::string, std::string>& params);
+    void handleKickCommand(const std::map<std::string, std::string>& params);
+    void handleInviteCommand(const std::map<std::string, std::string>& params);
+    void handleTopicCommand(const std::map<std::string, std::string>& params);
+    void handleModeCommand(const std::map<std::string, std::string>& params);
+    void handlePartCommand(const std::map<std::string, std::string>& params);    
 };
 
 #endif

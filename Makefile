@@ -7,7 +7,7 @@ CXX := g++
 CXXFLAGS := -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address $(INCLUDE_DIR)
 
 # Target to build the executable
-TARGET := app
+TARGET := ircserv
 
 all: $(TARGET)
 
@@ -18,6 +18,11 @@ $(TARGET): $(OBJ_FILES)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ_FILES) $(TARGET)
+	rm -f $(OBJ_FILES)
 
-.PHONY: all clean
+fclean: clean
+	rm -f $(TARGET)
+
+re: fclean all
+
+.PHONY: all clean fclean re

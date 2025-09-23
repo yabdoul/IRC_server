@@ -82,7 +82,17 @@ void Client::subscribe2channel(Channel &ch )
         throw std::runtime_error("[Already in The Channel]") ;   
 } ;   
 
-
+void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string >&params   )  
+{ 
+    try{  
+         cmd.execute(*this ,   params );  
+    }  
+    catch(std::exception &e  ) 
+    { 
+         std::cerr<<e.what()<<std::endl ;    
+    }
+}  ;   
+ 
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {

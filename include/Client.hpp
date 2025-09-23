@@ -1,18 +1,17 @@
 #include "IEventHandler.hpp"
 #include <iostream>
-#include "IOstream.hpp"
 #include <sys/socket.h>
-#include <vector>
-#include "Command.hpp"  
+#include <vector> 
+#include "Command.hpp" 
 #include "Iclient.hpp"   
 
 #include <map>  
-#ifndef   CLIENT_HPP  
-#define CLINET_HPP  
 #pragma once 
+#ifndef CLIENT_HPP 
+#define CLIENT_HPP
+class Channel ;
+class Command;
 
-class Channel ;     
- 
 class Client : public IEventHandler  ,  Iclient   {
 private:
     // IOstream* _IO;
@@ -48,7 +47,7 @@ public:
     /* 
         Parser Should Send a map of Params any way ;    
     */     
-    void userCommand(Command *  cmd , std::vector<std::string>  params  )  ;    
+    void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;    
 };
 
 #endif

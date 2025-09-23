@@ -380,30 +380,60 @@ void Client::handleKickCommand(const std::map<std::string, std::string>& params)
     }
     
     std::string channelName = ch_it->second;
+    // Normalize # name
+    if (!channelName.empty() && channelName[0] != '#') {
+        channelName = "#" + channelName;
+    }
+    
     Channel* channel = Server::getInstance().IsChannelExist(channelName);
     
     if (!channel) {
-        std::string error = ":server 403 " + _Nick + " #" + channelName + " :No such channel\r\n";
+        std::string error = ":server 403 " + _Nick + " " + channelName + " :No such channel\r\n";
         rcvMsg(error);
         return;
     }
     
-    try {
-        Client& targetClient = Server::getInstance().getUser(nick_it->second);
-        std::string reason = "No reason given";
-        
-        std::map<std::string, std::string>::const_iterator reason_it = params.find("reason");
-        if (reason_it != params.end()) {
-            reason = reason_it->second;
-        }
-        
-        channel->kickUser(*this, targetClient, reason);
-        std::cout << _Nick << " kicked " << nick_it->second << " from #" << channelName << std::endl;
-        
-    } catch (std::exception& e) {
-        std::string error = ":server 482 " + _Nick + " #" + channelName + " :" + e.what() + "\r\n";
+    // kicker is in channel
+    if (!channel->isUserInChannel(*this)) {
+        std::string error = ":server 442 " + _Nick + " " + channelName + " :You're not on that channel\r\n";
         rcvMsg(error);
+        return;
     }
+    
+    // kicker is operator
+    if (!channel->isOp(*this)) {
+        std::string error = ":server 482 " + _Nick + " " + channelName + " :You're not channel operator\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    // target user exists
+    Client* targetClient = NULL;
+    try {
+        targetClient = &Server::getInstance().getUser(nick_it->second);
+    } catch (...) {
+        std::string error = ":server 401 " + _Nick + " " + nick_it->second + " :No such nick\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    // target is on the channel
+    if (!channel->isUserInChannel(*targetClient)) {
+        std::string error = ":server 441 " + _Nick + " " + nick_it->second + " " + channelName + " :They aren't on that channel\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    // Get kick reason
+    std::string reason = "No reason given";
+    std::map<std::string, std::string>::const_iterator reason_it = params.find("reason");
+    if (reason_it != params.end()) {
+        reason = reason_it->second;
+    }
+    
+    // (No exceptions left)
+    channel->kickUser(*this, *targetClient, reason);
+    std::cout << _Nick << " kicked " << nick_it->second << " from " << channelName << std::endl;
 }
 
 void Client::handleInviteCommand(const std::map<std::string, std::string>& params) {
@@ -417,29 +447,60 @@ void Client::handleInviteCommand(const std::map<std::string, std::string>& param
     }
     
     std::string channelName = ch_it->second;
+    if (!channelName.empty() && channelName[0] != '#') {
+        channelName = "#" + channelName;
+    }
+    
     Channel* channel = Server::getInstance().IsChannelExist(channelName);
     
     if (!channel) {
-        std::string error = ":server 403 " + _Nick + " #" + channelName + " :No such channel\r\n";
+        std::string error = ":server 403 " + _Nick + " " + channelName + " :No such channel\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+
+    if (!channel->isUserInChannel(*this)) {
+        std::string error = ":server 442 " + _Nick + " " + channelName + " :You're not on that channel\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    Client* targetClient = NULL;
+    try {
+        targetClient = &Server::getInstance().getUser(nick_it->second);
+    } catch (...) {
+        std::string error = ":server 401 " + _Nick + " " + nick_it->second + " :No such nick\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    if (channel->isUserInChannel(*targetClient)) {
+        std::string error = ":server 443 " + _Nick + " " + nick_it->second + " " + channelName + " :is already on channel\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    if (channel->isInviteOnly() && !channel->isOp(*this)) {
+        std::string error = ":server 482 " + _Nick + " " + channelName + " :You're not channel operator\r\n";
         rcvMsg(error);
         return;
     }
     
     try {
-        Client& targetClient = Server::getInstance().getUser(nick_it->second);
-        channel->inviteUser(*this, targetClient);
+        channel->inviteUser(*this, *targetClient);
         
         std::string inviteMsg = ":" + _Nick + "!" + _User + "@" + _hostname + 
-                               " INVITE " + nick_it->second + " #" + channelName + "\r\n";
-        targetClient.rcvMsg(inviteMsg);
+                               " INVITE " + nick_it->second + " " + channelName + "\r\n";
+        targetClient->rcvMsg(inviteMsg);
         
-        std::string confirm = ":server 341 " + _Nick + " " + nick_it->second + " #" + channelName + "\r\n";
+        std::string confirm = ":server 341 " + _Nick + " " + nick_it->second + " " + channelName + "\r\n";
         rcvMsg(confirm);
         
-        std::cout << _Nick << " invited " << nick_it->second << " to #" << channelName << std::endl;
+        std::cout << _Nick << " invited " << nick_it->second << " to " << channelName << std::endl;
         
     } catch (std::exception& e) {
-        std::string error = ":server 482 " + _Nick + " #" + channelName + " :" + e.what() + "\r\n";
+        std::string error = ":server 482 " + _Nick + " " + channelName + " :" + e.what() + "\r\n";
         rcvMsg(error);
     }
 }
@@ -454,10 +515,20 @@ void Client::handleTopicCommand(const std::map<std::string, std::string>& params
     }
     
     std::string channelName = ch_it->second;
+    if (!channelName.empty() && channelName[0] != '#') {
+        channelName = "#" + channelName;
+    }
+    
     Channel* channel = Server::getInstance().IsChannelExist(channelName);
     
     if (!channel) {
-        std::string error = ":server 403 " + _Nick + " #" + channelName + " :No such channel\r\n";
+        std::string error = ":server 403 " + _Nick + " " + channelName + " :No such channel\r\n";
+        rcvMsg(error);
+        return;
+    }
+    
+    if (!channel->isUserInChannel(*this)) {
+        std::string error = ":server 442 " + _Nick + " " + channelName + " :You're not on that channel\r\n";
         rcvMsg(error);
         return;
     }
@@ -465,20 +536,26 @@ void Client::handleTopicCommand(const std::map<std::string, std::string>& params
     std::map<std::string, std::string>::const_iterator topic_it = params.find("topic");
     
     if (topic_it != params.end()) {
+        if (channel->isTopicRestricted() && !channel->isOp(*this)) {
+            std::string error = ":server 482 " + _Nick + " " + channelName + " :You're not channel operator\r\n";
+            rcvMsg(error);
+            return;
+        }
+        
         try {
             channel->setTopic(*this, topic_it->second);
-            std::cout << _Nick << " set topic for #" << channelName << ": " << topic_it->second << std::endl;
+            std::cout << _Nick << " set topic for " << channelName << ": " << topic_it->second << std::endl;
         } catch (std::exception& e) {
-            std::string error = ":server 482 " + _Nick + " #" + channelName + " :" + e.what() + "\r\n";
+            std::string error = ":server 482 " + _Nick + " " + channelName + " :You're not channel operator\r\n";
             rcvMsg(error);
         }
     } else {
         const std::string& topic = channel->getTopic();
         if (topic.empty()) {
-            std::string reply = ":server 331 " + _Nick + " #" + channelName + " :No topic is set\r\n";
+            std::string reply = ":server 331 " + _Nick + " " + channelName + " :No topic is set\r\n";
             rcvMsg(reply);
         } else {
-            std::string reply = ":server 332 " + _Nick + " #" + channelName + " :" + topic + "\r\n";
+            std::string reply = ":server 332 " + _Nick + " " + channelName + " :" + topic + "\r\n";
             rcvMsg(reply);
         }
     }
@@ -498,15 +575,31 @@ void Client::handleModeCommand(const std::map<std::string, std::string>& params)
         }
         
         std::string channelName = ch_it->second;
+        if (!channelName.empty() && channelName[0] != '#') {
+            channelName = "#" + channelName;
+        }
+        
         Channel* channel = Server::getInstance().IsChannelExist(channelName);
         
         if (!channel) {
-            std::string error = ":server 403 " + _Nick + " #" + channelName + " :No such channel\r\n";
+            std::string error = ":server 403 " + _Nick + " " + channelName + " :No such channel\r\n";
+            rcvMsg(error);
+            return;
+        }
+        
+        if (!channel->isUserInChannel(*this)) {
+            std::string error = ":server 442 " + _Nick + " " + channelName + " :You're not on that channel\r\n";
             rcvMsg(error);
             return;
         }
         
         if (mode_it != params.end()) {
+            if (!channel->isOp(*this)) {
+                std::string error = ":server 482 " + _Nick + " " + channelName + " :You're not channel operator\r\n";
+                rcvMsg(error);
+                return;
+            }
+            
             try {
                 std::string param = "";
                 std::map<std::string, std::string>::const_iterator param_it = params.find("mode_param");
@@ -515,14 +608,14 @@ void Client::handleModeCommand(const std::map<std::string, std::string>& params)
                 }
                 
                 channel->setMode(*this, mode_it->second, param);
-                std::cout << _Nick << " set mode " << mode_it->second << " on #" << channelName << std::endl;
+                std::cout << _Nick << " set mode " << mode_it->second << " on " << channelName << std::endl;
                 
             } catch (std::exception& e) {
-                std::string error = ":server 482 " + _Nick + " #" + channelName + " :" + e.what() + "\r\n";
+                std::string error = ":server 501 " + _Nick + " :Unknown MODE flag\r\n";
                 rcvMsg(error);
             }
         } else {
-            std::string reply = ":server 324 " + _Nick + " #" + channelName + " +nt\r\n";
+            std::string reply = ":server 324 " + _Nick + " " + channelName + " +nt\r\n";
             rcvMsg(reply);
         }
     }

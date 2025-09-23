@@ -44,14 +44,12 @@ bool Channel::isOp(Client & sender )  {
 
 void Channel::inviteUser(Client &sender ,  Client  &target )    
 {    
-      if(isOp(sender))  
-      { 
-            if(_inviteList.count(target) != 0 )  
-                  throw std::runtime_error("[Join]:User Already in Invite List") ;    
-            _inviteList[target] =  INV ;      
-            return ;   
-      }           
-      throw std::runtime_error("[JOIN] : You are  Not An OPP ") ;   
+      (void)sender;
+      if(_inviteList.count(target) != 0 )  
+            throw std::runtime_error("User already in channel or invite list") ;    
+      
+      // (invited but not yet joined)
+      _inviteList[target] =  INV ;      
 }  ;   
  
 void Channel::lockChannel(Client &sender)  
@@ -180,4 +178,12 @@ std::vector<Client*> Channel::getChannelMembers() const {
 
 const std::string& Channel::getName() const {
     return _channelName;
+}
+
+bool Channel::isInviteOnly() const {
+    return _invitOnly;
+}
+
+bool Channel::isTopicRestricted() const {
+    return _topicRestricted;
 }

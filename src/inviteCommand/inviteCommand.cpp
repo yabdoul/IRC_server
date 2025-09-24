@@ -4,41 +4,35 @@
 std::vector<int> inviteCommand::exeChannel(Client &cl , Channel &ch  , std::map<std::string ,  std::string >&params   )  
 {   
     std::vector<int> responses;
-    
-    // Validate parameters
     if (params.find("nickname") == params.end()) {
-        responses.push_back(461); // ERR_NEEDMOREPARAMS
+        responses.push_back(461); 
         return responses;
     }
     
     try {
-        // Check if user exists
         Client& targetClient = Server::getInstance().getUser(params["nickname"]);
         
-        // iff user is already on channel
         if (ch.isUserInChannel(targetClient)) {
-            responses.push_back(443); // ERR_USERONCHANNEL
+            responses.push_back(443);
             return responses;
         }
         
-        // if inviter is on channel
+
         if (!ch.isUserInChannel(cl)) {
-            responses.push_back(442); // ERR_NOTONCHANNEL  
+            responses.push_back(442);
             return responses;
         }
         
-        // if channel is invite-only
         if (ch.isInviteOnly() && !ch.isOp(cl)) {
-            responses.push_back(482); // ERR_CHANOPRIVSNEEDED
+            responses.push_back(482);
             return responses;
         }
         
-        // Execute invite
         ch.inviteUser(cl, targetClient);
-        responses.push_back(341); // RPL_INVITING
+        responses.push_back(341); 
         
     } catch (std::exception& e) {
-        responses.push_back(401); // ERR_NOSUCHNICK
+        responses.push_back(401); 
     }
     
     return responses;

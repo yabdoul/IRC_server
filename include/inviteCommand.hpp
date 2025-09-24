@@ -4,9 +4,12 @@
  
 class inviteCommand : public Command  , public ChannelCommand  {  
     private:  
-        void execute() ;   
+        std::vector<int>  execute(Client & sender ,  std::map<std::string ,  std::string  >&params  )  {  
+            (void) sender  , (void ) params ;     
+            return std::vector<int>() ;   
+        }        
     public : 
             inviteCommand() {} ;  
             ~inviteCommand(){} ;   
-            void exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)   ;   
+            std::vector<int> exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)   ;   
 }  ;   

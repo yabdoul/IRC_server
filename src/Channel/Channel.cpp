@@ -28,15 +28,12 @@ Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channe
 
 void Channel::ExecuteCommand(Command * cmd  ,  Client client   ,  std::map<std::string  , std::string>params  )     
 {       
-      (void) params ;   
       if(dynamic_cast<ChannelCommand *> (cmd) )  
       { 
             ChannelCommand * tmp =  dynamic_cast<ChannelCommand *>  (cmd) ;    
             tmp->exeChannel(client ,  *this , params) ;   
       }   
-      else {  
-            cmd->execute() ;    
-      }
+
 }  ;   
 
 bool Channel::isOp(Client & sender )  {

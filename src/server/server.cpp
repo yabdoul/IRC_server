@@ -4,8 +4,7 @@
 #include "IEventHandler.hpp"
 #include "Client.hpp"
 #include <algorithm>  
-#include "commandFactory.hpp"   
-#include "severResponsFactory.hpp"
+#include "commandFactory.hpp"
 /**
  * @brief Constructor for the Server class.
  * 
@@ -196,11 +195,34 @@ void  Server::UnsubscribeChannel(std::string &CName)
 		} 
 }     
 
+
+void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>&params ,   Client & sender ) 
+{  
+	Command * tmp  = commandFactory::makeCommand(cmd)  ;  
+	if(dynamic_cast<ChannelCommand * > (tmp)) 
+	{   
+		Channel * ch =  IsChannelExist(params["channel"])  ;    
+		if(ch)   
+		ch->ExecuteCommand(tmp , sender  , params ) ;   
+		else  
+		throw std::runtime_error("Channel doesnt Exist") ;   
+	}    
+	else 
+	{ 
+		sender.userCommand(*tmp,  params)   ;    
+	} ;   
+	
+}  ;      
+
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        
-		size_t len = resp.length();   
-	    if(send(Client_fd, resp.c_str(), len, 0) == -1)
+		size_t len =  0 ;   
+	    if(send(Client_fd ,resp.c_str() ,len ,   0 ) == -1)
 	    { 
 			throw std::runtime_error("[Response] :  Problem in send mechanisme") ;   
 		}  
+		/* 
+		  
+			[todo]  Implement  send logic here
+		*/
 } ;  

@@ -1,18 +1,17 @@
 #include "IEventHandler.hpp"
 #include <iostream>
-#include "IOstream.hpp"
 #include <sys/socket.h>
-#include <vector>
-#include "Command.hpp"  
+#include <vector> 
+#include "Command.hpp" 
 #include "Iclient.hpp"   
 
 #include <map>  
-#ifndef   CLIENT_HPP  
-#define CLINET_HPP  
 #pragma once 
+#ifndef CLIENT_HPP 
+#define CLIENT_HPP
+class Channel ;
+class Command;
 
-class Channel ;     
- 
 class Client : public IEventHandler  ,  Iclient   {
 public:
     enum ClientState {
@@ -59,7 +58,7 @@ public:
     /* 
         Parser Should Send a map of Params any way ;    
     */     
-    void userCommand(Command *  cmd , std::vector<std::string>  params  )  ;
+    void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
     
     bool isRegistered() const;
     ClientState getState() const;
@@ -68,20 +67,6 @@ public:
     const std::string& getUsername() const;
     const std::string& getRealName() const;
     int getClientFd() const;
-    
-    void processCommand(const std::string& command);
-    void handlePassCommand(const std::string& password);
-    void handleNickCommand(const std::string& nickname);
-    void handleUserCommand(const std::string& username, const std::string& hostname, 
-                          const std::string& servername, const std::string& realname);
-    void sendWelcomeSequence();
-    void handlePrivmsgCommand(const std::map<std::string, std::string>& params);
-    void handleJoinCommand(const std::map<std::string, std::string>& params);
-    void handleKickCommand(const std::map<std::string, std::string>& params);
-    void handleInviteCommand(const std::map<std::string, std::string>& params);
-    void handleTopicCommand(const std::map<std::string, std::string>& params);
-    void handleModeCommand(const std::map<std::string, std::string>& params);
-    void handlePartCommand(const std::map<std::string, std::string>& params);    
 };
 
 #endif

@@ -29,19 +29,16 @@ private:
     std::string _realName;
     std::string _hostname;
     ClientState _state;
-    std::vector<std::string> writeQue  ;     
     std::string _messageBuffer;  // For partial message case
     std::vector<Channel *  >  _subscribed2Channel ;  
-public: 
+public:
     ~Client();       
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
     Client(int client_fd);  
     Client(std::string Nick ):_Nick(Nick){} ;    
-    Client(const Client &other)  ;     
+    Client(const Client &other)  ;   
     // Client() ;    
-    void  add2Que(std::string &res ){   
-        writeQue.push_back(res) ;               
-    }
+ 
     bool operator<(const   Client & other   )   const  
     { 
         return  _Nick > other._Nick ;  

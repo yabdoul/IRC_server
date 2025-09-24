@@ -8,6 +8,8 @@
 #include "Server.hpp"
 #include <errno.h>
 #include <cstring>
+#include "commandFactory.hpp"  
+
 
 inline std::string SSTR(int x) {
     std::ostringstream oss;
@@ -121,6 +123,20 @@ void Client::handle_event(epoll_event e)
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
+                Parser::getInstance().parse(command) ;  
+                Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;  
+                (void) Cmd ;   
+                // if(dynamic_cast<channelCommand  *> (Cmd) )  
+                // { 
+                     
+                // }  
+                // else { 
+                     
+                // } 
+
+                // if (command.empty()){
+
+                // }
             }
         } else if (n == 0) {
             std::cout << "Client " << _Nick << " disconnected" << std::endl;

@@ -67,20 +67,6 @@ public:
     const std::string& getUsername() const;
     const std::string& getRealName() const;
     int getClientFd() const;
-    
-    void processCommand(const std::string& command);
-    void handlePassCommand(const std::string& password);
-    void handleNickCommand(const std::string& nickname);
-    void handleUserCommand(const std::string& username, const std::string& hostname, 
-                          const std::string& servername, const std::string& realname);
-    void sendWelcomeSequence();
-    void handlePrivmsgCommand(const std::map<std::string, std::string>& params);
-    void handleJoinCommand(const std::map<std::string, std::string>& params);
-    void handleKickCommand(const std::map<std::string, std::string>& params);
-    void handleInviteCommand(const std::map<std::string, std::string>& params);
-    void handleTopicCommand(const std::map<std::string, std::string>& params);
-    void handleModeCommand(const std::map<std::string, std::string>& params);
-    void handlePartCommand(const std::map<std::string, std::string>& params);    
 };
 
 #endif

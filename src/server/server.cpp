@@ -22,7 +22,8 @@
  * @throws std::exception If an error occurs during registration with the Reactor.
  */
 Server::Server() : IEventHandler(), _port(6667), _password("")
-{   
+{     
+	_ready2Respond = false  ;  
 	_serverName= SERVER_NAME ;   
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
 	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
@@ -112,9 +113,8 @@ void Server::handle_event(epoll_event ev)
 		struct epoll_event ev;
 		ev.events = EPOLLIN | EPOLLOUT;
 		ev.data.fd = client_fd;
-		Reactor::getInstance().registre(ev, client);  
-		saveUser(*client) ;  
-		serverResponseFactory::respond(001 , *client) ;  
+		Reactor::getInstance().registre(ev, client) ;   
+		saveUser(*client)  ;     
 		std::cout << "New client connected on fd: " << client_fd << std::endl;
 	} catch (std::exception &e) {
 		throw e;
@@ -214,15 +214,17 @@ void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>
 	
 }  ;      
 
-void  Server::Respond2User(int Client_fd , std::string resp  )  
+void  Server::Respond2User(Client &c  , std::vector<int>& resps   )  
 {        
-		size_t len =  0 ;   
-	    if(send(Client_fd ,resp.c_str() ,len ,   0 ) == -1)
-	    { 
-			throw std::runtime_error("[Response] :  Problem in send mechanisme") ;   
+	for(std::vector<int>::iterator it =  resps.begin() ;  it != resps.end() ;  it++ ) 
+	{  
+		try{  
+			serverResponseFactory::respond(*it , c ) ;  
 		}  
-		/* 
-		  
-			[todo]  Implement  send logic here
-		*/
+		catch(std::exception &e  ) 
+		{ 
+			 std::cerr<<e.what()<<std::endl ;   
+		}
+	} ;   
+
 } ;  

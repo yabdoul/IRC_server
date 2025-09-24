@@ -154,7 +154,7 @@ void Client::handle_event(epoll_event e)
             }
         }
     
-    } else if (e.events & EPOLLOUT) {
+    } else if (e.events & EPOLLOUT   &&  ) {
         // TODO: Implement send buffer handling for better performance
         // For now, basic implementation
     }

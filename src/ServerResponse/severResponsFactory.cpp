@@ -24,26 +24,15 @@ void  serverResponseFactory::respond(int code  ,   Client & cl  )
 {     
     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");           
     std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code), cl.userData());      
-    
-    // response ends with \r\n
     if (response.length() >= 2 && response.substr(response.length() - 2) != "\r\n") {
         response += "\r\n";
     }
-    
-    size_t len = response.length();    //not 0 
+    size_t len = response.length();   
     if(send(cl.getClientFd(), response.c_str(), len, 0) == -1)
     { 
         throw std::runtime_error("[Response] : Problem in send mechanism");   
     }
     
     std::cout << "Sent numeric " << code << " to " << cl.getNickname() << ": " << response;
- 
-    // std::map<std::string , std::string >::iterator  it  = cl.userData().begin()    ;   
-    // while(it !=   cl.userData().end()  )  
-    // {    
-    //      std::cout<<it->first<<"="<<it->second<<std::endl;   
-    //      it++ ;  
-    // }   
-    // if(send(cl)) 
 
 }  ;   

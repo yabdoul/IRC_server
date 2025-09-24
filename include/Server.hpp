@@ -36,7 +36,8 @@ class  Server: public IEventHandler
           int listen_fd ;       
           std::string  _serverName ;     
           int _port;
-          std::string _password;
+          std::string _password;  
+          bool _ready2Respond ;     
           Server() ;   
           Server(Server & copy  )  ;   
           virtual void handle_event(epoll_event   ev)  ;  
@@ -52,9 +53,10 @@ class  Server: public IEventHandler
           Channel *  IsChannelExist(std::string &ChName   ) ;      
           void AddChannel(std::string  &ChName )   ;  
           void UnsubscribeChannel (std::string &CName) ;     
-          void saveUser(Client &c  ) ;  
+          void saveUser(Client &c  ) ;    
+          bool isReady2Respond() const { return _ready2Respond  ;   } ;  
           void callCommand(std::string& Command , std::map<std::string , std::string> & params  ,  Client &sender    )  ;       
-          void Respond2User(int Client_fd ,  std::string resp )  ;
+          void Respond2User(Client &c , std::vector<int>& resps   )  ;   
           const std::string& getPassword() const;      
      //--->ac         
 }  ;          

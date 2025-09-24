@@ -41,6 +41,7 @@ class Channel  {
                 bool isUserInChannel(const Client& user) const;
                 bool isInviteOnly() const;
                 bool isTopicRestricted() const;
+                bool isUserInvited(const Client& user) const;
                 std::vector<Client*> getChannelMembers() const;
                 const std::string& getName() const;   
 } ;    

@@ -4,7 +4,8 @@
 #include "IEventHandler.hpp"
 #include "Client.hpp"
 #include <algorithm>  
-
+#include "commandFactory.hpp"   
+#include "severResponsFactory.hpp"
 /**
  * @brief Constructor for the Server class.
  * 
@@ -113,7 +114,8 @@ void Server::handle_event(epoll_event ev)
 		ev.events = EPOLLIN | EPOLLOUT;
 		ev.data.fd = client_fd;
 		Reactor::getInstance().registre(ev, client);  
-		saveUser(*client) ;
+		saveUser(*client) ;  
+		serverResponseFactory::respond(001 , *client) ;  
 		std::cout << "New client connected on fd: " << client_fd << std::endl;
 	} catch (std::exception &e) {
 		throw e;

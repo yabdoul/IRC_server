@@ -187,3 +187,8 @@ bool Channel::isInviteOnly() const {
 bool Channel::isTopicRestricted() const {
     return _topicRestricted;
 }
+
+bool Channel::isUserInvited(const Client& user) const {
+    std::map<Client, int>::const_iterator it = _inviteList.find(const_cast<Client&>(user));
+    return (it != _inviteList.end() && it->second == INV);
+}

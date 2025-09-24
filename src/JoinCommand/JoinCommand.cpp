@@ -3,10 +3,7 @@
 /* 
     Implement an Execute Command in  Channel Class 
 */
-void JoinCommand::execute()  
-{  
-    throw std::runtime_error("[JOIN]: IS a Channel Command") ;   
-} ;      
+
 
 std::vector<int> JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)     
 {          

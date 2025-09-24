@@ -92,7 +92,7 @@ void Client::rcvMsg(std::string &Msg) const
 void Client::subscribe2channel(Channel &ch )  
 {   
     if(std::find(_subscribed2Channel.begin() ,  _subscribed2Channel.end()  ,  &ch) == _subscribed2Channel.end() )
-      _subscribed2Channel.push_back(&ch) ;    
+      _subscribed2Channel.push_back(ch) ;    
     else 
         throw std::runtime_error("[Already in The Channel]") ;   
 } ;   
@@ -107,7 +107,15 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
          std::cerr<<e.what()<<std::endl ;    
     }
 }  ;   
- 
+const Channel& Client::getChannel(std::string chName )  
+{   
+     for(std::vector<Channel>::const_iterator it = _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++)   
+    { 
+       if(it->getName() == chName)  
+        return *it ;      
+    }     
+    throw std::runtime_error("CHANNEL NOT FOUND")  ;   
+}
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
@@ -125,14 +133,14 @@ void Client::handle_event(epoll_event e)
                 _messageBuffer.erase(0, pos + 2);
                 Parser::getInstance().parse(command) ;  
                 Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;  
-                (void) Cmd ;   
-                // if(dynamic_cast<channelCommand  *> (Cmd) )  
-                // { 
+                if(dynamic_cast<ChannelCommand  *> (Cmd) )  
+                {   
+                    Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;     
+                    target.ExecuteCommand(*Cmd ,  *this ,  Parser::getInstance().getParams() ) ;    
+                    }  
+                else { 
                      
-                // }  
-                // else { 
-                     
-                // } 
+                } 
 
                 // if (command.empty()){
 

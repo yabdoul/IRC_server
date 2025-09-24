@@ -30,7 +30,7 @@ private:
     std::string _hostname;
     ClientState _state;
     std::string _messageBuffer;  // For partial message case
-    std::vector<Channel *  >  _subscribed2Channel ;  
+    std::vector<Channel  >  _subscribed2Channel ;  
 public:
     ~Client();       
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
@@ -54,12 +54,12 @@ public:
     virtual void handle_event(epoll_event   ev);      
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
-    void subscribe2channel(Channel &ch  )   ;    
+    void subscribe2channel(Channel &ch  )   ;  
+    const  Channel& getChannel(std::string chName ) ;      
     /* 
         Parser Should Send a map of Params any way ;    
     */     
     void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
-    
     bool isRegistered() const;
     ClientState getState() const;
     void setState(ClientState state);

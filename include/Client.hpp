@@ -3,13 +3,12 @@
 #include <sys/socket.h>
 #include <vector> 
 #include "Command.hpp" 
-#include "Iclient.hpp"   
-
+#include "Iclient.hpp"    
+#include "Channel.hpp" 
 #include <map>  
 #pragma once 
 #ifndef CLIENT_HPP 
 #define CLIENT_HPP
-class Channel ;
 class Command;
 
 class Client : public IEventHandler  ,  Iclient   {
@@ -55,7 +54,7 @@ public:
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;  
-    const  Channel& getChannel(std::string chName ) ;      
+      Channel getChannel(std::string chName ) ;      
     /* 
         Parser Should Send a map of Params any way ;    
     */     

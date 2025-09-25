@@ -31,7 +31,7 @@ void Channel::ExecuteCommand(Command & cmd  ,  Client client   ,  std::map<std::
       if(dynamic_cast<ChannelCommand *> (&cmd) )  
       { 
             ChannelCommand * tmp =  dynamic_cast<ChannelCommand *>  (&cmd) ;    
-            tmp->exeChannel(client ,  *this , params) ;   
+            tmp->exeChannel(client , *this , params) ;   
       }   
 
 }  ;   

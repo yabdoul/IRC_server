@@ -203,9 +203,9 @@ void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>
 	{   
 		Channel * ch =  IsChannelExist(params["channel"])  ;    
 		if(ch)   
-		ch->ExecuteCommand(tmp , sender  , params ) ;   
+			ch->ExecuteCommand(*tmp , sender  , params ) ;   
 		else  
-		throw std::runtime_error("Channel doesnt Exist") ;   
+			throw std::runtime_error("Channel doesnt Exist") ;   
 	}    
 	else 
 	{ 

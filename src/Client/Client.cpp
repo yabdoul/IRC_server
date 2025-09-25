@@ -88,7 +88,7 @@ void Client::rcvMsg(std::string &Msg) const
 {
         std::map<std::string ,  std::string> result ;   
         result["_client_fd"] = SSTR(_client_fd).c_str()      ;    
-        result["nickname"]   = _Nick ;    
+        result["nick"]   = _Nick ;    
         result["user"] =  _User ;    
         result["server"] = "ascasc" ;   
         return  result  ;   
@@ -140,11 +140,11 @@ void Client::addMsg(std::string msg) {
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
-        std::vector<char> buffer(1024, '\0');  
+        std::vector<char> buffer(1024, '\0');    
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);
         
         if (n > 0) {  
-            std::cout << "RAW string: " << std::string(buffer.data(), n) << std::endl;
+            std::cout << "RAW string: " << buffer.data() << std::endl;
             _messageBuffer.append(buffer.data(), n);
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
@@ -163,8 +163,10 @@ void Client::handle_event(epoll_event e)
                             std::map<std::string, std::string> params = Parser::getInstance().getParams();
                             userCommand(*Cmd, params);
                         }
-                        Server::getInstance().beReady2Send() ;   
-                            
+                        Server::getInstance().beReady2Send() ;     
+                        std::string testMsg = ":server 001 " + _Nick + " :Welcome to the IRC server\r\n";
+                        ssize_t result = send(_client_fd, testMsg.c_str(), testMsg.size(), 0);
+                        std::cout << "Direct send result: " << result << " errno: " << strerror(errno) << std::endl;
                     } catch(const std::exception& e) {
                         std::cerr << "Command execution error: " << e.what() << std::endl;
                     }   
@@ -188,7 +190,7 @@ void Client::handle_event(epoll_event e)
         }
     } 
     
-    if ((e.events & EPOLLOUT) && !_msgQue.empty()) {    
+    if ((e.events & EPOLLOUT) && !_msgQue.empty()  && Server::getInstance().isReady( )) {    
         std::cout << "Handling EPOLLOUT event for client " << _Nick << std::endl;   
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         { 
@@ -202,18 +204,14 @@ void Client::handle_event(epoll_event e)
                     break;
                 }
             } else if (bytes_sent < static_cast<ssize_t>(it->size())) {
-                // Partial send, update message and retry later
                 *it = it->substr(bytes_sent);
                 std::cout << "Partial send: " << bytes_sent << " bytes, remaining: " << it->size() << std::endl;
                 break;
             } else {
-                // Complete send, remove message from queue
                 std::cout << "Message sent successfully: " << bytes_sent << " bytes" << std::endl;
                 it = _msgQue.erase(it);
             }
         }
-        
-        // If queue is empty, remove EPOLLOUT to avoid unnecessary wake-ups
         if (_msgQue.empty()) {
             struct epoll_event ev;
             ev.events = EPOLLIN;  // Only listen for input

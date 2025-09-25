@@ -66,7 +66,6 @@ void    Reactor::Run()
  */
 void Reactor::registre(epoll_event ev, IEventHandler* e) {
     int fd = ev.data.fd;
-
    std::map<int , IEventHandler * >::iterator it  = _registred.find(fd);
     if (it == _registred.end()) {
         // fd not registered yet, add it

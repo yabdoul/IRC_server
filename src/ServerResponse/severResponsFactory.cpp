@@ -20,18 +20,9 @@ std::string serverResponseFactory::replacePlaceholders( std::string tmpl, std::m
     return result;
 }  
 
-void  serverResponseFactory::respond(int code  ,   Client & cl  )   
+std::string    serverResponseFactory::getResp(int code  ,   Client & cl  )   
 {     
     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");           
     std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code), cl.userData());      
-    
- 
-    // std::map<std::string , std::string >::iterator  it  = cl.userData().begin()    ;   
-    // while(it !=   cl.userData().end()  )  
-    // {    
-    //      std::cout<<it->first<<"="<<it->second<<std::endl;   
-    //      it++ ;  
-    // }   
-    // if(send(cl)) 
-
+    return response ;    
 }  ;   

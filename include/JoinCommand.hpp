@@ -6,13 +6,13 @@
 class JoinCommand :  public Command  , public ChannelCommand   
 {   
     private:
-        std::vector<int>    execute(Client & sender ,  std::map<std::string ,  std::string  >&params  )  {  
-                (void) sender  , (void ) params ;     
-                return std::vector<int>() ;   
+        void  execute(Client & sender ,  std::map<std::string ,  std::string  >&params  )  {  
+             (void ) sender  ;  
+             (void ) params ;   
         }          
     public :  
         JoinCommand() {}; 
         ~JoinCommand() {} ;   
-        std::vector<int>  exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)    ;   
+        void  exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)    ;   
 
 };  

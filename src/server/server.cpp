@@ -22,7 +22,8 @@
  * @throws std::exception If an error occurs during registration with the Reactor.
  */
 Server::Server() : IEventHandler(), _port(6667), _password("")
-{   
+{     
+	_ready2Send = false  ;   
 	_serverName= SERVER_NAME ;   
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
 	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
@@ -65,7 +66,7 @@ const std::string& Server::getPassword() const {
 	return _password;
 }  
 
-void Server::saveUser(Client &C )  
+void Server::saveUser(Client *C )  
 { 
 	if(std::find(_clientList.begin() , _clientList.end() ,  C )   ==  _clientList.end( ) )  
 		_clientList.push_back(C) ;    
@@ -97,36 +98,37 @@ Server::~Server()
  */
 void Server::handle_event(epoll_event ev)
 {
-	(void)ev;
+    (void)ev;
 
-	std::cout << "Accept handle event called" << std::endl;
-	sockaddr_in client_addr;
-	socklen_t client_len = sizeof(client_addr);
-	int client_fd = accept(listen_fd, (sockaddr *)&client_addr, &client_len);
-	if (client_fd == -1)
-		throw std::runtime_error("fatal : Accept() ");
+    std::cout << "Accept handle event called" << std::endl;
+    sockaddr_in client_addr;
+    socklen_t client_len = sizeof(client_addr);
+    int client_fd = accept(listen_fd, (sockaddr *)&client_addr, &client_len);
+    if (client_fd == -1)
+        throw std::runtime_error("fatal : Accept() ");
 
-	Client *client = new Client(client_fd);
-	try
-	{
-		struct epoll_event ev;
-		ev.events = EPOLLIN | EPOLLOUT;
-		ev.data.fd = client_fd;
-		Reactor::getInstance().registre(ev, client);  
-		saveUser(*client) ;  
-		serverResponseFactory::respond(001 , *client) ;  
-		std::cout << "New client connected on fd: " << client_fd << std::endl;
-	} catch (std::exception &e) {
-		throw e;
-	}
+    Client *client = new Client(client_fd);
+    try
+    {
+        struct epoll_event ev;
+        ev.events = EPOLLIN ;
+        ev.data.fd = client_fd;
+        Reactor::getInstance().registre(ev, client);  
+        // Store the pointer instead of copying the object
+        // Remove this line that causes the copy:
+        // this->_clientList.push_back(*client);   
+    } catch (std::exception &e) {
+        delete client;  // Clean up on error
+        throw e;
+    }
 }  
 
   Client&  Server::getUser(std::string nickname )   
 {  
-	for(std::vector<Client>::iterator it =  _clientList.begin() ;  it  !=  _clientList.end() ;  it++)  
+	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
 	{ 
-		  if((it)->userData()["nickname"]  ==   nickname  )  
-		  	 return  (*it)    ;   
+		  if((*it)->userData()["nickname"] == nickname)  
+			 return *(*it);   
 	}  ;      
 	throw std::runtime_error("User Not found") ;   
 } 
@@ -145,10 +147,11 @@ Server &Server::getInstance()
  * @param CnName Reference to the name of the channel to be added.
  *               This name will be used as the key in the ChannelList map.
  */
-void Server::AddChannel(std::string  &CnName  ) 
+Channel   Server::AddChannel(std::string  &CnName  ) 
 {    
-	Channel ch ;   
+	Channel ch ;    
 	this->ChannelList.insert(std::make_pair(CnName, ch));
+	return ch;   
 }  
 
 /**
@@ -163,19 +166,21 @@ void Server::AddChannel(std::string  &CnName  )
  * 
  * @throws ServerException If the channel is not found in the channel list.
  */
-Channel *  Server::IsChannelExist(std::string &ChName   )  
+Channel    Server::IsChannelExist(std::string &ChName   )  
 {  
 	std::map <std::string , Channel>::iterator it =   this->ChannelList.find(ChName);   
 	try {  
 		 if( it  !=  ChannelList.end() )  
-				return &it->second ;   
+				return it->second ;   
 		else 
-			throw ServerException("Channel Not Found") ;   
+			{  
+				return(AddChannel(ChName))  ;   
+			}         
 	} 
 	catch(ServerException &e )
 	{ 
-			std::cerr<<e.what()  ;    
-			return NULL ;   
+			std::cerr<<e.what()  ;  
+			return Channel() ;      
 	}
 } 
 
@@ -189,10 +194,8 @@ Channel *  Server::IsChannelExist(std::string &ChName   )
  */
 void  Server::UnsubscribeChannel(std::string &CName)   
 {  
-	    if(IsChannelExist(CName))
-		{  
+	  
 			 this->ChannelList.erase(CName) ;  
-		} 
 }     
 
 
@@ -201,11 +204,14 @@ void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>
 	Command * tmp  = commandFactory::makeCommand(cmd)  ;  
 	if(dynamic_cast<ChannelCommand * > (tmp)) 
 	{   
-		Channel * ch =  IsChannelExist(params["channel"])  ;    
-		if(ch)   
-			ch->ExecuteCommand(*tmp , sender  , params ) ;   
-		else  
-			throw std::runtime_error("Channel doesnt Exist") ;   
+		Channel  ch =  IsChannelExist(params["channel"])  ;    
+		try{  
+			ch.ExecuteCommand(*tmp , sender  , params ) ;   
+		}  
+		catch(std::exception &e  )    
+		{ 
+			std::cerr<<e.what()<<std::endl  ;    
+		}
 	}    
 	else 
 	{ 
@@ -225,4 +231,4 @@ void  Server::Respond2User(int Client_fd , std::string resp  )
 		  
 			[todo]  Implement  send logic here
 		*/
-} ;  
+} ;

@@ -27,8 +27,9 @@ private:
     std::string _User;
     std::string _realName;
     std::string _hostname;
-    ClientState _state;
-    std::string _messageBuffer;  // For partial message case
+    ClientState _state;   
+    std::vector<std::string> _msgQue;     
+    std::string _messageBuffer ;   
     std::vector<Channel  >  _subscribed2Channel ;  
 public:
     ~Client();       
@@ -54,7 +55,9 @@ public:
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;  
-      Channel getChannel(std::string chName ) ;      
+    void addMsg(std::string Msg )  ;    
+    Channel getChannel(std::string chName ) ;        
+
     /* 
         Parser Should Send a map of Params any way ;    
     */     

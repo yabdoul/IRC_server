@@ -64,19 +64,27 @@ void    Reactor::Run()
  *
  * @throws ReactorException If epoll_ctl fails or if the file descriptor is already registered.
  */
-void   Reactor::registre(epoll_event ev , IEventHandler * e  )  {   
+void Reactor::registre(epoll_event ev, IEventHandler* e) {
+    int fd = ev.data.fd;
 
-
-     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, ev.data.fd, &ev)  == -1)  
-          throw ReactorException("Fatal: epoll_ctl() faild");
-     std::map<int, IEventHandler *>::iterator it = _registred.find(ev.data.fd);
-     if (it != _registred.end())
-          {   
-                throw ReactorException("Fd Already exist");  
-          }  
-     int fd = ev.data.fd;
-     _registred.insert(std::make_pair(fd , e));
-} 
+   std::map<int , IEventHandler * >::iterator it  = _registred.find(fd);
+    if (it == _registred.end()) {
+        // fd not registered yet, add it
+        if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {  
+            std::cerr << "epoll_ctl ADD failed:  fd "<< ev.data.fd << strerror(errno) << std::endl;
+            throw ReactorException("Fatal: epoll_ctl() ADD failed");
+        }
+        _registred.insert(std::make_pair(fd, e));
+        std::cout << "Registered new fd " << fd << std::endl;
+    } else {
+        if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
+            std::cerr << "epoll_ctl MOD failed: " << ev.data.fd << strerror(errno) << std::endl;
+            throw ReactorException("Fatal: epoll_ctl() MOD failed");
+        }
+        it->second = e;
+        std::cout << "Modified registration for fd " << fd << std::endl;
+    }
+}
 
 /**
  * @brief Unregisters a file descriptor from the reactor.

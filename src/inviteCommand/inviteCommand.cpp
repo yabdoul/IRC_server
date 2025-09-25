@@ -1,45 +1,31 @@
 #include "inviteCommand.hpp"   
 #include  "Server.hpp"  
 
-std::vector<int> inviteCommand::exeChannel(Client &cl , Channel &ch  , std::map<std::string ,  std::string >&params   )  
+void  inviteCommand::exeChannel(Client &cl , Channel &ch  , std::map<std::string ,  std::string >&params   )  
 {   
     std::vector<int> responses;
     
-    // Validate parameters
     if (params.find("nickname") == params.end()) {
-        responses.push_back(461); // ERR_NEEDMOREPARAMS
-        return responses;
+        cl.addMsg(serverResponseFactory::getResp(461 ,  cl )) ;   
     }
     
     try {
-        // Check if user exists
         Client& targetClient = Server::getInstance().getUser(params["nickname"]);
-        
-        // iff user is already on channel
-        if (ch.isUserInChannel(targetClient)) {
-            responses.push_back(443); // ERR_USERONCHANNEL
-            return responses;
+
+        if (ch.isUserInChannel(targetClient)) {  
+            cl.addMsg(serverResponseFactory::getResp(443 ,  cl ))  ;  
         }
         
-        // if inviter is on channel
         if (!ch.isUserInChannel(cl)) {
-            responses.push_back(442); // ERR_NOTONCHANNEL  
-            return responses;
+            cl.addMsg(serverResponseFactory::getResp(442 ,  cl ))  ;  
         }
         
-        // if channel is invite-only
         if (ch.isInviteOnly() && !ch.isOp(cl)) {
-            responses.push_back(482); // ERR_CHANOPRIVSNEEDED
-            return responses;
+            cl.addMsg(serverResponseFactory::getResp(482 ,  cl ))  ;  
         }
-        
-        // Execute invite
         ch.inviteUser(cl, targetClient);
-        responses.push_back(341); // RPL_INVITING
-        
+        cl.addMsg(serverResponseFactory::getResp(341 ,  cl ))  ;  
     } catch (std::exception& e) {
-        responses.push_back(401); // ERR_NOSUCHNICK
+        responses.push_back(401); 
     }
-    
-    return responses;
 } ;     

@@ -1,39 +1,26 @@
 #include "TopicCommand.hpp"   
 
-std::vector<int> TopicCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
+void  TopicCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
 {   
-    std::vector<int> responses;
-    
-    // Check if user is on channel
-    if (!ch.isUserInChannel(cl)) {
-        responses.push_back(442); // ERR_NOTONCHANNEL  
-        return responses;
+    if (!ch.isUserInChannel(cl)) {  
+        cl.addMsg(serverResponseFactory::getResp(442 ,  cl ) )  ;    
     }
-    
-    // If no topic parameter, return current topic
     if (params.find("topic") == params.end()) {
         if (ch.getTopic().empty()) {
-            responses.push_back(331); // RPL_NOTOPIC
+            cl.addMsg(serverResponseFactory::getResp(331  ,  cl ) )  ;    
         } else {
-            responses.push_back(332); // RPL_TOPIC  
+            cl.addMsg(serverResponseFactory::getResp(332  ,  cl ) )  ;    
         }
-        return responses;
     }
     
-    // Setting topic - check if topic protection is enabled
     if (ch.isTopicRestricted() && !ch.isOp(cl)) {
-        responses.push_back(482); // ERR_CHANOPRIVSNEEDED
-        return responses;
+        cl.addMsg(serverResponseFactory::getResp(482  ,  cl ) )  ;    
     }
     
     try {
-        // Set topic
         ch.setTopic(cl, params["topic"]);
-        // Topic change is broadcast as TOPIC message, not numeric
-        
     } catch (std::exception& e) {
-        responses.push_back(482); // ERR_CHANOPRIVSNEEDED (fallback)
+        cl.addMsg(serverResponseFactory::getResp(482  ,  cl ) )  ;    
+
     }
-    
-    return responses;
 }

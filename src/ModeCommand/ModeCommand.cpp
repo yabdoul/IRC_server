@@ -1,25 +1,18 @@
 #include "ModeCommand.hpp"   
 
-std::vector<int> ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
+void   ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
 {   
-    std::vector<int> responses;
     
-    // if user is on channel
-    if (!ch.isUserInChannel(cl)) {
-        responses.push_back(442); // ERR_NOTONCHANNEL  
-        return responses;
+    if (!ch.isUserInChannel(cl)) {   
+        cl.addMsg(serverResponseFactory::getResp(442 ,  cl )) ;  
     }
     
-    // If no mode parameter, return current modes
     if (params.find("mode") == params.end()) {
-        responses.push_back(324); // RPL_CHANNELMODEIS
-        return responses;
+        cl.addMsg(serverResponseFactory::getResp(324 , cl )) ;  
     }
     
-    // Setting mode - check operator privileges
     if (!ch.isOp(cl)) {
-        responses.push_back(482); // ERR_CHANOPRIVSNEEDED
-        return responses;
+        cl.addMsg(serverResponseFactory::getResp(482 , cl  ))  ;  
     }
     
     try {
@@ -30,12 +23,10 @@ std::vector<int> ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::
             modeParam = params["mode_param"];
         }
         
-        // Execute mode change
         ch.setMode(cl, mode, modeParam);
         
     } catch (std::exception& e) {
-        responses.push_back(501); // ERR_UNKNOWNMODE
+        cl.addMsg(serverResponseFactory::getResp(501  ,  cl ) ) ;  
     }
     
-    return responses;
 }

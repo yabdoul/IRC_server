@@ -10,14 +10,14 @@ class Client ;
 class Command ;   
 class Channel  {  
         private :  
-                 std::map<Client  , int   >    _inviteList ;    
+                 std::map<Client*, int>    _inviteList ;    
                  std::string _channelName ;            
                  bool _invitOnly ;
                  bool _topicRestricted;
                  std::string _topic;
-                 std::string _key;  // Channel password
-                 int _userLimit;    // 0 = no limit     
-        public :   
+                 std::string _key; 
+                 int _userLimit;   
+        public:    
                 Channel() ;  
                 Channel(std::string channelName  ,  Client & owner)  ;     
                 ~Channel();         

@@ -5,6 +5,7 @@ class Command {
         public :  
             virtual  void    execute(Client & sender ,  std::map<std::string ,  std::string  >&params  )   =0  ;   
             Command(){} ;   
+            virtual ~Command(){} ;   // Add virtual destructor
 }  ;     
   
 

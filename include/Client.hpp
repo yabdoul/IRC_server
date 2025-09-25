@@ -27,9 +27,8 @@ private:
     std::string _User;
     std::string _realName;
     std::string _hostname;
-    ClientState _state;   
-    std::vector<std::string> _msgQue;     
-    std::string _messageBuffer ;   
+    ClientState _state;
+    std::string _messageBuffer;  // For partial message case
     std::vector<Channel  >  _subscribed2Channel ;  
 public:
     ~Client();       
@@ -52,16 +51,10 @@ public:
         return( (C._Nick ==   _Nick )?(true):(false)) ;    
     } ;     
     virtual void handle_event(epoll_event   ev);      
-     std::map<std::string ,  std::string> userData() const  ;    
-    void addUserData(std::string key , std::string value ) 
-     {  
-         (void ) key ,  (void) value ;    
-     } 
-    void rcvMsg(std::string&  Msg)  const  ;      
+     std::map<std::string ,  std::string> userData() const  ;   
+    void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;  
-    void addMsg(std::string Msg )  ;    
-    Channel getChannel(std::string chName ) ;        
-
+      Channel getChannel(std::string chName ) ;      
     /* 
         Parser Should Send a map of Params any way ;    
     */     
@@ -71,8 +64,9 @@ public:
     void setState(ClientState state);
     const std::string& getNickname() const;
     const std::string& getUsername() const;
-    const std::string& getRealName() const;
-    int getClientFd() const;
+    const std::string& getRealName() const  ; 
+    void   addMsg(std::string&  msg) ;   
+    int getClientFd() const; 
 };
 
 #endif

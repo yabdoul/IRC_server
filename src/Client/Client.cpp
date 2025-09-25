@@ -91,10 +91,13 @@ void Client::rcvMsg(std::string &Msg) const
 
 void Client::subscribe2channel(Channel &ch )  
 {   
-    if(std::find(_subscribed2Channel.begin() ,  _subscribed2Channel.end()  ,  &ch) == _subscribed2Channel.end() )
-      _subscribed2Channel.push_back(&ch) ;    
-    else 
-        throw std::runtime_error("[Already in The Channel]") ;   
+    // Check if channel is already subscribed by comparing names
+    for(std::vector<Channel>::iterator it = _subscribed2Channel.begin(); it != _subscribed2Channel.end(); ++it) {
+        if(it->getName() == ch.getName()) {
+            throw std::runtime_error("[Already in The Channel]");
+        }
+    }
+    _subscribed2Channel.push_back(ch);
 } ;   
 
 void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string >&params   )  
@@ -107,7 +110,15 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
          std::cerr<<e.what()<<std::endl ;    
     }
 }  ;   
- 
+ Channel  Client::getChannel(std::string chName)  
+{   
+     for(std::vector<Channel>::const_iterator it = _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++)   
+    { 
+       if(it->getName() == chName)  
+        return *it ;      
+    }     
+    throw std::runtime_error("CHANNEL NOT FOUND")  ;   
+}
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
@@ -125,14 +136,23 @@ void Client::handle_event(epoll_event e)
                 _messageBuffer.erase(0, pos + 2);
                 Parser::getInstance().parse(command) ;  
                 Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;  
-                (void) Cmd ;   
-                // if(dynamic_cast<channelCommand  *> (Cmd) )  
-                // { 
-                     
-                // }  
-                // else { 
-                     
-                // } 
+                if(Cmd) {
+                    try {
+                        if(dynamic_cast<ChannelCommand  *> (Cmd) )  
+                        {   
+                             Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
+                            target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;       
+                            // Note: You may need to modify Channel::ExecuteCommand to accept const Channel&
+                            // target.ExecuteCommand(*Cmd ,  *this ,  Parser::getInstance().getParams() ) ;    
+                        }  
+                        else { 
+                            std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                            userCommand(*Cmd, params);
+                        }
+                    } catch(const std::exception& e) {
+                        std::cerr << "Command execution error: " << e.what() << std::endl;
+                    }
+                } 
 
                 // if (command.empty()){
 
@@ -153,7 +173,6 @@ void Client::handle_event(epoll_event e)
                 return;
             }
         }
-    
     } else if (e.events & EPOLLOUT      ) {
         // TODO: Implement send buffer handling for better performance
         // For now, basic implementation

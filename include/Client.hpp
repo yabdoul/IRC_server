@@ -3,13 +3,12 @@
 #include <sys/socket.h>
 #include <vector> 
 #include "Command.hpp" 
-#include "Iclient.hpp"   
-
+#include "Iclient.hpp"    
+#include "Channel.hpp" 
 #include <map>  
 #pragma once 
 #ifndef CLIENT_HPP 
 #define CLIENT_HPP
-class Channel ;
 class Command;
 
 class Client : public IEventHandler  ,  Iclient   {
@@ -29,19 +28,16 @@ private:
     std::string _realName;
     std::string _hostname;
     ClientState _state;
-    std::vector<std::string> writeQue  ;     
     std::string _messageBuffer;  // For partial message case
-    std::vector<Channel *  >  _subscribed2Channel ;  
-public: 
+    std::vector<Channel  >  _subscribed2Channel ;  
+public:
     ~Client();       
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
     Client(int client_fd);  
     Client(std::string Nick ):_Nick(Nick){} ;    
-    Client(const Client &other)  ;     
+    Client(const Client &other)  ;   
     // Client() ;    
-    void  add2Que(std::string &res ){   
-        writeQue.push_back(res) ;               
-    }
+ 
     bool operator<(const   Client & other   )   const  
     { 
         return  _Nick > other._Nick ;  
@@ -57,12 +53,12 @@ public:
     virtual void handle_event(epoll_event   ev);      
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
-    void subscribe2channel(Channel &ch  )   ;    
+    void subscribe2channel(Channel &ch  )   ;  
+      Channel getChannel(std::string chName ) ;      
     /* 
         Parser Should Send a map of Params any way ;    
     */     
     void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
-    
     bool isRegistered() const;
     ClientState getState() const;
     void setState(ClientState state);

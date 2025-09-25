@@ -1,13 +1,13 @@
 #include <map>  
 #include "Command.hpp"    
 #include <algorithm>  
-#include "Ichannel.hpp"  
 #include <algorithm>  
 #include <exception>          
 #ifndef   CHANNEL_HPP  
 #define CHANNEL_HPP 
 #pragma once    
-class Client ;   
+class Client ;    
+class Command ;   
 class Channel  {  
         private :  
                  std::map<Client  , int   >    _inviteList ;    
@@ -28,8 +28,8 @@ class Channel  {
                 }
                 bool isOp(Client &sender )   ;      
                 void rcvMsg(std::string  &msg  )  ; 
-                void lockChannel(Client & sender )  ;        
-                void ExecuteCommand(Command  *  cmd  , Client Client  , std::map<std::string , std::string>  params  )   ;     
+                void lockChannel(Client & sender )  ;         
+                void ExecuteCommand(Command  &  cmd  , Client Client  , std::map<std::string , std::string>  params  )     ;     
                 void inviteUser(Client &sender ,  Client &target )  ;      
                 void  enterChannel(Client &cl  ) ;
                 void kickUser(Client &sender, Client &target, const std::string& reason);

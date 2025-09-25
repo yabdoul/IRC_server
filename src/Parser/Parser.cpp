@@ -3,24 +3,32 @@
 #include <algorithm>
 #include <vector>
 #include <cctype>
+#include <iostream>
 
-Parser::Parser() {}
+Parser::Parser() : isValid(false) {}
 
 Parser& Parser::getInstance() {
     static Parser instance;
     return instance;
 }
 
-void Parser::parse(const std::string& rawCommand) {
+bool Parser::parse(const std::string& rawCommand) {
     prefix.clear();
     command.clear();
     params.clear();
+    lastError.clear();
+    isValid = false;
     
     if (rawCommand.empty()) {
-        return;
+        lastError = "Empty command";
+        return false;
     }
     
     std::string cleanCommand = rawCommand;
+    if (!sanitizeInput(cleanCommand)) {
+        return false;
+    }
+    
     // Remove trailing \r\n if present
     if (cleanCommand.size() >= 2 && cleanCommand.substr(cleanCommand.size() - 2) == "\r\n") {
         cleanCommand = cleanCommand.substr(0, cleanCommand.size() - 2);
@@ -73,8 +81,153 @@ void Parser::parse(const std::string& rawCommand) {
         parameters.push_back(trailingParam);
     }
     
+    // Validate command
+    if (!validateCommand(command)) {
+        return false;
+    }
+    
     // Map parameters to appropriate keys based on command
     mapCommandParameters(command, parameters);
+    
+    isValid = true;
+    return true;
+}
+
+// Input sanitization to prevent injection attacks
+bool Parser::sanitizeInput(std::string& input) {
+    // Remove null bytes and dangerous control characters
+    for (size_t i = 0; i < input.length(); ++i) {
+        unsigned char c = input[i];
+        if (c == 0 || (c < 32 && c != '\r' && c != '\n')) {
+            input.erase(i, 1);
+            --i;
+        }
+    }
+    
+    // RFC 2812: Max message length is 512 characters including CRLF
+    if (input.length() > 510) {
+        input = input.substr(0, 510);
+        lastError = "Message truncated: exceeds maximum length";
+        return false;
+    }
+    
+    return true;
+}
+
+// Validate IRC command names
+bool Parser::validateCommand(const std::string& cmd) {
+    if (cmd.empty()) {
+        lastError = "Empty command";
+        return false;
+    }
+    
+    // Check if it's a numeric command (001, 002, etc.)
+    bool isNumeric = true;
+    for (size_t i = 0; i < cmd.length(); ++i) {
+        if (!std::isdigit(cmd[i])) {
+            isNumeric = false;
+            break;
+        }
+    }
+    
+    if (isNumeric && cmd.length() == 3) {
+        return true; // Valid numeric command
+    }
+    
+    // List of valid IRC commands
+    if (cmd == "PASS" || cmd == "NICK" || cmd == "USER" || cmd == "JOIN" ||
+        cmd == "PART" || cmd == "PRIVMSG" || cmd == "NOTICE" || cmd == "KICK" ||
+        cmd == "INVITE" || cmd == "MODE" || cmd == "TOPIC" || cmd == "QUIT" ||
+        cmd == "WHO" || cmd == "WHOIS" || cmd == "LIST" || cmd == "NAMES" ||
+        cmd == "PING" || cmd == "PONG") {
+        return true;
+    }
+    
+    lastError = "Unknown command: " + cmd;
+    return false;
+}
+
+// Validate IRC nickname format
+bool Parser::validateNickname(const std::string& nick) {
+    if (nick.empty() || nick.length() > 9) {
+        return false;
+    }
+    
+    // First character must be letter or special char
+    char first = nick[0];
+    if (!std::isalpha(first) && first != '[' && first != ']' && 
+        first != '\\' && first != '`' && first != '_' && 
+        first != '^' && first != '{' && first != '|' && first != '}') {
+        return false;
+    }
+    
+    // Remaining chars: letters, digits, or special chars
+    for (size_t i = 1; i < nick.length(); ++i) {
+        char c = nick[i];
+        if (!std::isalnum(c) && c != '[' && c != ']' && c != '\\' && 
+            c != '`' && c != '_' && c != '^' && c != '{' && c != '|' && 
+            c != '}' && c != '-') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Validate IRC channel name format
+bool Parser::validateChannelName(const std::string& channel) {
+    if (channel.empty() || channel.length() > 50) {
+        return false;
+    }
+    
+    if (channel[0] != '#' && channel[0] != '&') {
+        return false;
+    }
+    
+    // No spaces, commas, or control characters
+    for (size_t i = 1; i < channel.length(); ++i) {
+        char c = channel[i];
+        if (c == ' ' || c == ',' || c == '\0' || c == '\r' || c == '\n' || c == 7) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Handle multiple commands in one buffer
+std::vector<std::string> Parser::parseMultiple(const std::string& buffer) {
+    std::vector<std::string> commands;
+    std::string tempBuffer = buffer;
+    
+    size_t pos = 0;
+    while ((pos = tempBuffer.find("\r\n")) != std::string::npos) {
+        std::string command = tempBuffer.substr(0, pos);
+        if (!command.empty()) {
+            commands.push_back(command);
+        }
+        tempBuffer.erase(0, pos + 2);
+    }
+    
+    return commands;
+}
+
+// Handle partial messages in buffer
+std::string Parser::parsePartialBuffer(std::string& buffer) {
+    size_t pos = 0;
+    
+    while ((pos = buffer.find("\r\n")) != std::string::npos) {
+        std::string command = buffer.substr(0, pos);
+        buffer.erase(0, pos + 2);
+        
+        if (!command.empty()) {
+            if (!parse(command)) {
+                // Log parsing error but continue
+                std::cerr << "Parse error: " << lastError << std::endl;
+            }
+        }
+    }
+    
+    // Return remaining partial message
+    return buffer;
 }
 
 void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std::string>& parameters) {
@@ -243,4 +396,44 @@ const std::string& Parser::getCommand() const {
 
 const std::map<std::string, std::string>& Parser::getParams() const {
     return params;
+}
+
+const std::string& Parser::getLastError() const {
+    return lastError;
+}
+
+bool Parser::isValidParse() const {
+    return isValid;
+}
+
+// Static validation helpers
+bool Parser::isValidIRCMessage(const std::string& message) {
+    if (message.empty() || message.length() > 512) {
+        return false;
+    }
+    
+    // Check for proper CRLF ending
+    if (message.length() >= 2) {
+        std::string ending = message.substr(message.length() - 2);
+        if (ending != "\r\n") {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+std::string Parser::sanitizeMessage(const std::string& message) {
+    std::string result = message;
+    
+    // Remove dangerous characters
+    for (size_t i = 0; i < result.length(); ++i) {
+        unsigned char c = result[i];
+        if (c == 0 || (c < 32 && c != '\r' && c != '\n')) {
+            result.erase(i, 1);
+            --i;
+        }
+    }
+    
+    return result;
 }

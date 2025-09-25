@@ -10,16 +10,33 @@ private:
     std::string prefix;
     std::string command;
     std::map<std::string, std::string> params;
+    std::string lastError;
+    bool isValid;
+    
     Parser();
     Parser(const Parser&);
     Parser& operator=(const Parser&);
     void mapCommandParameters(const std::string& cmd, const std::vector<std::string>& parameters);
+    bool validateCommand(const std::string& cmd);
+    bool sanitizeInput(std::string& input);
+    bool validateNickname(const std::string& nick);
+    bool validateChannelName(const std::string& channel);
+    
 public:
     static Parser& getInstance();
-    void parse(const std::string& rawCommand);
+    bool parse(const std::string& rawCommand);
+    std::vector<std::string> parseMultiple(const std::string& buffer);
+    std::string parsePartialBuffer(std::string& buffer);
+    
     const std::string& getPrefix() const;
     const std::string& getCommand() const;
     const std::map<std::string, std::string>& getParams() const;
+    const std::string& getLastError() const;
+    bool isValidParse() const;
+    
+    // Static validation helpers
+    static bool isValidIRCMessage(const std::string& message);
+    static std::string sanitizeMessage(const std::string& message);
 };
 
 #endif // PARSER_HPP

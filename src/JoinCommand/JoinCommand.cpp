@@ -4,40 +4,31 @@
     Implement an Execute Command in  Channel Class 
 */
 
-
-std::vector<int> JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)     
-{          
-    std::vector<int> responses;
-    (void) params;
-    
+void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)     
+{            
+    (void )params ;    
     try {  
-        // Check if user is already on channel
         if (ch.isUserInChannel(cl)) {
-            // Already on channel, return
-            return responses;
+            return ;
         }
         
-        // Check channel limits, keys, invite-only, etc.
-        if (ch.isInviteOnly() && !ch.isUserInvited(cl)) {
-            responses.push_back(473); // ERR_INVITEONLYCHAN
-            return responses;
+        if (ch.isInviteOnly() && !ch.isUserInvited(cl)) {    
+            cl.addMsg(serverResponseFactory::getResp(473 ,  cl )) ;   
         }
         
-        // Execute join
         ch.enterChannel(cl);       
         
-        // Success responses
-        responses.push_back(353); // RPL_NAMREPLY (names list)
-        responses.push_back(366); // RPL_ENDOFNAMES
-        
+        cl.addMsg(serverResponseFactory::getResp(353 ,  cl )) ;   
+        cl.addMsg(serverResponseFactory::getResp(366 ,  cl )) ;   
+    
         // If channel has topic, send it
         if (!ch.getTopic().empty()) {
-            responses.push_back(332); // RPL_TOPIC
+        cl.addMsg(serverResponseFactory::getResp(332 ,  cl )) ;   
         }
         
     } catch (std::exception &e) { 
-        responses.push_back(403); // ERR_NOSUCHCHANNEL or generic error
+              cl.addMsg(serverResponseFactory::getResp(403 ,  cl )) ;   
+
     }
     
-    return responses;
 } 

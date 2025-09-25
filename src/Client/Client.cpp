@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <cstring>
 #include "commandFactory.hpp"  
-
+#include "Reactor.hpp"
 
 inline std::string SSTR(int x) {
     std::ostringstream oss;
@@ -53,9 +53,15 @@ Client::~Client()
 }
 
 Client::Client(const Client &other):IEventHandler(other)
-{  
-     _Nick =  other._Nick ;   
-     _Pass = other._Pass ;     
+{    
+    std::cout<<"entre copy"<<std::endl ;   
+     _client_fd = -1; 
+     _Nick = other._Nick;   
+     _Pass = other._Pass;
+     _User = other._User;
+     _state = other._state;
+     _realName = other._realName;
+     // Don't copy _msgQue or _subscribed2Channel - they should be unique per client
 }  
 
 void Client::rcvMsg(std::string &Msg) const  
@@ -116,9 +122,21 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
     { 
        if(it->getName() == chName)  
         return *it ;      
-    }     
-    throw std::runtime_error("CHANNEL NOT FOUND")  ;   
+    }       
+    return(Server::getInstance().AddChannel(chName));   
+}   
+
+void Client::addMsg(std::string msg) {  
+    _msgQue.push_back(msg);
+    // Register for EPOLLOUT when we have messages to send
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = getClientFd();
+    Reactor::getInstance().registre(ev, this);
+    
+    std::cout << "Added message to queue for client " << _Nick << ", registered EPOLLOUT" << std::endl;
 }
+
 void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
@@ -127,9 +145,7 @@ void Client::handle_event(epoll_event e)
         
         if (n > 0) {  
             std::cout << "RAW string: " << std::string(buffer.data(), n) << std::endl;
-            
             _messageBuffer.append(buffer.data(), n);
-            
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
@@ -140,23 +156,20 @@ void Client::handle_event(epoll_event e)
                     try {
                         if(dynamic_cast<ChannelCommand  *> (Cmd) )  
                         {   
-                             Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
+                            Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
                             target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;       
-                            // Note: You may need to modify Channel::ExecuteCommand to accept const Channel&
-                            // target.ExecuteCommand(*Cmd ,  *this ,  Parser::getInstance().getParams() ) ;    
                         }  
                         else { 
                             std::map<std::string, std::string> params = Parser::getInstance().getParams();
                             userCommand(*Cmd, params);
                         }
+                        Server::getInstance().beReady2Send() ;   
+                            
                     } catch(const std::exception& e) {
                         std::cerr << "Command execution error: " << e.what() << std::endl;
-                    }
+                    }   
                 } 
 
-                // if (command.empty()){
-
-                // }
             }
         } else if (n == 0) {
             std::cout << "Client " << _Nick << " disconnected" << std::endl;
@@ -173,9 +186,41 @@ void Client::handle_event(epoll_event e)
                 return;
             }
         }
-    } else if (e.events & EPOLLOUT      ) {
-        // TODO: Implement send buffer handling for better performance
-        // For now, basic implementation
+    } 
+    
+    if ((e.events & EPOLLOUT) && !_msgQue.empty()) {    
+        std::cout << "Handling EPOLLOUT event for client " << _Nick << std::endl;   
+        for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
+        { 
+            ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
+            if (bytes_sent < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    std::cout << "Send would block, will retry later" << std::endl;
+                    break;
+                } else {
+                    std::cerr << "Send error for client " << _Nick << ": " << strerror(errno) << std::endl;
+                    break;
+                }
+            } else if (bytes_sent < static_cast<ssize_t>(it->size())) {
+                // Partial send, update message and retry later
+                *it = it->substr(bytes_sent);
+                std::cout << "Partial send: " << bytes_sent << " bytes, remaining: " << it->size() << std::endl;
+                break;
+            } else {
+                // Complete send, remove message from queue
+                std::cout << "Message sent successfully: " << bytes_sent << " bytes" << std::endl;
+                it = _msgQue.erase(it);
+            }
+        }
+        
+        // If queue is empty, remove EPOLLOUT to avoid unnecessary wake-ups
+        if (_msgQue.empty()) {
+            struct epoll_event ev;
+            ev.events = EPOLLIN;  // Only listen for input
+            ev.data.fd = getClientFd();
+            Reactor::getInstance().registre(ev, this);
+            std::cout << "Message queue empty, removed EPOLLOUT for client " << _Nick << std::endl;
+        }
     }
 }
 

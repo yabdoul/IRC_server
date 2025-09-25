@@ -10,5 +10,5 @@ class ChannelCommand{
     public :   
         ChannelCommand() ;  
         ~ChannelCommand() ;   
-        virtual std::vector<int>  exeChannel(Client &cl , Channel &ch  , std::map<std::string ,  std::string>&params  =  g_emptyMap ) =0  ;   
+        virtual void  exeChannel(Client &cl , Channel &ch  , std::map<std::string ,  std::string>&params  =  g_emptyMap ) =0  ;   
 } ;  

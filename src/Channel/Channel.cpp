@@ -25,7 +25,6 @@ Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channe
       _userLimit = 0;
 }
 
-
 void Channel::ExecuteCommand(Command & cmd  ,  Client client   ,  std::map<std::string  , std::string>params  )      
 {       
       if(dynamic_cast<ChannelCommand *> (&cmd) )  

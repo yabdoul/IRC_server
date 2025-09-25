@@ -15,7 +15,8 @@ class Reactor
         void    unregistre(epoll_event ev)  ;
         int Dispatch()  ;     
         void test(){ std::cout<<"single tone"<<std::endl   ;   }  
-        void notify(epoll_event  event ) ;     
+        void notify(epoll_event  event ) ;        
+        
         int   getFd()   ;     
     private: 
         Reactor();  

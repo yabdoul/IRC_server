@@ -29,7 +29,7 @@ class Channel  {
                 bool isOp(Client &sender )   ;      
                 void rcvMsg(std::string  &msg  )  ; 
                 void lockChannel(Client & sender )  ;         
-                void ExecuteCommand(Command  &  cmd  , Client Client  , std::map<std::string , std::string>  params  )     ;     
+                void ExecuteCommand(Command  &  cmd  , Client&  Client  , std::map<std::string , std::string>  params  )     ;     
                 void inviteUser(Client &sender ,  Client &target )  ;      
                 void  enterChannel(Client &cl  ) ;
                 void kickUser(Client &sender, Client &target, const std::string& reason);

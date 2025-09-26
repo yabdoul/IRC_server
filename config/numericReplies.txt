@@ -19,6 +19,7 @@
 324=: {server} 324 {nick} {channel} {modes}
 331=: {server} 331 {nick} {channel} :No topic is set
 332=: {server} 332 {nick} {channel} :{topic}
+333=: {server} 333 {nick} {channel} {topicSetter} {topicTimestamp}
 353=: {server} 353 {nick} {symbol} {channel} :{nickList}
 366=: {server} 366 {nick} {channel} :End of /NAMES list
 372=: {server} 372 {nick} :{motdLine}

@@ -2,6 +2,7 @@
 #include  "KickCommand.hpp"  
 #include "inviteCommand.hpp"
 #include "PartCommand.hpp"
+#include "TopicCommand.hpp"
 
 class commandFactory {  
     public:

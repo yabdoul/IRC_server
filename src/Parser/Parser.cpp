@@ -285,7 +285,7 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
             if (channel[0] == '#' || channel[0] == '&') {
                 params["channel"] = channel.substr(1);
             }
-            params["nickname"] = parameters[1]; // User to kick
+            params["nicknames"] = parameters[1]; // Users to kick (comma-separated)
             if (parameters.size() > 2) {
                 params["reason"] = parameters[2];
             }

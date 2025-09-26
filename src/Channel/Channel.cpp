@@ -14,6 +14,7 @@ Channel::Channel(){
       _invitOnly = false;
       _topicRestricted = false;
       _userLimit = 0;
+      _topicTimestamp = 0;
 }  
 Channel::~Channel(){}   
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
@@ -23,6 +24,7 @@ Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channe
       _invitOnly = false;
       _topicRestricted = false;
       _userLimit = 0;
+      _topicTimestamp = 0;
 }
 
 void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string, std::string>params)      
@@ -88,6 +90,8 @@ void Channel::setTopic(Client &sender, const std::string& newTopic) {
     }
     
     _topic = newTopic;
+    _topicSetter = sender.getNickname();
+    _topicTimestamp = std::time(NULL);
     
     std::string topicMsg = ":" + sender.getNickname() + " TOPIC #" + _channelName + 
                           " :" + newTopic + "\r\n";
@@ -96,6 +100,14 @@ void Channel::setTopic(Client &sender, const std::string& newTopic) {
 
 const std::string& Channel::getTopic() const {
     return _topic;
+}
+
+const std::string& Channel::getTopicSetter() const {
+    return _topicSetter;
+}
+
+time_t Channel::getTopicTimestamp() const {
+    return _topicTimestamp;
 }
 
 void Channel::setMode(Client &sender, const std::string& mode, const std::string& param) {

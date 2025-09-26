@@ -2,7 +2,7 @@
 #include "channelCommand.hpp"
 #include "severResponsFactory.hpp"  
 
-class KickCommand :  public  Command  
+class KickCommand :  public  Command, public ChannelCommand  
  {    
     private : 
       void execute(Client & sender ,  std::map<std::string ,  std::string  >&params  )  {  

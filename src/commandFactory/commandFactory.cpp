@@ -13,5 +13,7 @@ Command* commandFactory::makeCommand(std::string  command )
             return  new inviteCommand() ;
         else if(command == "PART")
             return new PartCommand() ;
+        else if(command == "TOPIC")
+            return new TopicCommand() ;
         return NULL ;    
 } ;  

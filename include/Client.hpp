@@ -27,7 +27,8 @@ private:
     std::string _User;
     std::string _realName;
     std::string _hostname;
-    ClientState _state;
+    ClientState _state;  
+    std::vector<std::string> _msgQue ;  
     std::string _messageBuffer;  // For partial message case
     std::vector<Channel  >  _subscribed2Channel ;  
 public:
@@ -65,7 +66,7 @@ public:
     const std::string& getNickname() const;
     const std::string& getUsername() const;
     const std::string& getRealName() const  ; 
-    void   addMsg(std::string&  msg) ;   
+    void addMsg(std::string msg);   
     int getClientFd() const; 
 };
 

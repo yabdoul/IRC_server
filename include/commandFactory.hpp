@@ -1,6 +1,12 @@
 #include "JoinCommand.hpp"  
 #include  "KickCommand.hpp"  
-#include "inviteCommand.hpp"  
+#include "inviteCommand.hpp"
+#include "PartCommand.hpp"
+#include "TopicCommand.hpp"
+#include "PrivmsgCommand.hpp"
+#include "QuitCommand.hpp"
+#include "PingCommand.hpp"
+#include "PongCommand.hpp"
 
 class commandFactory {  
     public:

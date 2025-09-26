@@ -70,18 +70,14 @@ void Reactor::registre(epoll_event ev, IEventHandler* e) {
     if (it == _registred.end()) {
         // fd not registered yet, add it
         if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {  
-            std::cerr << "epoll_ctl ADD failed:  fd "<< ev.data.fd << strerror(errno) << std::endl;
             throw ReactorException("Fatal: epoll_ctl() ADD failed");
         }
         _registred.insert(std::make_pair(fd, e));
-        std::cout << "Registered new fd " << fd << std::endl;
     } else {
         if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
-            std::cerr << "epoll_ctl MOD failed: " << ev.data.fd << strerror(errno) << std::endl;
             throw ReactorException("Fatal: epoll_ctl() MOD failed");
         }
         it->second = e;
-        std::cout << "Modified registration for fd " << fd << std::endl;
     }
 }
 

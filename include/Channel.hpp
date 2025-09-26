@@ -2,7 +2,8 @@
 #include "Command.hpp"    
 #include <algorithm>  
 #include <algorithm>  
-#include <exception>          
+#include <exception>
+#include <ctime>          
 #ifndef   CHANNEL_HPP  
 #define CHANNEL_HPP 
 #pragma once    
@@ -15,9 +16,11 @@ class Channel  {
                  bool _invitOnly ;
                  bool _topicRestricted;
                  std::string _topic;
-                 std::string _key; 
-                 int _userLimit;   
-        public:    
+                 std::string _topicSetter;      // Who set the topic
+                 time_t _topicTimestamp;        // When topic was set
+                 std::string _key;  // Channel password
+                 int _userLimit;    // 0 = no limit     
+        public :   
                 Channel() ;  
                 Channel(std::string channelName  ,  Client & owner)  ;     
                 ~Channel();         
@@ -36,6 +39,8 @@ class Channel  {
                 void removeUser(Client &client);
                 void setTopic(Client &sender, const std::string& newTopic);
                 const std::string& getTopic() const;
+                const std::string& getTopicSetter() const;
+                time_t getTopicTimestamp() const;
                 void setMode(Client &sender, const std::string& mode, const std::string& param);
                 void broadcastMessage(const std::string& message, Client* exclude = NULL);
                 bool isUserInChannel(const Client& user) const;

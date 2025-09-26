@@ -1,10 +1,11 @@
 #include "severResponsFactory.hpp"   
 #include "numericRepliesParser.hpp"  
+#include "respData.hpp"
 #include <map>   
 
 
 
-std::string serverResponseFactory::replacePlaceholders( std::string tmpl, std::map<std::string, std::string> values) 
+std::string  serverResponseFactory::replacePlaceholders( std::string tmpl, std::map<std::string, std::string> values) 
 { 
     std::string result = tmpl;
     for (std::map<std::string, std::string>::const_iterator it = values.begin(); it != values.end(); ++it)
@@ -20,9 +21,9 @@ std::string serverResponseFactory::replacePlaceholders( std::string tmpl, std::m
     return result;
 }  
 
-std::string    serverResponseFactory::getResp(int code  ,   Client & cl  )   
+std::string    serverResponseFactory::getResp(int code  ,   Client & cl   , std::map<std::string , std::string>& params   )   
 {     
     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");           
-    std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code), cl.userData());      
+    std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code),    respData::getRespData(cl , params   ));      
     return response ;    
 }  ;   

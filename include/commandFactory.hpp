@@ -8,6 +8,7 @@
 #include "PingCommand.hpp"
 #include "nickCommand.hpp"
 #include "PongCommand.hpp"
+#include "ListCommand.hpp"
 
 class commandFactory {  
     public:

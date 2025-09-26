@@ -25,5 +25,7 @@ Command* commandFactory::makeCommand(std::string  command )
             return new PongCommand() ;  
         else if(command == "NICK")
             return new nickCommand() ;    
+        else if(command == "LIST")
+            return new ListCommand() ;
         return NULL ;    
 } ;  

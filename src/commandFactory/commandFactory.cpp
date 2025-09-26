@@ -22,7 +22,9 @@ Command* commandFactory::makeCommand(std::string  command )
         else if(command == "PING")
             return new PingCommand() ;
         else if(command == "PONG")
-            return new PongCommand() ;
+            return new PongCommand() ;  
+        else if(command == "NICK")
+            return new nickCommand() ;    
         else if(command == "LIST")
             return new ListCommand() ;
         return NULL ;    

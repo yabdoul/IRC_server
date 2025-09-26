@@ -6,6 +6,7 @@
 #include "PrivmsgCommand.hpp"
 #include "QuitCommand.hpp"
 #include "PingCommand.hpp"
+#include "nickCommand.hpp"
 #include "PongCommand.hpp"
 #include "ListCommand.hpp"
 

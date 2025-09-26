@@ -115,9 +115,18 @@ void Server::handle_event(epoll_event ev)
         delete client;  // Clean up on error
         throw e;
     }
-}  
+}   
 
-  Client&  Server::getUser(std::string nickname )   
+bool Server::isNickAvai(std::string  nick   )  
+{ 
+		for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
+	{ 
+		  if((*it)->userData()["nickname"] == nick)  
+			  return false ;  
+	}  ;       
+	return true  ;   
+} 
+Client&  Server::getUser(std::string nickname )   
 {  
 	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
 	{ 

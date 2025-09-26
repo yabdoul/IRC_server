@@ -123,6 +123,10 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
     return(Server::getInstance().AddChannel(chName));   
 }   
 
+void Client::setNickName(std::string &   nick  ) 
+ { 
+    _Nick = nick ;        
+ }
 void Client::addMsg(std::string msg) {   
 if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
@@ -141,7 +145,6 @@ void Client::handle_event(epoll_event e)
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);
         
         if (n > 0) {  
-            std::cout << "RAW string: " << buffer.data() << std::endl;
             _messageBuffer.append(buffer.data(), n);
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {

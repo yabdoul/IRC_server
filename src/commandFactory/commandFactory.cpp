@@ -10,6 +10,8 @@ Command* commandFactory::makeCommand(std::string  command )
         else if(command == "KICK")  
             return new KickCommand() ;  
         else if(command  ==  "INVITE")
-            return  new inviteCommand() ;    
+            return  new inviteCommand() ;
+        else if(command == "PART")
+            return new PartCommand() ;
         return NULL ;    
 } ;  

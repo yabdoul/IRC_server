@@ -10,19 +10,19 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
 {
     // Check if nicknames parameter is provided
     if (params.find("nicknames") == params.end()) {
-        cl.addMsg(serverResponseFactory::getResp(461 ,  cl ));  // ERR_NEEDMOREPARAMS
+        cl.addMsg(serverResponseFactory::getResp(461 ,  cl  ,  params  ));  // ERR_NEEDMOREPARAMS
         return;
     }
     
     // Check if user is in the channel
     if (!ch.isUserInChannel(cl)) {
-        cl.addMsg(serverResponseFactory::getResp(442 ,   cl ));  // ERR_NOTONCHANNEL
-        return;
+        cl.addMsg(serverResponseFactory::getResp(442 ,   cl  ,  params  ));  // ERR_NOTONCHANNEL
+        return; 
     }
     
     // Check if user is channel operator
     if (!ch.isOp(cl)) {
-        cl.addMsg(serverResponseFactory::getResp(482 ,  cl ));  // ERR_CHANOPRIVSNEEDED
+        cl.addMsg(serverResponseFactory::getResp(482 ,  cl , params   ));  // ERR_CHANOPRIVSNEEDED
         return;
     }
     
@@ -58,7 +58,7 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
             
             // Check if target user is in the channel
             if (!ch.isUserInChannel(targetClient)) {
-                cl.addMsg(serverResponseFactory::getResp(441 ,  cl ));  // ERR_USERNOTINCHANNEL
+                cl.addMsg(serverResponseFactory::getResp(441 ,  cl   ,  params      ));  // ERR_USERNOTINCHANNEL
                 continue;  // Skip this user but continue with others
             }
             
@@ -66,7 +66,7 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
             ch.kickUser(cl, targetClient, reason);
             
         } catch (std::exception& e) {
-            cl.addMsg(serverResponseFactory::getResp(401 ,  cl ));  // ERR_NOSUCHNICK
+            cl.addMsg(serverResponseFactory::getResp(401 ,  cl ,  params   ));  // ERR_NOSUCHNICK
             // Continue with next user
         }
     }

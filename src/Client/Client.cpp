@@ -3,7 +3,7 @@
 #include <unistd.h>  
 #include "Parser.hpp"  
 #include <cstdlib>  
-#include <sstream> 
+#include <sstream>
 #include "Channel.hpp"
 #include "Server.hpp"
 #include <errno.h>
@@ -62,26 +62,23 @@ Client::Client(const Client &other):IEventHandler(other)
      _state = other._state;
      _realName = other._realName;
      // Don't copy _msgQue or _subscribed2Channel - they should be unique per client
-}  
+}    
+  
 
-void Client::rcvMsg(std::string &Msg) const  
+void Client::rcvMsg(std::string &Msg)   const 
 { 
-
     if (_client_fd == -1) {
+        std::cout << "Cannot send to client " << _Nick << " - invalid file descriptor" << std::endl;
         return;
     }
     
-    ssize_t bytes_sent = send(_client_fd, Msg.c_str(), Msg.size(), MSG_DONTWAIT);
-    
-    if (bytes_sent < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            std::cout << "Send buffer full for client " << _Nick << std::endl;
-        } else {
-            std::cout << "Send error for client " << _Nick << ": " << strerror(errno) << std::endl;
-        }
-    } else if (bytes_sent < static_cast<ssize_t>(Msg.size())) {
-        std::cout << "Partial send for client " << _Nick << ": " << bytes_sent << "/" << Msg.size() << " bytes" << std::endl;
+    // Ensure message ends with \r\n for IRC protocol
+    if (!Msg.empty() && Msg.substr(Msg.length() >= 2 ? Msg.length() - 2 : 0) != "\r\n") {
+        Msg += "\r\n";
     }
+    
+    // Use the queue system for proper async sending
+    // addMsg(Msg);
 }  ;   
 
   std::map<std::string ,  std::string> Client::userData () const   
@@ -126,15 +123,15 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
     return(Server::getInstance().AddChannel(chName));   
 }   
 
-void Client::addMsg(std::string msg) {  
-    _msgQue.push_back(msg);
-    // Register for EPOLLOUT when we have messages to send
+void Client::addMsg(std::string msg) {   
+if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
+    msg += "\r\n";
+} 
+    _msgQue.push_back(msg); 
     struct epoll_event ev;
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = getClientFd();
     Reactor::getInstance().registre(ev, this);
-    
-    std::cout << "Added message to queue for client " << _Nick << ", registered EPOLLOUT" << std::endl;
 }
 
 void Client::handle_event(epoll_event e)
@@ -164,17 +161,14 @@ void Client::handle_event(epoll_event e)
                             userCommand(*Cmd, params);
                         }
                         Server::getInstance().beReady2Send() ;     
-                        std::string testMsg = ":server 001 " + _Nick + " :Welcome to the IRC server\r\n";
-                        ssize_t result = send(_client_fd, testMsg.c_str(), testMsg.size(), 0);
-                        std::cout << "Direct send result: " << result << " errno: " << strerror(errno) << std::endl;
                     } catch(const std::exception& e) {
                         std::cerr << "Command execution error: " << e.what() << std::endl;
                     }   
+                    delete Cmd;  
                 } 
 
             }
         } else if (n == 0) {
-            std::cout << "Client " << _Nick << " disconnected" << std::endl;
             close(_client_fd);
             _client_fd = -1;
             return;
@@ -182,7 +176,6 @@ void Client::handle_event(epoll_event e)
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 return;
             } else {
-                std::cerr << "recv() error for client " << _Nick << ": " << strerror(errno) << std::endl;
                 close(_client_fd);
                 _client_fd = -1;
                 return;
@@ -190,34 +183,30 @@ void Client::handle_event(epoll_event e)
         }
     } 
     
-    if ((e.events & EPOLLOUT) && !_msgQue.empty()  && Server::getInstance().isReady( )) {    
-        std::cout << "Handling EPOLLOUT event for client " << _Nick << std::endl;   
+    if ((e.events & EPOLLOUT) && !_msgQue.empty()) {    
+        
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         { 
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    std::cout << "Send would block, will retry later" << std::endl;
                     break;
                 } else {
-                    std::cerr << "Send error for client " << _Nick << ": " << strerror(errno) << std::endl;
                     break;
                 }
             } else if (bytes_sent < static_cast<ssize_t>(it->size())) {
                 *it = it->substr(bytes_sent);
-                std::cout << "Partial send: " << bytes_sent << " bytes, remaining: " << it->size() << std::endl;
                 break;
             } else {
-                std::cout << "Message sent successfully: " << bytes_sent << " bytes" << std::endl;
                 it = _msgQue.erase(it);
             }
         }
+        
         if (_msgQue.empty()) {
             struct epoll_event ev;
             ev.events = EPOLLIN;  // Only listen for input
             ev.data.fd = getClientFd();
             Reactor::getInstance().registre(ev, this);
-            std::cout << "Message queue empty, removed EPOLLOUT for client " << _Nick << std::endl;
         }
     }
 }

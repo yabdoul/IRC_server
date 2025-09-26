@@ -20,13 +20,22 @@ Channel::~Channel(){}
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
 Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channelName)
 { 
-      _inviteList[owner] = OP;
+      _inviteList[&owner] = OP;
       _invitOnly = false;
       _topicRestricted = false;
       _userLimit = 0;
       _topicTimestamp = 0;
 }
-
+std::vector<Client *> Channel::getUsers()
+{
+    std::vector<Client *> _v;
+    _v.reserve(_inviteList.size());
+    for (std::map<Client*, int>::iterator it = _inviteList.begin(); it != _inviteList.end(); ++it)
+    {
+        _v.push_back(it->first);
+    }
+    return _v;
+}
 void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string, std::string>params)      
 {       
     if(dynamic_cast<ChannelCommand *> (&cmd))  
@@ -37,16 +46,16 @@ void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string
 }  ;   
 
 bool Channel::isOp(Client & sender )  {
-     return((_inviteList[sender] ==OP)?(true):(false)) ;}  
+     return((_inviteList[&sender] ==OP)?(true):(false)) ;}  
 
 void Channel::inviteUser(Client &sender ,  Client  &target )    
 {    
       (void)sender;
-      if(_inviteList.count(target) != 0 )  
+      if(_inviteList.count(&target) != 0 )  
             throw std::runtime_error("User already in channel or invite list") ;    
       
       // (invited but not yet joined)
-      _inviteList[target] =  INV ;      
+      _inviteList[&target] =  INV ;      
 }  ;   
  
 void Channel::lockChannel(Client &sender)  
@@ -55,9 +64,9 @@ void Channel::lockChannel(Client &sender)
 }
 void Channel::enterChannel(Client &cl  ) 
 {    
-      if(!_invitOnly || _inviteList.count(cl) > 0)   
+      if(!_invitOnly || _inviteList.count(&cl) > 0)   
       {
-          _inviteList[cl] = MEMB;
+          _inviteList[&cl] = MEMB;
           return;
       }
       
@@ -69,11 +78,11 @@ void Channel::kickUser(Client &sender, Client &target, const std::string& reason
         throw std::runtime_error("You're not channel operator");
     }
     
-    if (_inviteList.find(target) == _inviteList.end()) {
+    if (_inviteList.find(&target) == _inviteList.end()) {
         throw std::runtime_error("They aren't on that channel");
     }
     
-    _inviteList.erase(target);
+    _inviteList.erase(&target);
     
     std::string kickMsg = ":" + sender.getNickname() + " KICK #" + _channelName + " " + 
                          target.getNickname() + " :" + reason + "\r\n";
@@ -81,7 +90,7 @@ void Channel::kickUser(Client &sender, Client &target, const std::string& reason
 }
 
 void Channel::removeUser(Client &client) {
-    _inviteList.erase(client);
+    _inviteList.erase(&client);
 }
 
 void Channel::setTopic(Client &sender, const std::string& newTopic) {
@@ -134,9 +143,9 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
             break;
         case 'o': // Give/take operator privilege
             if (!param.empty()) {
-                for (std::map<Client, int>::iterator it = _inviteList.begin(); 
+                for (std::map<Client*, int>::iterator it = _inviteList.begin(); 
                      it != _inviteList.end(); ++it) {
-                    if (it->first.getNickname() == param) {
+                    if (it->first->getNickname() == param) {
                         it->second = adding ? OP : MEMB;
                         break;
                     }
@@ -161,24 +170,24 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
 }
 
 void Channel::broadcastMessage(const std::string& message, Client* exclude) {
-    for (std::map<Client, int>::iterator it = _inviteList.begin(); 
+    for (std::map<Client*, int>::iterator it = _inviteList.begin(); 
          it != _inviteList.end(); ++it) {
-        if (exclude == NULL || !(it->first == *exclude)) {
+        if (exclude == NULL || it->first != exclude) {
             std::string msg = message;
-            it->first.rcvMsg(msg);
+            it->first->rcvMsg(msg);
         }
     }
 }
 
 bool Channel::isUserInChannel(const Client& user) const {
-    return _inviteList.find(const_cast<Client&>(user)) != _inviteList.end();
+    return _inviteList.find(const_cast<Client*>(&user)) != _inviteList.end();
 }
 
 std::vector<Client*> Channel::getChannelMembers() const {
     std::vector<Client*> members;
-    for (std::map<Client, int>::const_iterator it = _inviteList.begin(); 
+    for (std::map<Client*, int>::const_iterator it = _inviteList.begin(); 
          it != _inviteList.end(); ++it) {
-        members.push_back(const_cast<Client*>(&it->first));
+        members.push_back(it->first);
     }
     return members;
 }
@@ -196,6 +205,6 @@ bool Channel::isTopicRestricted() const {
 }
 
 bool Channel::isUserInvited(const Client& user) const {
-    std::map<Client, int>::const_iterator it = _inviteList.find(const_cast<Client&>(user));
+    std::map<Client*, int>::const_iterator it = _inviteList.find(const_cast<Client*>(&user));
     return (it != _inviteList.end() && it->second == INV);
 }

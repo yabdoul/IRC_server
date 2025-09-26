@@ -61,7 +61,7 @@ bool ListCommand::isChannelVisible(const Channel& channel, const Client& client)
 void ListCommand::execute(Client& sender, std::map<std::string, std::string>& params)
 {
     // Send RPL_LISTSTART (321)
-    sender.addMsg(serverResponseFactory::getResp(321, sender));
+    sender.addMsg(serverResponseFactory::getResp(321, sender, params));
     
     // Get all channels from server
     const std::map<std::string, Channel>& channels = Server::getInstance().getChannelList();
@@ -133,7 +133,7 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
         
         // Send RPL_LIST (322) for this channel
         // Format: 322 nick #channel userCount :topic
-        std::string listMsg = serverResponseFactory::getResp(322, sender);
+        std::string listMsg = serverResponseFactory::getResp(322, sender, params);
         
         // Replace placeholders with actual values
         // This is a simplified approach - ideally serverResponseFactory would handle this
@@ -141,5 +141,5 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
     }
     
     // Send RPL_LISTEND (323)
-    sender.addMsg(serverResponseFactory::getResp(323, sender));
+    sender.addMsg(serverResponseFactory::getResp(323, sender, params));
 }

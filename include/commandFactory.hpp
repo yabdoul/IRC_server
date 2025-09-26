@@ -7,6 +7,7 @@
 #include "QuitCommand.hpp"
 #include "PingCommand.hpp"
 #include "PongCommand.hpp"
+#include "ListCommand.hpp"
 
 class commandFactory {  
     public:

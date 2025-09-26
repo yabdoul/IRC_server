@@ -17,6 +17,9 @@
 322=: {server} 322 {nick} {channel} {userCount} :{topic}
 323=: {server} 323 {nick} :End of /LIST
 324=: {server} 324 {nick} {channel} {modes}
+321=: {server} 321 {nick} :Channel :Users  Name
+322=: {server} 322 {nick} {channel} {userCount} :{topic}
+323=: {server} 323 {nick} :End of /LIST
 331=: {server} 331 {nick} {channel} :No topic is set
 332=: {server} 332 {nick} {channel} :{topic}
 333=: {server} 333 {nick} {channel} {topicSetter} {topicTimestamp}

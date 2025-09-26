@@ -23,5 +23,7 @@ Command* commandFactory::makeCommand(std::string  command )
             return new PingCommand() ;
         else if(command == "PONG")
             return new PongCommand() ;
+        else if(command == "LIST")
+            return new ListCommand() ;
         return NULL ;    
 } ;  

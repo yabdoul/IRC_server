@@ -3,6 +3,7 @@
 #include "inviteCommand.hpp"
 #include "PartCommand.hpp"
 #include "TopicCommand.hpp"
+#include "PrivmsgCommand.hpp"
 
 class commandFactory {  
     public:

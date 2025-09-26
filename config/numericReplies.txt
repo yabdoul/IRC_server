@@ -32,6 +32,7 @@
 405=: {server} 405 {nick} {channel} :You have joined too many channels
 406=: {server} 406 {nick} {target} :Nick collision KILL
 407=: {server} 407 {nick} {target} :Target is on another server
+412=: {server} 412 {nick} :No text to send
 421=: {server} 421 {nick} {command} :Unknown command
 422=: {server} 422 {nick} :MOTD File is missing
 432=: {server} 432 {nick} {badNick} :Erroneous Nickname

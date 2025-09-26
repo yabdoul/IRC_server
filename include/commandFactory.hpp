@@ -4,6 +4,7 @@
 #include "PartCommand.hpp"
 #include "TopicCommand.hpp"
 #include "PrivmsgCommand.hpp"
+#include "QuitCommand.hpp"
 
 class commandFactory {  
     public:

@@ -17,5 +17,7 @@ Command* commandFactory::makeCommand(std::string  command )
             return new TopicCommand() ;
         else if(command == "PRIVMSG")
             return new PrivmsgCommand() ;
+        else if(command == "QUIT")
+            return new QuitCommand() ;
         return NULL ;    
 } ;  

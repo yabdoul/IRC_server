@@ -8,19 +8,13 @@
 /**
  * @brief Constructor for the Server class.
  * 
- * Initializes a server socket, binds it to a specified address and port, 
- * and sets it to listen for incoming connections. Additionally, registers 
- * the socket with the Reactor for event handling.
- * 
- * @details
- * - Creates a socket using the `socket` function.
- * - Binds the socket to `INADDR_ANY` and the configured port.
- * - Sets the socket to listen with a backlog of 100 connections.
- * - Registers the socket with the Reactor for EPOLLIN events.
- * - Handles exceptions during registration with the Reactor.
- * 
- * @throws std::exception If an error occurs during registration with the Reactor.
- */
+*/
+
+const std::map<std::string, Channel>& Server::getChannelList() const
+{
+    return ChannelList;
+}
+
 Server::Server() : IEventHandler(), _port(6667), _password("")
 {     
 	_ready2Send = false  ;   

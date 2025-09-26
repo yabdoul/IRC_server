@@ -47,7 +47,8 @@ class  Server: public IEventHandler
           static Server&  getInstance() ;
           void beReady2Send() { 
                _ready2Send = true  ;  
-          } ;       
+          } ;         
+          bool isNickAvai(std::string nick)  ;    
           bool isReady(){ return _ready2Send  ;   } ;   
           static void initServer(int port, const std::string& password);   
           ~Server() ;    

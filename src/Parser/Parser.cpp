@@ -352,6 +352,16 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
             params["message"] = parameters[0];
         }
     }
+    else if (cmd == "PING") {
+        if (!parameters.empty()) {
+            params["server"] = parameters[0];
+        }
+    }
+    else if (cmd == "PONG") {
+        if (!parameters.empty()) {
+            params["server"] = parameters[0];
+        }
+    }
     else if (cmd == "WHO") {
         if (!parameters.empty()) {
             std::string target = parameters[0];

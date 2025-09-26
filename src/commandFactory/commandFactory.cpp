@@ -19,5 +19,9 @@ Command* commandFactory::makeCommand(std::string  command )
             return new PrivmsgCommand() ;
         else if(command == "QUIT")
             return new QuitCommand() ;
+        else if(command == "PING")
+            return new PingCommand() ;
+        else if(command == "PONG")
+            return new PongCommand() ;
         return NULL ;    
 } ;  

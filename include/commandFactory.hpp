@@ -5,6 +5,8 @@
 #include "TopicCommand.hpp"
 #include "PrivmsgCommand.hpp"
 #include "QuitCommand.hpp"
+#include "PingCommand.hpp"
+#include "PongCommand.hpp"
 
 class commandFactory {  
     public:

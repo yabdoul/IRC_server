@@ -5,9 +5,27 @@
 
 
 
-std::string  serverResponseFactory::replacePlaceholders( std::string tmpl, std::map<std::string, std::string> values) 
-{ 
+std::string serverResponseFactory::replacePlaceholders(std::string tmpl, std::map<std::string, std::string> values, Channel *c  )
+{
     std::string result = tmpl;
+
+    // Handle the special {nicklist} placeholder
+    const std::string nicklistKey = "{nicklist}";
+    size_t nicklistPos = result.find(nicklistKey);
+    if (nicklistPos != std::string::npos)
+    {
+        std::string nicklist;
+        const std::vector<Client*>& users = c->getUsers();
+        for (size_t i = 0; i < users.size(); ++i)
+        {
+            if (i > 0)
+                nicklist += " ";
+            nicklist += users[i]->getNickname();
+        }
+        result.replace(nicklistPos, nicklistKey.length(), nicklist);
+    }
+
+    // Replace other placeholders
     for (std::map<std::string, std::string>::const_iterator it = values.begin(); it != values.end(); ++it)
     {
         std::string key = "{" + it->first + "}";
@@ -19,11 +37,11 @@ std::string  serverResponseFactory::replacePlaceholders( std::string tmpl, std::
         }
     }
     return result;
-}  
+}
 
-std::string    serverResponseFactory::getResp(int code  ,   Client & cl   , std::map<std::string , std::string>& params   )   
+std::string    serverResponseFactory::getResp(int code  ,   Client & cl   , std::map<std::string , std::string>& params ,  Channel *c     )   
 {     
     NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");           
-    std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code),    respData::getRespData(cl , params   ));      
+    std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code),    respData::getRespData(cl , params   )  ,c  );      
     return response ;    
 }  ;   

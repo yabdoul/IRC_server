@@ -13,20 +13,20 @@ void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
         }
         
         if (ch.isInviteOnly() && !ch.isUserInvited(cl)) {    
-            cl.addMsg(serverResponseFactory::getResp(473 ,  cl   , params  )) ;   
+            cl.addMsg(serverResponseFactory::getResp(473 ,  cl   , params  ,  &ch    )) ;   
         }
         
         ch.enterChannel(cl);       
         
-        cl.addMsg(serverResponseFactory::getResp(353 ,  cl  , params   )) ;   
-        cl.addMsg(serverResponseFactory::getResp(366 ,  cl   , params   )) ;  
+        cl.addMsg(serverResponseFactory::getResp(353 ,  cl  , params  ,  &ch   )) ;   
+        cl.addMsg(serverResponseFactory::getResp(366 ,  cl   , params  ,  &ch    )) ;  
         // If channel has topic, send it
         if (!ch.getTopic().empty()) {
-        cl.addMsg(serverResponseFactory::getResp(332 ,  cl  , params  )) ;   
+        cl.addMsg(serverResponseFactory::getResp(332 ,  cl  , params   ,  &ch   )) ;   
         }
         
     } catch (std::exception &e) { 
-              cl.addMsg(serverResponseFactory::getResp(403 ,  cl  , params   )) ;   
+              cl.addMsg(serverResponseFactory::getResp(403 ,  cl  , params   , &ch   )) ;   
 
     }
     

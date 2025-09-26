@@ -29,7 +29,8 @@ class Channel  {
                 {    
                     return((_channelName == other._channelName)?(true):(false)) ;   
                 }
-                bool isOp(Client &sender )   ;      
+                bool isOp(Client &sender )   ;        
+                std::vector<Client  *>  getUsers() ;    
                 void rcvMsg(std::string  &msg  )  ; 
                 void lockChannel(Client & sender )  ;         
                 void ExecuteCommand(Command  &  cmd  , Client&  Client  , std::map<std::string , std::string>  params  )     ;     

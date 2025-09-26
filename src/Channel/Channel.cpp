@@ -26,7 +26,16 @@ Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channe
       _userLimit = 0;
       _topicTimestamp = 0;
 }
-
+std::vector<Client *> Channel::getUsers()
+{
+    std::vector<Client *> _v;
+    _v.reserve(_inviteList.size());
+    for (std::map<Client*, int>::iterator it = _inviteList.begin(); it != _inviteList.end(); ++it)
+    {
+        _v.push_back(it->first);
+    }
+    return _v;
+}
 void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string, std::string>params)      
 {       
     if(dynamic_cast<ChannelCommand *> (&cmd))  

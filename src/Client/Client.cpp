@@ -62,7 +62,8 @@ Client::Client(const Client &other):IEventHandler(other)
      _state = other._state;
      _realName = other._realName;
      // Don't copy _msgQue or _subscribed2Channel - they should be unique per client
-}  
+}    
+  
 
 void Client::rcvMsg(std::string &Msg)   const 
 { 
@@ -76,7 +77,6 @@ void Client::rcvMsg(std::string &Msg)   const
         Msg += "\r\n";
     }
     
-    std::cout << "Sending message to client " << _Nick << " (fd: " << _client_fd << "): [" << Msg << "]" << std::endl;
     // Use the queue system for proper async sending
     // addMsg(Msg);
 }  ;   
@@ -127,7 +127,6 @@ void Client::addMsg(std::string msg) {
 if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
-    std::cerr << "Sending: [" << msg << "]" << std::endl;
     _msgQue.push_back(msg); 
     struct epoll_event ev;
     ev.events = EPOLLIN | EPOLLOUT;
@@ -162,14 +161,10 @@ void Client::handle_event(epoll_event e)
                             userCommand(*Cmd, params);
                         }
                         Server::getInstance().beReady2Send() ;     
-                        
-                        // Use the queue system instead of direct send
-                        // Remove direct send and let EPOLLOUT handle it
-                        
                     } catch(const std::exception& e) {
                         std::cerr << "Command execution error: " << e.what() << std::endl;
                     }   
-                    delete Cmd;  // Fix memory leak   
+                    delete Cmd;  
                 } 
 
             }

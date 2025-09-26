@@ -1,5 +1,6 @@
 #include "PrivmsgCommand.hpp"
 #include "Server.hpp"
+#include "Reactor.hpp"  
 
 PrivmsgCommand::PrivmsgCommand()
 {
@@ -11,13 +12,11 @@ PrivmsgCommand::~PrivmsgCommand()
 
 void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>& params)
 {
-    // Check if message parameter is provided
     if (params.find("message") == params.end()) {
-        sender.addMsg(serverResponseFactory::getResp(412, sender ,  params  ));  // ERR_NOTEXTTOSEND
+        sender.addMsg(serverResponseFactory::getResp(412, sender ,  params  ));
         return;
     }
     
-    // Check target type
     if (params.find("target_type") == params.end()) {
         sender.addMsg(serverResponseFactory::getResp(461, sender  ,  params  ));  // ERR_NEEDMOREPARAMS
         return;
@@ -27,7 +26,6 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
     std::string targetType = params["target_type"];
     
     if (targetType == "channel") {
-        // Channel message
         if (params.find("channel") == params.end()) {
             sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  // ERR_NEEDMOREPARAMS
             return;
@@ -37,9 +35,8 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
             std::string channelName = params["channel"];
             Channel targetChannel = Server::getInstance().IsChannelExist(channelName);
             
-            // Check if sender is in the channel
             if (!targetChannel.isUserInChannel(sender)) {
-                sender.addMsg(serverResponseFactory::getResp(404, sender ,  params  ));  // ERR_CANNOTSENDTOCHAN
+                sender.addMsg(serverResponseFactory::getResp(404, sender ,  params  ));  
                 return;
             }
             
@@ -64,14 +61,9 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
         try {
             std::string targetNick = params["nickname"];
             Client& targetUser = Server::getInstance().getUser(targetNick);
-            
-            // Create PRIVMSG message: :nick!user@host PRIVMSG target :message
             std::string privmsgMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 
                                     "@localhost PRIVMSG " + targetNick + " :" + message + "\r\n";
-            
-            // Send message to target user
-            targetUser.addMsg(privmsgMsg);
-            
+            targetUser.addMsg(privmsgMsg)    ;
         } catch (std::exception& e) {
             sender.addMsg(serverResponseFactory::getResp(401, sender  , params  ));  // ERR_NOSUCHNICK
         }

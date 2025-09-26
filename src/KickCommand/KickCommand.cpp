@@ -58,7 +58,7 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
             
             // Check if target user is in the channel
             if (!ch.isUserInChannel(targetClient)) {
-                cl.addMsg(serverResponseFactory::getResp(441 ,  cl   ,  params   ));  // ERR_USERNOTINCHANNEL
+                cl.addMsg(serverResponseFactory::getResp(441 ,  cl   ,  params      ));  // ERR_USERNOTINCHANNEL
                 continue;  // Skip this user but continue with others
             }
             

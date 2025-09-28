@@ -40,7 +40,7 @@ class  Server: public IEventHandler
           Server() ;   
           Server(Server & copy  )  ;   
           virtual void handle_event(epoll_event   ev)  ;  
-          std::map <std::string , Channel  >  ChannelList ;    
+          std::vector< Channel * >  ChannelList ;    
           std::vector<Client*>  _clientList  ;     
            bool _ready2Send       ;           
      public  :    
@@ -55,10 +55,10 @@ class  Server: public IEventHandler
           Server&  operator=(Server &copy  ) ;  
           int getListenFd()  ;  
            Client&  getUser(std::string nickname )   ;    
-          Channel  IsChannelExist(std::string &ChName   ) ;      
-          Channel    AddChannel(std::string  &ChName )   ;  
+          Channel*  IsChannelExist(std::string &ChName   ) ;      
+          Channel    AddChannel(std::string  &ChName  ,  Client &owner   )   ;  
           void UnsubscribeChannel (std::string &CName) ;
-          const std::map<std::string, Channel>& getChannelList() const;     
+          const std::vector<Channel * >  & getChannelList() const;     
           void saveUser(Client  *  c  ) ;  
           void callCommand(std::string& Command , std::map<std::string , std::string> & params  ,  Client &sender    )  ;       
           void Respond2User(int Client_fd ,  std::string resp )  ;

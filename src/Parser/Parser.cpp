@@ -396,23 +396,21 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
 
 }
 
-const std::string& Parser::getPrefix() const {
-    return prefix;
+ std::string& Parser::getPrefix()    {
+    return  prefix;
 }
 
-const std::string& Parser::getCommand() const {
+ std::string&  Parser::getCommand()     {
     return command;
 }
 
-const std::map<std::string, std::string>& Parser::getParams() const {
-    return params;
+ std::map<std::string, std::string>&  Parser::getParams()  {
+    return  params;
 }
 
-const std::string& Parser::getLastError() const {
-    return lastError;
-}
 
-bool Parser::isValidParse() const {
+
+bool Parser::isValidParse()  const  {
     return isValid;
 }
 

@@ -1,7 +1,7 @@
 #include "ListCommand.hpp"
 #include "Server.hpp"
 #include <algorithm>
-
+#include <iostream>
 ListCommand::ListCommand()
 {
 }
@@ -43,7 +43,7 @@ bool ListCommand::matchesPattern(const std::string& channelName, const std::stri
     return j == pattern.length();
 }
 
-bool ListCommand::isChannelVisible(const Channel& channel, const Client& client)
+bool ListCommand::isChannelVisible( Channel& channel,  Client& client)
 {
     // Check if channel is visible to the client
     // For now, we'll implement basic visibility:
@@ -59,19 +59,14 @@ bool ListCommand::isChannelVisible(const Channel& channel, const Client& client)
 }
 
 void ListCommand::execute(Client& sender, std::map<std::string, std::string>& params)
-{
-    // Send RPL_LISTSTART (321)
+{  
     sender.addMsg(serverResponseFactory::getResp(321, sender, params));
     
-    // Get all channels from server
-    const std::map<std::string, Channel>& channels = Server::getInstance().getChannelList();
-    
-    // Parse channel filters if provided
-    std::vector<std::string> filters;
+        std::vector<Channel *> channelList =  Server::getInstance().getChannelList() ;   
+        std::vector<std::string> filters;
     if (params.find("channels") != params.end()) {
         std::string channelParam = params["channels"];
         
-        // Split comma-separated channel list
         std::string currentFilter = "";
         for (size_t i = 0; i < channelParam.length(); ++i) {
             if (channelParam[i] == ',') {
@@ -88,30 +83,24 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
         }
     }
     
-    // Iterate through all channels
-    for (std::map<std::string, Channel>::const_iterator it = channels.begin(); 
-         it != channels.end(); ++it) {
+    for (std::vector<Channel  *>::iterator it = channelList.begin();     
+    it != channelList.end(); ++it) {
+        std::cout<<"channel ,  loop"<<std::endl ;   
         
-        const std::string& channelName = it->first;
-        const Channel& channel = it->second;
-        
-        // Check visibility
-        if (!isChannelVisible(channel, sender)) {
+        if (!isChannelVisible( **it , sender)) {
             continue;
         }
         
-        // Apply filters if specified
-        bool matchesFilter = filters.empty();  // If no filters, show all
+        bool matchesFilter = filters.empty();  
         
         for (size_t i = 0; i < filters.size(); ++i) {
             std::string filter = filters[i];
             
-            // Remove # prefix from filter if present
             if (!filter.empty() && filter[0] == '#') {
                 filter = filter.substr(1);
             }
             
-            if (matchesPattern(channelName, filter)) {
+            if (matchesPattern((*it)->getName(), filter)) {
                 matchesFilter = true;
                 break;
             }
@@ -121,25 +110,14 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
             continue;
         }
         
-        // Get channel information
-        std::string topic = channel.getTopic();
+        std::string topic = (*it)->getTopic();
         if (topic.empty()) {
             topic = "";
         }
         
-        // Count users in channel (for now, we'll use a placeholder)
-        // TODO: Implement actual user count from Channel class
         std::string userCount = "1";  // Placeholder
-        
-        // Send RPL_LIST (322) for this channel
-        // Format: 322 nick #channel userCount :topic
         std::string listMsg = serverResponseFactory::getResp(322, sender, params);
-        
-        // Replace placeholders with actual values
-        // This is a simplified approach - ideally serverResponseFactory would handle this
         sender.addMsg(listMsg);
     }
-    
-    // Send RPL_LISTEND (323)
     sender.addMsg(serverResponseFactory::getResp(323, sender, params));
 }

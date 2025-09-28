@@ -20,7 +20,6 @@ void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
         
         cl.addMsg(serverResponseFactory::getResp(353 ,  cl  , params  ,  &ch   )) ;   
         cl.addMsg(serverResponseFactory::getResp(366 ,  cl   , params  ,  &ch    )) ;  
-        // If channel has topic, send it
         if (!ch.getTopic().empty()) {
         cl.addMsg(serverResponseFactory::getResp(332 ,  cl  , params   ,  &ch   )) ;   
         }

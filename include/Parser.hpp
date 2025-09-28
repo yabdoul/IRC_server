@@ -28,10 +28,10 @@ public:
     std::vector<std::string> parseMultiple(const std::string& buffer);
     std::string parsePartialBuffer(std::string& buffer);
     
-    const std::string& getPrefix() const;
-    const std::string& getCommand() const;
-    const std::map<std::string, std::string>& getParams() const;
-    const std::string& getLastError() const;
+     std::string& getPrefix() ;
+     std::string&  getCommand() ;
+     std::map<std::string, std::string>& getParams() ;
+     std::string& getLastError() const;
     bool isValidParse() const;
     
     // Static validation helpers

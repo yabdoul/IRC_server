@@ -10,9 +10,9 @@
  * 
 */
 
-const std::map<std::string, Channel>& Server::getChannelList() const
+const std::vector<Channel *  >&  Server::getChannelList() const
 {
-    return ChannelList;
+    return ChannelList ;
 }
 
 Server::Server() : IEventHandler(), _port(6667), _password("")
@@ -150,10 +150,10 @@ Server &Server::getInstance()
  * @param CnName Reference to the name of the channel to be added.
  *               This name will be used as the key in the ChannelList map.
  */
-Channel   Server::AddChannel(std::string  &CnName  ) 
+Channel   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
 {    
-	Channel ch ;    
-	this->ChannelList.insert(std::make_pair(CnName, ch));
+	Channel ch(ChName , owner  ) ;   
+	ChannelList.push_back(&ch) ;    
 	return ch;   
 }  
 
@@ -169,22 +169,14 @@ Channel   Server::AddChannel(std::string  &CnName  )
  * 
  * @throws ServerException If the channel is not found in the channel list.
  */
-Channel    Server::IsChannelExist(std::string &ChName   )  
+Channel *    Server::IsChannelExist(std::string &ChName   )  
 {  
-	std::map <std::string , Channel>::iterator it =   this->ChannelList.find(ChName);   
-	try {  
-		 if( it  !=  ChannelList.end() )  
-				return it->second ;   
-		else 
-			{  
-				return(AddChannel(ChName))  ;   
-			}         
-	} 
-	catch(ServerException &e )
-	{ 
-			std::cerr<<e.what()  ;  
-			return Channel() ;      
-	}
+	  for(std::vector<Channel *>::iterator it  =  ChannelList.begin() ;  it !=  ChannelList.end() ;  it++ )  
+	  { 
+		    if(ChName  ==  (*it)->getName() )     
+			 return  *it  ;    
+	  }   
+	  return NULL ;    
 } 
 
 /**
@@ -195,26 +187,29 @@ Channel    Server::IsChannelExist(std::string &ChName   )
  * This function checks if the specified channel exists in the server's channel list.
  * If the channel exists, it removes the channel from the list.
  */
-void  Server::UnsubscribeChannel(std::string &CName)   
+void  Server::UnsubscribeChannel(std::string &ChName )   
 {  
-	  
-			 this->ChannelList.erase(CName) ;  
-}     
+	  for(std::vector<Channel *>::iterator it =  ChannelList.begin()  ;  it != ChannelList.end() ;  it++  )  
+	  {    
+		  if(ChName == (*it)->getName())  
+		   	ChannelList.erase(it) ; 
+	  }    ;   
+	  throw std::runtime_error("Channel doesn't Exist") ;   
+}      
 
 
 void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>&params ,   Client & sender ) 
 {  
 	Command * tmp  = commandFactory::makeCommand(cmd)  ;  
+	if(!tmp)  
+	{
+		return ;   
+	}  
 	if(dynamic_cast<ChannelCommand * > (tmp)) 
 	{   
-		Channel  ch =  IsChannelExist(params["channel"])  ;    
-		try{  
-			ch.ExecuteCommand(*tmp , sender  , params ) ;   
-		}  
-		catch(std::exception &e  )    
-		{ 
-			std::cerr<<e.what()<<std::endl  ;    
-		}
+		Channel *  ch =  IsChannelExist(params["channel"])  ;    
+		if(ch) 
+			ch->ExecuteCommand(*tmp , sender  , params ) ;    
 	}    
 	else 
 	{ 

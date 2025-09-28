@@ -120,22 +120,23 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
        if(it->getName() == chName)  
         return *it ;      
     }       
-    return(Server::getInstance().AddChannel(chName));   
+    return(Server::getInstance().AddChannel(chName  ,  *this ));   
 }   
 
 void Client::setNickName(std::string &   nick  ) 
  { 
     _Nick = nick ;        
  }
-void Client::addMsg(std::string msg) {   
-if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
+void Client::addMsg(std::string msg) {     
+    std::cout<<"sent"<<msg<<std::endl  ;  
+    if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
     _msgQue.push_back(msg); 
     struct epoll_event ev;
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = getClientFd();
-    Reactor::getInstance().registre(ev, this);
+    Reactor::getInstance().registre(ev, this)   ;
 }
 
 void Client::handle_event(epoll_event e)
@@ -151,25 +152,29 @@ void Client::handle_event(epoll_event e)
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
                 Parser::getInstance().parse(command) ;  
-                Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;  
+                Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;     
                 if(Cmd) {
-                    try {
-                        if(dynamic_cast<ChannelCommand  *> (Cmd) )  
-                        {   
-                            Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
-                            target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;       
-                        }  
-                        else { 
-                            std::map<std::string, std::string> params = Parser::getInstance().getParams();
-                            userCommand(*Cmd, params);
-                        }
-                        Server::getInstance().beReady2Send() ;     
+                    try {    
+                        std::cout<<Parser::getInstance().getCommand()<<std::endl  ;     
+                        if(!Cmd)  
+                        {                         
+                            if(dynamic_cast<ChannelCommand  *> (Cmd) )  
+                            {   
+                                Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
+                                target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;       
+                            }  
+                            else { 
+                                std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                                userCommand(*Cmd, params);
+                            }  
+                            Server::getInstance().beReady2Send() ;    
+                        }   
                     } catch(const std::exception& e) {
-                        std::cerr << "Command execution error: " << e.what() << std::endl;
+                        std::cerr << "Command execution error: " << e.what() << std::endl;   
                     }   
                     delete Cmd;  
                 } 
-
+                Server::getInstance().callCommand(Parser::getInstance().getCommand() ,  Parser::getInstance().getParams() , *this     ) ;   
             }
         } else if (n == 0) {
             close(_client_fd);
@@ -186,10 +191,10 @@ void Client::handle_event(epoll_event e)
         }
     } 
     
-    if ((e.events & EPOLLOUT) && !_msgQue.empty()) {    
-        
+    if ((e.events & EPOLLOUT) && !_msgQue.empty()) {       
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         { 
+         std::cout<<"Sent"<<*it<<std::endl  ;  
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {

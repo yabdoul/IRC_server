@@ -18,7 +18,7 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
     }
     
     if (params.find("target_type") == params.end()) {
-        sender.addMsg(serverResponseFactory::getResp(461, sender  ,  params  ));  // ERR_NEEDMOREPARAMS
+        sender.addMsg(serverResponseFactory::getResp(461, sender  ,  params  ));  
         return;
     }
     
@@ -27,34 +27,32 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
     
     if (targetType == "channel") {
         if (params.find("channel") == params.end()) {
-            sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  // ERR_NEEDMOREPARAMS
+            sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   )); 
             return;
         }
         
         try {
             std::string channelName = params["channel"];
-            Channel targetChannel = Server::getInstance().IsChannelExist(channelName);
+            Channel * targetChannel = Server::getInstance().IsChannelExist(channelName);
             
-            if (!targetChannel.isUserInChannel(sender)) {
+            if (!targetChannel->isUserInChannel(sender)) {
                 sender.addMsg(serverResponseFactory::getResp(404, sender ,  params  ));  
                 return;
             }
             
-            // Create PRIVMSG message: :nick!user@host PRIVMSG #channel :message
             std::string privmsgMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 
                                     "@localhost PRIVMSG #" + channelName + " :" + message + "\r\n";
             
-            // Broadcast to channel members (exclude sender)
-            targetChannel.broadcastMessage(privmsgMsg, &sender);
+            targetChannel->broadcastMessage(privmsgMsg, &sender);
             
         } catch (std::exception& e) {
-            sender.addMsg(serverResponseFactory::getResp(403, sender , params  ));  // ERR_NOSUCHCHANNEL
+            sender.addMsg(serverResponseFactory::getResp(403, sender , params  )); 
         }
         
     } else if (targetType == "user") {
         // User-to-user message
         if (params.find("nickname") == params.end()) {
-            sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  // ERR_NEEDMOREPARAMS
+            sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  
             return;
         }
         
@@ -65,10 +63,10 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
                                     "@localhost PRIVMSG " + targetNick + " :" + message + "\r\n";
             targetUser.addMsg(privmsgMsg)    ;
         } catch (std::exception& e) {
-            sender.addMsg(serverResponseFactory::getResp(401, sender  , params  ));  // ERR_NOSUCHNICK
+            sender.addMsg(serverResponseFactory::getResp(401, sender  , params  ));  
         }
         
     } else {
-        sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  // ERR_NEEDMOREPARAMS
+        sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  
     }
 }

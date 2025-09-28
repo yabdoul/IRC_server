@@ -14,10 +14,10 @@ class Command;
 class Client : public IEventHandler  ,  Iclient   {
 public:
     enum ClientState {
-        CONNECTING,     // Connected, needs PASS
-        PASSWORD_SET,   // PASS, needs NICK
-        NICK_SET,       // NICK, needs USER
-        REGISTERED      // Fully authenticated
+        CONNECTING,    
+        PASSWORD_SET,  
+        NICK_SET,     
+        REGISTERED     
     };
     
 private:
@@ -29,7 +29,7 @@ private:
     std::string _hostname;
     ClientState _state;  
     std::vector<std::string> _msgQue ;  
-    std::string _messageBuffer;  // For partial message case
+    std::string _messageBuffer;
     std::vector<Channel  >  _subscribed2Channel ;  
 public:
     ~Client();       
@@ -37,7 +37,6 @@ public:
     Client(int client_fd);  
     Client(std::string Nick ):_Nick(Nick){} ;    
     Client(const Client &other)  ;   
-    // Client() ;    
  
     bool operator<(const   Client & other   )   const  
     { 
@@ -55,10 +54,7 @@ public:
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;  
-      Channel getChannel(std::string chName ) ;      
-    /* 
-        Parser Should Send a map of Params any way ;    
-    */     
+    Channel getChannel(std::string chName ) ;      
     void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
     bool isRegistered() const;
     ClientState getState() const;

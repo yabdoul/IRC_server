@@ -16,10 +16,10 @@ class Channel  {
                  bool _invitOnly ;
                  bool _topicRestricted;
                  std::string _topic;
-                 std::string _topicSetter;      // Who set the topic
-                 time_t _topicTimestamp;        // When topic was set
-                 std::string _key;  // Channel password
-                 int _userLimit;    // 0 = no limit     
+                 std::string _topicSetter;    
+                 time_t _topicTimestamp;     
+                 std::string _key; 
+                 int _userLimit;   
         public :   
                 Channel() ;  
                 Channel(std::string channelName  ,  Client & owner)  ;     
@@ -46,7 +46,10 @@ class Channel  {
                 void broadcastMessage(const std::string& message, Client* exclude = NULL);
                 bool isUserInChannel(const Client& user) const;
                 bool isInviteOnly() const;
-                bool isTopicRestricted() const;
+                bool isTopicRestricted() const;  
+                std::string getName() {  
+                    return  _channelName ;   
+                };    
                 bool isUserInvited(const Client& user) const;
                 std::vector<Client*> getChannelMembers() const;
                 const std::string& getName() const;   

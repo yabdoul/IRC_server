@@ -58,8 +58,9 @@ class  Server: public IEventHandler
           Channel*  IsChannelExist(std::string &ChName   ) ;      
           Channel    AddChannel(std::string  &ChName  ,  Client &owner   )   ;  
           void UnsubscribeChannel (std::string &CName) ;
-          const std::vector<Channel * >  & getChannelList() const;     
-          void saveUser(Client  *  c  ) ;  
+          const std::vector<Channel * >  & getChannelList() const;       
+          void  delUser( Client & Cl  )  ;   
+          void saveUser(Client  * c  ) ;  
           void callCommand(std::string& Command , std::map<std::string , std::string> & params  ,  Client &sender    )  ;       
           void Respond2User(int Client_fd ,  std::string resp )  ;
           const std::string& getPassword() const;      

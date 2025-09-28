@@ -59,7 +59,17 @@ void Server::initServer(int port, const std::string& password) {
 const std::string& Server::getPassword() const {
 	return _password;
 }  
-
+void Server::delUser(Client &cl  ) 
+{ 
+	std::cout<<"deleating User"<<cl.getClientFd()<<std::endl ;   
+	for(std::vector<Client *>::iterator  it =  _clientList.begin() ;  it != _clientList.end()   ;  it++ )  
+	{    
+		std::cout<<"compare"<<cl.getClientFd()<<" & "<<(**it).getClientFd() <<std::endl ;   
+		if(cl.getClientFd() ==  (**it).getClientFd() )   
+			 _clientList.erase(it)  ;  
+ 	}  
+	throw std::runtime_error("[DELUSER]: user Not Found") ;   
+}
 void Server::saveUser(Client *C )  
 { 
 	if(std::find(_clientList.begin() , _clientList.end() ,  C )   ==  _clientList.end( ) )  

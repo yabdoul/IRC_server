@@ -4,6 +4,7 @@
 #include "IEventHandler.hpp"
 #include "Client.hpp"
 #include <algorithm>  
+#include <memory>
 #include "commandFactory.hpp"
 /**
  * @brief Constructor for the Server class.
@@ -208,23 +209,28 @@ void  Server::UnsubscribeChannel(std::string &ChName )
 }      
 
 
-void Server::callCommand(std::string& cmd  , std::map<std::string , std::string>&params ,   Client & sender ) 
+void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& params, Client& sender) 
 {  
-	Command * tmp  = commandFactory::makeCommand(cmd)  ;  
-	if(!tmp)  
-	{
-		return ;   
-	}  
-	if(dynamic_cast<ChannelCommand * > (tmp)) 
-	{   
-		Channel *  ch =  IsChannelExist(params["channel"])  ;    
-		if(ch) 
-			ch->ExecuteCommand(*tmp , sender  , params ) ;    
-	}    
-	else 
-	{ 
-		sender.userCommand(*tmp,  params)   ;    
-	} ;   
+    Command* tmp = commandFactory::makeCommand(cmd);
+    if (!tmp) {
+        return;
+    }
+    
+    if (dynamic_cast<ChannelCommand*>(tmp)) {
+        // Make a local copy of the channel name
+        std::string channelName(params["channel"]);
+        
+        // Get channel pointer and execute command while it's valid
+        Channel* ch = IsChannelExist(channelName);
+        if (ch) {
+            ch->ExecuteCommand(*tmp, sender, params);
+        }
+    } else {
+        sender.userCommand(*tmp, params);
+    }
+    
+    // Clean up command object
+    delete tmp;
 	
 }  ;      
 

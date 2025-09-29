@@ -234,22 +234,19 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
     if (cmd == "JOIN") {
         if (!parameters.empty()) {
             std::string channels = parameters[0];
-            // Handle multiple channels separated by commas
             size_t pos = 0;
             std::string channel;
             while ((pos = channels.find(',')) != std::string::npos) {
                 channel = channels.substr(0, pos);
                 if (channel[0] == '#' || channel[0] == '&') {
-                    params["channel"] = channel.substr(1); // Remove # or &
-                    break; // Take first channel for now
+                    params["channel"] = channel.substr(1); 
+                    break;
                 }
                 channels.erase(0, pos + 1);
             }
-            // Handle last/only channel
             if (!channels.empty() && (channels[0] == '#' || channels[0] == '&')) {
                 params["channel"] = channels.substr(1);
             }
-            // Handle password if provided
             if (parameters.size() > 1) {
                 params["password"] = parameters[1];
             }

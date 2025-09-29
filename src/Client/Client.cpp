@@ -127,8 +127,8 @@ void Client::setNickName(std::string &   nick  )
  { 
     _Nick = nick ;        
  }
-void Client::addMsg(std::string msg) {     
-    std::cout<<"sent"<<msg<<std::endl  ;  
+void Client::addMsg(std::string msg) {       
+    std::cout<<"addMsg Scoop"<<msg<<std::endl  ;  
     if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
@@ -144,7 +144,6 @@ void Client::handle_event(epoll_event e)
     if (e.events & EPOLLIN) {
         std::vector<char> buffer(1024, '\0');    
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);
-        
         if (n > 0) {  
             _messageBuffer.append(buffer.data(), n);
             size_t pos;
@@ -155,15 +154,17 @@ void Client::handle_event(epoll_event e)
                 Command * Cmd  =  commandFactory::makeCommand(Parser::getInstance().getCommand())  ;     
                 if(Cmd) {
                     try {    
-                        std::cout<<Parser::getInstance().getCommand()<<std::endl  ;     
-                        if(!Cmd)  
+                        std::cout<<Parser::getInstance().getCommand()<<std::endl  ;       
+                        if(Cmd)  
                         {                         
                             if(dynamic_cast<ChannelCommand  *> (Cmd) )  
                             {   
-                                Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;    
-                                target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;       
-                            }  
-                            else { 
+                                Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;      
+                                std::cout<<"Executing"<<std::endl ;   
+                                target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;              
+                            }    
+                            else {  
+                                std::cout<<"HERE"<<std::endl ;   
                                 std::map<std::string, std::string> params = Parser::getInstance().getParams();
                                 userCommand(*Cmd, params);
                             }  
@@ -173,7 +174,22 @@ void Client::handle_event(epoll_event e)
                         std::cerr << "Command execution error: " << e.what() << std::endl;   
                     }   
                     delete Cmd;  
-                } 
+                }   
+                /* 
+                        =================================================================
+                        ==3637==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7fd479302730 at pc 0x7fd47b445f1e bp 0x7ffc8fc78f40 sp 0x7ffc8fc786e8
+                        READ of size 6 at 0x7fd479302730 thread T0
+                        #0 0x7fd47b445f1d in memcpy (/usr/lib/x86_64-linux-gnu/libasan.so.8+0x100f1d) (BuildId: f1bcae188e96eba85c822b6bdce2858c59963ad1)
+                            #1 0x7fd47b2257d5 in void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<char*>(char*, char*, std::forward_iterator_tag) (/usr/lib/x86_64-linux-gnu/libstdc++.so.6+0x1777d5) (BuildId: bd00d851857c6423cde21b91def861ceed2c23d7)
+                            #2 0x55ddb35b645b in Channel::getName[abi:cxx11]() include/Channel.hpp:51
+                            #3 0x55ddb35d0b91 in Server::IsChannelExist(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&) src/server/server.cpp:186
+                            #4 0x55ddb35d1379 in Server::callCommand(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >&, Client&) src/server/server.cpp:220
+                            #5 0x55ddb35b5097 in Client::handle_event(epoll_event) src/Client/Client.cpp:178
+                            #6 0x55ddb35ca910 in Reactor::notify(epoll_event) src/reactor/reactor.cpp:125
+                            #7 0x55ddb35c8feb in Demultiplexer::Demultiplexer() src/demultiplexer/demultiplexer.cpp:39
+                            #8 0x55ddb35c9585 in Reactor::Run() src/reactor/reactor.cpp:44
+                            #9 0x55ddb35de549 in main src/test.cpp:33
+                */
                 Server::getInstance().callCommand(Parser::getInstance().getCommand() ,  Parser::getInstance().getParams() , *this     ) ;   
             }
         } else if (n == 0) {
@@ -190,11 +206,12 @@ void Client::handle_event(epoll_event e)
             }
         }
     } 
-    
+      
     if ((e.events & EPOLLOUT) && !_msgQue.empty()) {       
+        std::cout<<"EPOLLOUT"<<std::endl ;   
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         { 
-         std::cout<<"Sent"<<*it<<std::endl  ;  
+         std::cout<<"Sent"<<*it<<_client_fd<<std::endl  ;  
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {

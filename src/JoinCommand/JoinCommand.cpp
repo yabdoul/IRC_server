@@ -6,10 +6,10 @@
 
 void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)     
 {            
-    (void )params ;      
-    std::cout<<"entred join Command"<<std::endl ;   
+    (void )params ;         
     try {  
         if (ch.isUserInChannel(cl)) {
+            std::cerr<<"return scoop"<<std::endl ;                
             return ;
         }
         
@@ -17,7 +17,7 @@ void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
             cl.addMsg(serverResponseFactory::getResp(473 ,  cl   , params  ,  &ch    )) ;   
         }
         
-        ch.enterChannel(cl);       
+        ch.enterChannel(&cl);       
         cl.addMsg(serverResponseFactory::getResp(353 ,  cl  , params  ,  &ch   )) ;   
         cl.addMsg(serverResponseFactory::getResp(366 ,  cl   , params  ,  &ch    )) ;  
         if (!ch.getTopic().empty()) {

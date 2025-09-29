@@ -160,12 +160,13 @@ Server &Server::getInstance()
  * 
  * @param CnName Reference to the name of the channel to be added.
  *               This name will be used as the key in the ChannelList map.
- */
+ */  
+
 Channel   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
-{    
-	Channel ch(ChName , owner  ) ;   
-	ChannelList.push_back(&ch) ;    
-	return ch;   
+{      
+	  Channel * newChannel  =  new Channel(ChName , owner) ;   
+	  ChannelList.push_back(newChannel)   ;  
+	  return *newChannel ;      
 }  
 
 /**

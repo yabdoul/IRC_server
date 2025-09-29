@@ -62,11 +62,11 @@ void Channel::lockChannel(Client &sender)
 { 
       _invitOnly = ((isOp(sender))?true:false)  ;  
 }
-void Channel::enterChannel(Client &cl  ) 
+void Channel::enterChannel(Client *cl  ) 
 {    
-      if(!_invitOnly || _inviteList.count(&cl) > 0)   
+      if(!_invitOnly || _inviteList.count(cl) > 0)   
       {
-          _inviteList[&cl] = MEMB;
+        _inviteList.insert(std::make_pair( cl ,  INV )) ;       
           return;
       }
       
@@ -177,10 +177,6 @@ void Channel::broadcastMessage(const std::string& message, Client* exclude) {
             it->first->rcvMsg(msg);
         }
     }
-}
-
-bool Channel::isUserInChannel(const Client& user) const {
-    return _inviteList.find(const_cast<Client*>(&user)) != _inviteList.end();
 }
 
 std::vector<Client*> Channel::getChannelMembers() const {

@@ -113,14 +113,14 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
          std::cerr<<e.what()<<std::endl ;    
     }
 }  ;   
- Channel  Client::getChannel(std::string chName)  
+  Channel*  Client::getChannel(std::string chName)  
 {   
      for(std::vector<Channel>::const_iterator it = _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++)   
     { 
        if(it->getName() == chName)  
-        return *it ;      
+        return it ;      
     }       
-    return(Server::getInstance().AddChannel(chName  ,  *this ));   
+    return NULL :   
 }   
 
 void Client::setNickName(std::string &   nick  ) 
@@ -160,7 +160,6 @@ void Client::handle_event(epoll_event e)
                             if(dynamic_cast<ChannelCommand  *> (Cmd) )  
                             {   
                                 Channel target = getChannel(Parser::getInstance().getParams().at("channel")) ;      
-                                std::cout<<"Executing"<<std::endl ;   
                                 target.ExecuteCommand(*Cmd ,  *this , Parser::getInstance().getParams()) ;              
                             }    
                             else {  
@@ -208,7 +207,7 @@ void Client::handle_event(epoll_event e)
     } 
       
     if ((e.events & EPOLLOUT) && !_msgQue.empty()) {       
-        std::cout<<"EPOLLOUT"<<std::endl ;   
+        std::cout<<"Entred the send scoop"<<std::endl ;   
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         { 
          std::cout<<"Sent"<<*it<<_client_fd<<std::endl  ;  

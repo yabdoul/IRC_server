@@ -35,7 +35,7 @@ class Channel  {
                 void lockChannel(Client & sender )  ;         
                 void ExecuteCommand(Command  &  cmd  , Client&  Client  , std::map<std::string , std::string>  params  )     ;     
                 void inviteUser(Client &sender ,  Client &target )  ;      
-                void  enterChannel(Client &cl  ) ;
+                void  enterChannel(Client *cl  ) ;
                 void kickUser(Client &sender, Client &target, const std::string& reason);
                 void removeUser(Client &client);
                 void setTopic(Client &sender, const std::string& newTopic);

@@ -62,10 +62,8 @@ const std::string& Server::getPassword() const {
 }  
 void Server::delUser(Client &cl  ) 
 { 
-	std::cout<<"deleating User"<<cl.getClientFd()<<std::endl ;   
 	for(std::vector<Client *>::iterator  it =  _clientList.begin() ;  it != _clientList.end()   ;  it++ )  
 	{    
-		std::cout<<"compare"<<cl.getClientFd()<<" & "<<(**it).getClientFd() <<std::endl ;   
 		if(cl.getClientFd() ==  (**it).getClientFd() )   
 			 _clientList.erase(it)  ;  
  	}  
@@ -105,7 +103,6 @@ void Server::handle_event(epoll_event ev)
 {
     (void)ev;
 
-    std::cout << "Accept handle event called" << std::endl;
     sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     int client_fd = accept(listen_fd, (sockaddr *)&client_addr, &client_len);
@@ -162,11 +159,11 @@ Server &Server::getInstance()
  *               This name will be used as the key in the ChannelList map.
  */  
 
-Channel   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
-{      
+Channel*   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
+{         
 	  Channel * newChannel  =  new Channel(ChName , owner) ;   
-	  ChannelList.push_back(newChannel)   ;  
-	  return *newChannel ;      
+	  ChannelList.push_back(newChannel)     ; 
+	  return  newChannel ;      
 }  
 
 /**
@@ -211,29 +208,30 @@ void  Server::UnsubscribeChannel(std::string &ChName )
 
 
 void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& params, Client& sender) 
-{  
-    Command* tmp = commandFactory::makeCommand(cmd);
-    if (!tmp) {
-        return;
-    }
-    
-    if (dynamic_cast<ChannelCommand*>(tmp)) {
-        // Make a local copy of the channel name
-        std::string channelName(params["channel"]);
-        
-        // Get channel pointer and execute command while it's valid
-        Channel* ch = IsChannelExist(channelName);
-        if (ch) {
-            ch->ExecuteCommand(*tmp, sender, params);
-        }
-    } else {
-        sender.userCommand(*tmp, params);
-    }
-    
-    // Clean up command object
-    delete tmp;
-	
-}  ;      
+{    
+
+    Command* Cmd = commandFactory::makeCommand(cmd) ;  
+	if(Cmd) 
+	{ 
+      if(dynamic_cast<ChannelCommand  *> (Cmd) )   
+	  { 
+		  Channel  *  target = sender.getChannel(params.at("channel"))   ;       
+		 
+		  if(!target  &&     cmd  == "JOIN")  
+		  { 
+			  target = Server::getInstance().AddChannel(params.at("channel") , sender) ;     
+			  sender.subscribe2channel(*target) ;   
+			}       
+		 if( target)  
+			target->ExecuteCommand(*Cmd , sender  , params) ;  
+		}    
+		else {  
+			sender.userCommand(*Cmd  , params  ) ;   
+		}  
+		Server::getInstance().beReady2Send() ;      
+	delete Cmd ;   
+	}
+	}  ;      
 
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        

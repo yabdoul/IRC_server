@@ -6,13 +6,10 @@
 
 void JoinCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)     
 {            
-    (void )params ;         
-    try {  
-        if (ch.isUserInChannel(cl)) {
-            std::cerr<<"return scoop"<<std::endl ;                
-            return ;
-        }
-        
+    (void )params ;           
+    std::cerr<<"entred join command scoop"<<std::endl ;   
+    try {    
+
         if (ch.isInviteOnly() && !ch.isUserInvited(cl)) {       
             cl.addMsg(serverResponseFactory::getResp(473 ,  cl   , params  ,  &ch    )) ;   
         }

@@ -85,7 +85,6 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
     
     for (std::vector<Channel  *>::iterator it = channelList.begin();     
     it != channelList.end(); ++it) {
-        std::cout<<"channel ,  loop"<<std::endl ;   
         
         if (!isChannelVisible( **it , sender)) {
             continue;

@@ -30,7 +30,7 @@ private:
     ClientState _state;  
     std::vector<std::string> _msgQue ;  
     std::string _messageBuffer;
-    std::vector<Channel  >  _subscribed2Channel ;  
+    std::vector<Channel  *  >  _subscribed2Channel ;  
 public:
     ~Client();       
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
@@ -54,7 +54,7 @@ public:
      std::map<std::string ,  std::string> userData() const  ;   
     void rcvMsg(std::string&  Msg)  const  ;     
     void subscribe2channel(Channel &ch  )   ;  
-    Channel getChannel(std::string chName ) ;      
+     Channel *  getChannel(std::string chName ) ;      
     void userCommand(Command &  cmd ,std::map<std::string ,  std::string >&params  )  ;
     bool isRegistered() const;
     ClientState getState() const;

@@ -15,7 +15,7 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
     }
     
     // Check if user is in the channel
-    if (!ch.isUserInChannel(cl)) {
+    if (cl.getChannel(ch.getName())) {
         cl.addMsg(serverResponseFactory::getResp(442 ,   cl  ,  params  ));  // ERR_NOTONCHANNEL
         return; 
     }
@@ -51,23 +51,19 @@ void KickCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std:
         targetNicks.push_back(currentNick);
     }
     
-    // Kick each target user
     for (size_t i = 0; i < targetNicks.size(); ++i) {
         try {
             Client& targetClient = Server::getInstance().getUser(targetNicks[i]);
             
-            // Check if target user is in the channel
-            if (!ch.isUserInChannel(targetClient)) {
-                cl.addMsg(serverResponseFactory::getResp(441 ,  cl   ,  params      ));  // ERR_USERNOTINCHANNEL
-                continue;  // Skip this user but continue with others
+            if (cl.getChannel(ch.getName())) {
+                cl.addMsg(serverResponseFactory::getResp(441 ,  cl   ,  params      ));  
+                continue; 
             }
             
-            // Kick the user
             ch.kickUser(cl, targetClient, reason);
             
         } catch (std::exception& e) {
-            cl.addMsg(serverResponseFactory::getResp(401 ,  cl ,  params   ));  // ERR_NOSUCHNICK
-            // Continue with next user
+            cl.addMsg(serverResponseFactory::getResp(401 ,  cl ,  params   ));  
         }
     }
     

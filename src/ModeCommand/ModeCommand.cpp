@@ -3,7 +3,7 @@
 void   ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
 {   
     
-    if (!ch.isUserInChannel(cl)) {   
+    if (!cl.getChannel(ch.getName())) {   
         cl.addMsg(serverResponseFactory::getResp(442 ,  cl   , params  )) ;  
     }
     

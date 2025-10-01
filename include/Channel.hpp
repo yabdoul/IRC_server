@@ -44,7 +44,6 @@ class Channel  {
                 time_t getTopicTimestamp() const;
                 void setMode(Client &sender, const std::string& mode, const std::string& param);
                 void broadcastMessage(const std::string& message, Client* exclude = NULL);
-                bool isUserInChannel(const Client& user) const;
                 bool isInviteOnly() const;
                 bool isTopicRestricted() const;  
                 std::string getName() {  

@@ -56,7 +56,7 @@ class  Server: public IEventHandler
           int getListenFd()  ;  
            Client&  getUser(std::string nickname )   ;    
           Channel*  IsChannelExist(std::string &ChName   ) ;      
-          Channel    AddChannel(std::string  &ChName  ,  Client &owner   )   ;  
+          Channel *   AddChannel(std::string  &ChName  ,  Client &owner   )   ;  
           void UnsubscribeChannel (std::string &CName) ;
           const std::vector<Channel * >  & getChannelList() const;       
           void  delUser( Client & Cl  )  ;   

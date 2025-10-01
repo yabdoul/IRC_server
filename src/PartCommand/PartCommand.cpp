@@ -4,7 +4,7 @@
 void PartCommand::exeChannel(Client& cl, Channel& ch, std::map<std::string, std::string>& params)
 {
     try {
-        if (!ch.isUserInChannel(cl)) {
+        if (!cl.getChannel(ch.getName())) {
             // 442 ERR_NOTONCHANNEL
             cl.addMsg(serverResponseFactory::getResp(442, cl , params  ));
             return;

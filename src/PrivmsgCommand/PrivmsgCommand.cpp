@@ -35,7 +35,7 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
             std::string channelName = params["channel"];
             Channel * targetChannel = Server::getInstance().IsChannelExist(channelName);
             
-            if (!targetChannel->isUserInChannel(sender)) {
+            if (!sender.getChannel(targetChannel->getName())) {
                 sender.addMsg(serverResponseFactory::getResp(404, sender ,  params  ));  
                 return;
             }

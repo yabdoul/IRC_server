@@ -12,11 +12,11 @@ void  inviteCommand::exeChannel(Client &cl , Channel &ch  , std::map<std::string
     try {
         Client& targetClient = Server::getInstance().getUser(params["nickname"]);
 
-        if (ch.isUserInChannel(targetClient)) {  
+        if (cl.getChannel(ch.getName())) {  
             cl.addMsg(serverResponseFactory::getResp(443 ,  cl  ,  params   ))  ;  
         }
         
-        if (!ch.isUserInChannel(cl)) {
+        if (!cl.getChannel(ch.getName())) {
             cl.addMsg(serverResponseFactory::getResp(442 ,  cl   , params  ))  ;  
         }
         

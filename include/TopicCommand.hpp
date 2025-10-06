@@ -13,5 +13,5 @@ class TopicCommand : public Command, public ChannelCommand
     public: 
         TopicCommand() {}; 
         ~TopicCommand() {}; 
-        void  exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params = g_emptyMap);   
+        void  exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params = g_emptyMap);   
 };

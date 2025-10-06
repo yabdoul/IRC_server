@@ -12,5 +12,5 @@ class inviteCommand : public Command  , public ChannelCommand  {
     public : 
             inviteCommand() {} ;  
             ~inviteCommand(){} ;   
-          void exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)   ;   
+          void exeChannel(Client  &cl ,  Channel *ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)   ;   
 }  ;   

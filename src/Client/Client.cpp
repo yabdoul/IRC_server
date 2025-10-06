@@ -124,7 +124,7 @@ void Client::setNickName(std::string &   nick  )
  { 
     _Nick = nick ;        
  }
-void Client::addMsg(std::string msg) {       
+void Client::addMsg(std::string msg) {   
     if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
@@ -139,14 +139,14 @@ void Client::handle_event(epoll_event e)
 {
     if (e.events & EPOLLIN) {
         std::vector<char> buffer(1024, '\0');    
-        ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);
+        ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);      
         if (n > 0) {  
-            _messageBuffer.append(buffer.data(), n);
+            _messageBuffer.append(buffer.data(), n);   
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
-                Parser::getInstance().parse(command) ;  
+                Parser::getInstance().parse(command) ;   
                 Server::getInstance().callCommand(Parser::getInstance().getCommand() ,  Parser::getInstance().getParams() , *this     ) ;   
             }
         } else if (n == 0) {
@@ -166,7 +166,8 @@ void Client::handle_event(epoll_event e)
       
     if ((e.events & EPOLLOUT) && !_msgQue.empty()) {       
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
-        { 
+        {   
+            std::cout<<this->_client_fd<<"received"<<*it<<std::endl  ;   
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {

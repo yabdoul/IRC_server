@@ -13,6 +13,6 @@ class JoinCommand :  public Command  , public ChannelCommand
     public :  
         JoinCommand() {}; 
         ~JoinCommand() {} ;   
-        void  exeChannel(Client  &cl ,  Channel &ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)    ;   
+        void  exeChannel(Client  &cl ,  Channel *ch   , std::map<std::string ,  std::string >&params  =  g_emptyMap)    ;   
 
 };  

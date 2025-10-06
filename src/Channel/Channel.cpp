@@ -2,7 +2,8 @@
 #include "channelCommand.hpp"  
 #include <algorithm>  
 #include "Client.hpp"
-#include <vector>
+#include <vector>  
+#include "severResponsFactory.hpp"
 #include <cstdlib>  
 enum Roles {
     OP,
@@ -16,7 +17,10 @@ Channel::Channel(){
       _userLimit = 0;
       _topicTimestamp = 0;
 }  
-Channel::~Channel(){}   
+Channel::~Channel(){}    
+
+
+
 // Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
 Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channelName)
 { 
@@ -30,7 +34,7 @@ std::vector<Client *> Channel::getUsers()
 {
     std::vector<Client *> _v;
     _v.reserve(_inviteList.size());
-    for (std::map<Client*, int>::iterator it = _inviteList.begin(); it != _inviteList.end(); ++it)
+    for (std::map<Client*, int>::iterator it = _inviteList.begin(); it != _inviteList.end(); it++)
     {
         _v.push_back(it->first);
     }
@@ -47,7 +51,7 @@ void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string
                 std::cerr<<"tmp is NULL"<<std::endl ;   
                 return ;   
             }
-        tmp->exeChannel(client, *this, params);   
+        tmp->exeChannel(client, this, params);   
     }   
 }  ;   
 
@@ -69,7 +73,8 @@ void Channel::lockChannel(Client &sender)
       _invitOnly = ((isOp(sender))?true:false)  ;  
 }
 void Channel::enterChannel(Client *cl  ) 
-{    
+{      
+    std::cout<<cl->getNickName()<<"entred Channel"<<std::endl ;   
       if(!_invitOnly || _inviteList.count(cl) > 0)   
       {
         _inviteList.insert(std::make_pair( cl ,  INV )) ;       
@@ -92,7 +97,7 @@ void Channel::kickUser(Client &sender, Client &target, const std::string& reason
     
     std::string kickMsg = ":" + sender.getNickname() + " KICK #" + _channelName + " " + 
                          target.getNickname() + " :" + reason + "\r\n";
-    broadcastMessage(kickMsg);
+    broadcastMessage(sender ,  kickMsg );
 }
 
 void Channel::removeUser(Client &client) {
@@ -110,7 +115,7 @@ void Channel::setTopic(Client &sender, const std::string& newTopic) {
     
     std::string topicMsg = ":" + sender.getNickname() + " TOPIC #" + _channelName + 
                           " :" + newTopic + "\r\n";
-    broadcastMessage(topicMsg);
+    broadcastMessage(sender  ,  topicMsg);
 }
 
 const std::string& Channel::getTopic() const {
@@ -172,19 +177,27 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
         modeMsg += " " + param;
     }
     modeMsg += "\r\n";
-    broadcastMessage(modeMsg);
+    broadcastMessage(sender  ,  modeMsg    ) ;
 }
 
-void Channel::broadcastMessage(const std::string& message, Client* exclude) {
-    for (std::map<Client*, int>::iterator it = _inviteList.begin(); 
-         it != _inviteList.end(); ++it) {
+void Channel::broadcastMessage(Client  &sender  ,  const std::string& message, Client* exclude) {   
+
+    for (std::map<Client*, int>::iterator it = _inviteList.begin();   
+         it != _inviteList.end() ; it++  ) {    
         if (exclude == NULL || it->first != exclude) {
             std::string msg = message;
-            it->first->rcvMsg(msg);
+            it->first->addMsg( ":" + sender.getNickName() + "!" + sender.getUsername() + "@" +"irc_server_ysf"+ " PRIVMSG " + "#"+getName() + " :" + message) ;    
         }
     }
 }
-
+  
+void Channel::getClients() const    
+                 { 
+                     for(std::map<Client  * , int>::const_iterator  it  = _inviteList.begin() ;  it !=   _inviteList.end( )  ; it++  )
+                    { 
+                            std::cout<<it->first->getNickName()<<std::endl ;   
+                    }
+                    }
 std::vector<Client*> Channel::getChannelMembers() const {
     std::vector<Client*> members;
     for (std::map<Client*, int>::const_iterator it = _inviteList.begin(); 

@@ -11,7 +11,7 @@ PrivmsgCommand::~PrivmsgCommand()
 }
 
 void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>& params)
-{
+{   
     if (params.find("message") == params.end()) {
         sender.addMsg(serverResponseFactory::getResp(412, sender ,  params  ));
         return;
@@ -43,7 +43,7 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
             std::string privmsgMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 
                                     "@localhost PRIVMSG #" + channelName + " :" + message + "\r\n";
             
-            targetChannel->broadcastMessage(privmsgMsg, &sender);
+            targetChannel->broadcastMessage( sender ,  privmsgMsg);
             
         } catch (std::exception& e) {
             sender.addMsg(serverResponseFactory::getResp(403, sender , params  )); 
@@ -68,5 +68,25 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
         
     } else {
         sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  
+    }
+}   
+ 
+
+void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::string ,  std::string>&params )
+{       
+    std::cout<<"Called by"<<sender.getNickName()<<std::endl ;   
+    ch->getClients() ;   
+    if(!ch)  
+    {  
+        std::cerr<<"channel Not found "  ; 
+        return ;   
+    }
+    if(!sender.getChannel(ch->getName()))     
+    {  
+        sender.addMsg(serverResponseFactory::getResp(403 ,  sender , params , ch )) ;     
+        return ;     
+    }  
+    else{ 
+        ch->broadcastMessage(sender ,   params.at("message")   , &sender   )  ;           
     }
 }

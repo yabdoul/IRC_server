@@ -160,8 +160,13 @@ Server &Server::getInstance()
  */  
 
 Channel*   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
-{         
-	  Channel * newChannel  =  new Channel(ChName , owner) ;   
+{              
+	  for(std::vector<Channel * >::iterator it  = ChannelList.begin() ;  it !=  ChannelList.end() ;  it++ )   
+	  {  
+		 if((**it).getName() == ChName )  
+		 	return *it  ;  
+	  } ;  
+	  Channel * newChannel  =  new Channel(ChName , owner) ;    
 	  ChannelList.push_back(newChannel)     ; 
 	  return  newChannel ;      
 }  
@@ -215,15 +220,15 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 	{ 
       if(dynamic_cast<ChannelCommand  *> (Cmd) )   
 	  { 
-		  Channel  *  target = sender.getChannel(params.at("channel"))   ;       
-		 
+		  Channel  *  target = sender.getChannel(params.at("channel"))     ;         
 		  if(!target  &&     cmd  == "JOIN")  
 		  { 
 			  target = Server::getInstance().AddChannel(params.at("channel") , sender) ;     
 			  sender.subscribe2channel(*target) ;   
-			}       
-		 if( target)  
-			target->ExecuteCommand(*Cmd , sender  , params) ;  
+			}         
+			if( target)    
+			   target->ExecuteCommand(*Cmd , sender  , params) ;  
+			
 		}    
 		else {  
 			sender.userCommand(*Cmd  , params  ) ;   

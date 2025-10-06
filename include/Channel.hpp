@@ -43,9 +43,10 @@ class Channel  {
                 const std::string& getTopicSetter() const;
                 time_t getTopicTimestamp() const;
                 void setMode(Client &sender, const std::string& mode, const std::string& param);
-                void broadcastMessage(const std::string& message, Client* exclude = NULL);
+                void broadcastMessage(Client &sender  ,   const std::string& message, Client* exclude = NULL);
                 bool isInviteOnly() const;
-                bool isTopicRestricted() const;  
+                bool isTopicRestricted() const;     
+                void getClients()   const ;    
                 std::string getName() {  
                     return  _channelName ;   
                 };    

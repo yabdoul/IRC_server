@@ -65,7 +65,7 @@ public:
     void addMsg(std::string msg);   
     int getClientFd() const;   
     void setNickName(std::string&  nick ) ;     
-    std::string  getNickName( ) 
+    std::string  getNickName( )  const   
     {  
         return _Nick ;   
     }

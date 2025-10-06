@@ -41,7 +41,11 @@ std::string serverResponseFactory::replacePlaceholders(std::string tmpl, std::ma
 
 std::string    serverResponseFactory::getResp(int code  ,   Client & cl   , std::map<std::string , std::string>& params ,  Channel *c     )   
 {     
-    NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");           
-    std::string response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code),    respData::getRespData(cl , params   )  ,c  );      
+    NumericTemplateParser::getInstance()->loadFile("config/numericReplies.txt");   
+    std::string response   ;    
+    if(code ==  1001  )  
+        response = replacePlaceholders(":{nick}!{user}@{host} JOIN :#{channel}" ,  respData::getRespData(cl , params) ,  c ) ;        
+    else 
+        response = replacePlaceholders(NumericTemplateParser::getInstance()->getTemplate(code),    respData::getRespData(cl , params   )  ,c  );      
     return response ;    
 }  ;   

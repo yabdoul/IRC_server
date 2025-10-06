@@ -1,9 +1,9 @@
 #include "ModeCommand.hpp"   
 
-void   ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params)  
+void   ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)  
 {   
     
-    if (!cl.getChannel(ch.getName())) {   
+    if (!cl.getChannel(ch->getName())) {   
         cl.addMsg(serverResponseFactory::getResp(442 ,  cl   , params  )) ;  
     }
     
@@ -11,7 +11,7 @@ void   ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, st
         cl.addMsg(serverResponseFactory::getResp(324 , cl ,  params )) ;  
     } 
     
-    if (!ch.isOp(cl)) {
+    if (!ch->isOp(cl)) {
         cl.addMsg(serverResponseFactory::getResp(482 , cl , params  ))  ;  
     }
     
@@ -23,7 +23,7 @@ void   ModeCommand::exeChannel(Client &cl, Channel &ch, std::map<std::string, st
             modeParam = params["mode_param"];
         }
         
-        ch.setMode(cl, mode, modeParam);
+        ch->setMode(cl, mode, modeParam);
         
     } catch (std::exception& e) {
         cl.addMsg(serverResponseFactory::getResp(501  ,  cl  , params  ) ) ;  

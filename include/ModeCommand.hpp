@@ -12,5 +12,5 @@ class ModeCommand : public Command, public ChannelCommand
     public: 
         ModeCommand() {}; 
         ~ModeCommand() {}; 
-       void   exeChannel(Client &cl, Channel &ch, std::map<std::string, std::string> &params = g_emptyMap);   
+       void   exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params = g_emptyMap);   
 };

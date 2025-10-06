@@ -11,7 +11,7 @@ PrivmsgCommand::~PrivmsgCommand()
 }
 
 void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>& params)
-{
+{   
     if (params.find("message") == params.end()) {
         sender.addMsg(serverResponseFactory::getResp(412, sender ,  params  ));
         return;
@@ -68,5 +68,24 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
         
     } else {
         sender.addMsg(serverResponseFactory::getResp(461, sender ,  params   ));  
+    }
+}   
+ 
+
+void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::string ,  std::string>&params )
+{     
+    ch->getClients() ;   
+    if(!ch)  
+    {  
+        std::cerr<<"channel Not found "  ; 
+        return ;   
+    }
+    if(!sender.getChannel(ch->getName()))     
+    {  
+        sender.addMsg(serverResponseFactory::getResp(403 ,  sender , params , ch )) ;     
+        return ;     
+    }  
+    else{ 
+        ch->broadcastMessage(params.at("message") )  ;           
     }
 }

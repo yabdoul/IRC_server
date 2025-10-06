@@ -19,7 +19,7 @@ void PartCommand::exeChannel(Client& cl, Channel *   ch, std::map<std::string, s
         std::string partMsg = ":" + cl.getNickname() + "!" + cl.getUsername() + 
                               "@localhost PART #" + ch->getName() + " :" + partMessage + "\r\n";
         
-        ch->broadcastMessage(partMsg);
+        ch->broadcastMessage(cl ,  partMsg );
         
         ch->removeUser(cl);
         

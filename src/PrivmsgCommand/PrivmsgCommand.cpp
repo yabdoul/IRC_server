@@ -43,7 +43,7 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
             std::string privmsgMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 
                                     "@localhost PRIVMSG #" + channelName + " :" + message + "\r\n";
             
-            targetChannel->broadcastMessage(privmsgMsg, &sender);
+            targetChannel->broadcastMessage( sender ,  privmsgMsg);
             
         } catch (std::exception& e) {
             sender.addMsg(serverResponseFactory::getResp(403, sender , params  )); 
@@ -73,7 +73,8 @@ void PrivmsgCommand::execute(Client& sender, std::map<std::string, std::string>&
  
 
 void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::string ,  std::string>&params )
-{     
+{       
+    std::cout<<"Called by"<<sender.getNickName()<<std::endl ;   
     ch->getClients() ;   
     if(!ch)  
     {  
@@ -86,6 +87,6 @@ void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::s
         return ;     
     }  
     else{ 
-        ch->broadcastMessage(params.at("message") )  ;           
+        ch->broadcastMessage(sender ,   params.at("message")   , &sender   )  ;           
     }
 }

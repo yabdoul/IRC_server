@@ -97,7 +97,7 @@ void Channel::kickUser(Client &sender, Client &target, const std::string& reason
     
     std::string kickMsg = ":" + sender.getNickname() + " KICK #" + _channelName + " " + 
                          target.getNickname() + " :" + reason + "\r\n";
-    broadcastMessage(kickMsg);
+    broadcastMessage(sender ,  kickMsg );
 }
 
 void Channel::removeUser(Client &client) {
@@ -115,7 +115,7 @@ void Channel::setTopic(Client &sender, const std::string& newTopic) {
     
     std::string topicMsg = ":" + sender.getNickname() + " TOPIC #" + _channelName + 
                           " :" + newTopic + "\r\n";
-    broadcastMessage(topicMsg);
+    broadcastMessage(sender  ,  topicMsg);
 }
 
 const std::string& Channel::getTopic() const {
@@ -177,16 +177,16 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
         modeMsg += " " + param;
     }
     modeMsg += "\r\n";
-    broadcastMessage(modeMsg);
+    broadcastMessage(sender  ,  modeMsg    ) ;
 }
 
-void Channel::broadcastMessage(const std::string& message, Client* exclude) {   
+void Channel::broadcastMessage(Client  &sender  ,  const std::string& message, Client* exclude) {   
 
     for (std::map<Client*, int>::iterator it = _inviteList.begin();   
          it != _inviteList.end() ; it++  ) {    
         if (exclude == NULL || it->first != exclude) {
             std::string msg = message;
-            it->first->addMsg( ":" + it->first->getNickName() + "!" + it->first->getUsername() + "@" +"irc_server_ysf"+ " PRIVMSG " + "#"+getName() + " :" + message) ;    
+            it->first->addMsg( ":" + sender.getNickName() + "!" + sender.getUsername() + "@" +"irc_server_ysf"+ " PRIVMSG " + "#"+getName() + " :" + message) ;    
         }
     }
 }

@@ -43,9 +43,10 @@ Client::Client(int client_fd, const std::string& Nick, const std::string& User, 
          _User = User  ;  
          _Pass = Pass ;
          _state = CONNECTING;
+         _disconnected = false;
     }
 
-Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING)
+Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING), _disconnected(false)
 {}
 
 Client::~Client()
@@ -146,16 +147,25 @@ void Client::handle_event(epoll_event e)
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
-                Parser::getInstance().parse(command) ;   
-                Server::getInstance().callCommand(Parser::getInstance().getCommand() ,  Parser::getInstance().getParams() , *this     ) ;   
+                
+                // Parse command and get results immediately to avoid singleton overwrites
+                if (Parser::getInstance().parse(command)) {
+                    std::string cmd = Parser::getInstance().getCommand();
+                    std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                    Server::getInstance().callCommand(cmd, params, *this);
+                }
             }
         } else if (n == 0) {
+            // Client disconnected normally
             close(_client_fd);
             _client_fd = -1;
+            _disconnected = true;
             return;
         } else {
+            // Error occurred
             close(_client_fd);
             _client_fd = -1;
+            _disconnected = true;
             return;
         }
     } 

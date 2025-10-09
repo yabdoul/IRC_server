@@ -67,13 +67,57 @@ void Server::initServer(int port, const std::string& password) {
 
 const std::string& Server::getPassword() const {
 	return _password;
+}
+
+void Server::removeClient(Client* client) {
+    if (!client) return;
+    
+    // Remove from client list
+    for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+        if(*it == client) {
+            _clientList.erase(it);
+            break;
+        }
+    }
+    
+    // Unregister from reactor
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = client->getClientFd();
+    try {
+        Reactor::getInstance().unregistre(ev);
+    } catch (...) {
+        // Ignore errors during cleanup
+    }
+    
+    // Delete the client object
+    delete client;
+}
+
+void Server::cleanupDisconnectedClients() {
+    std::vector<Client*> toDelete;
+    
+    // Find disconnected clients
+    for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+        if((*it)->isDisconnected()) {
+            toDelete.push_back(*it);
+        }
+    }
+    
+    // Remove disconnected clients
+    for(std::vector<Client*>::iterator it = toDelete.begin(); it != toDelete.end(); ++it) {
+        removeClient(*it);
+    }
 }  
 void Server::delUser(Client &cl  ) 
 { 
 	for(std::vector<Client *>::iterator  it =  _clientList.begin() ;  it != _clientList.end()   ;  it++ )  
 	{    
 		if(cl.getClientFd() ==  (**it).getClientFd() )   
-			 _clientList.erase(it)  ;  
+		{
+			 _clientList.erase(it);  
+			 return; // Successfully found and removed user
+		}
  	}  
 	throw std::runtime_error("[DELUSER]: user Not Found") ;   
 }
@@ -130,9 +174,8 @@ void Server::handle_event(epoll_event ev)
         ev.events = EPOLLIN ;
         ev.data.fd = client_fd;
         Reactor::getInstance().registre(ev, client);  
-        // Store the pointer instead of copying the object
-        // Remove this line that causes the copy:
-        // this->_clientList.push_back(*client);   
+        // Add client to the client list for tracking
+        this->_clientList.push_back(client);   
     } catch (std::exception &e) {
         delete client;  // Clean up on error
         throw e;
@@ -228,29 +271,34 @@ void  Server::UnsubscribeChannel(std::string &ChName )
 
 void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& params, Client& sender) 
 {    
-
     Command* Cmd = commandFactory::makeCommand(cmd) ;  
 	if(Cmd) 
 	{ 
-      if(dynamic_cast<ChannelCommand  *> (Cmd) )   
-	  { 
-		  Channel  *  target = sender.getChannel(params.at("channel"))     ;         
-		  if(!target  &&     cmd  == "JOIN")  
-		  { 
-			  target = Server::getInstance().AddChannel(params.at("channel") , sender) ;     
-			  sender.subscribe2channel(*target) ;   
-			}         
-			if( target)    
-			   target->ExecuteCommand(*Cmd , sender  , params) ;  
-			
-		}    
-		else {  
-			sender.userCommand(*Cmd  , params  ) ;   
-		}  
-		Server::getInstance().beReady2Send() ;      
-	delete Cmd ;   
+        try {
+            if(dynamic_cast<ChannelCommand  *> (Cmd) )   
+            { 
+                if (params.find("channel") != params.end()) {
+                    Channel  *  target = sender.getChannel(params["channel"])     ;         
+                    if(!target  &&     cmd  == "JOIN")  
+                    { 
+                        target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+                        sender.subscribe2channel(*target) ;   
+                    }         
+                    if( target)    
+                       target->ExecuteCommand(*Cmd , sender  , params) ;  
+                }
+            }    
+            else {  
+                sender.userCommand(*Cmd  , params  ) ;   
+            }  
+            Server::getInstance().beReady2Send() ;
+        } catch (const std::exception& e) {
+            delete Cmd;
+            throw; // Re-throw the exception after cleanup
+        }
+        delete Cmd ;   
 	}
-	}  ;      
+}  ;      
 
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        

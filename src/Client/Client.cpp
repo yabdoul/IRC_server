@@ -154,13 +154,9 @@ void Client::handle_event(epoll_event e)
             _client_fd = -1;
             return;
         } else {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                return;
-            } else {
-                close(_client_fd);
-                _client_fd = -1;
-                return;
-            }
+            close(_client_fd);
+            _client_fd = -1;
+            return;
         }
     } 
       
@@ -170,11 +166,7 @@ void Client::handle_event(epoll_event e)
             std::cout<<this->_client_fd<<"received"<<*it<<std::endl  ;   
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    break;
-                } else {
-                    break;
-                }
+                break;
             } else if (bytes_sent < static_cast<ssize_t>(it->size())) {
                 *it = it->substr(bytes_sent);
                 break;
@@ -219,4 +211,14 @@ const std::string& Client::getRealName() const {
 
 int Client::getClientFd() const {
     return _client_fd;
+}
+
+void Client::setUser(const std::string& user) {
+    _User = user;
+}
+
+void Client::setAuthenticated(bool authenticated) {
+    if (authenticated) {
+        _state = PASSWORD_SET;
+    }
 }

@@ -26,6 +26,10 @@ Command* commandFactory::makeCommand(std::string  command )
         else if(command == "NICK")
             return new nickCommand() ;    
         else if(command == "LIST")
-            return new ListCommand() ;  
+            return new ListCommand() ;
+        else if(command == "USER")
+            return new UserCommand() ;
+        else if(command == "PASS")
+            return new PassCommand() ;
        return NULL ;    
 } ;  

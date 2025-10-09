@@ -65,6 +65,8 @@ public:
     void addMsg(std::string msg);   
     int getClientFd() const;   
     void setNickName(std::string&  nick ) ;     
+    void setUser(const std::string& user);
+    void setAuthenticated(bool authenticated);
     std::string  getNickName( )  const   
     {  
         return _Nick ;   

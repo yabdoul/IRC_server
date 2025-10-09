@@ -6,6 +6,7 @@
 #include <algorithm>  
 #include <memory>
 #include "commandFactory.hpp"
+#include <fcntl.h>
 /**
  * @brief Constructor for the Server class.
  * 
@@ -22,6 +23,13 @@ Server::Server() : IEventHandler(), _port(6667), _password("")
 	_serverName= SERVER_NAME ;   
 	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
 	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
+	
+	// Set server socket to non-blocking mode (MANDATORY requirement)
+	if (fcntl(listen_fd, F_SETFL, O_NONBLOCK) == -1) {
+		close(listen_fd);
+		throw std::runtime_error("Failed to set server socket to non-blocking mode");
+	}
+	
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
@@ -108,6 +116,12 @@ void Server::handle_event(epoll_event ev)
     int client_fd = accept(listen_fd, (sockaddr *)&client_addr, &client_len);
     if (client_fd == -1)
         throw std::runtime_error("fatal : Accept() ");
+
+    // Set client socket to non-blocking mode (MANDATORY requirement)
+    if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+        close(client_fd);
+        throw std::runtime_error("Failed to set client socket to non-blocking mode");
+    }
 
     Client *client = new Client(client_fd);
     try

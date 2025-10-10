@@ -144,9 +144,23 @@ void Client::handle_event(epoll_event e)
         if (n > 0) {  
             _messageBuffer.append(buffer.data(), n);   
             size_t pos;
+            // First try \r\n, then fall back to \n
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
+                
+                // Parse command and get results immediately to avoid singleton overwrites
+                if (Parser::getInstance().parse(command)) {
+                    std::string cmd = Parser::getInstance().getCommand();
+                    std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                    Server::getInstance().callCommand(cmd, params, *this);
+                }
+            }
+            
+            // Handle plain \n (Unix line endings)
+            while ((pos = _messageBuffer.find("\n")) != std::string::npos) {
+                std::string command = _messageBuffer.substr(0, pos);
+                _messageBuffer.erase(0, pos + 1);
                 
                 // Parse command and get results immediately to avoid singleton overwrites
                 if (Parser::getInstance().parse(command)) {

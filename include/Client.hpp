@@ -28,6 +28,7 @@ private:
     std::string _realName;
     std::string _hostname;
     ClientState _state;  
+    bool _disconnected;
     std::vector<std::string> _msgQue ;  
     std::string _messageBuffer;
     std::vector<Channel  *  >  _subscribed2Channel ;  
@@ -65,6 +66,10 @@ public:
     void addMsg(std::string msg);   
     int getClientFd() const;   
     void setNickName(std::string&  nick ) ;     
+    void setUser(const std::string& user);
+    void setAuthenticated(bool authenticated);
+    bool isDisconnected() const { return _disconnected; }
+    void markDisconnected() { _disconnected = true; }
     std::string  getNickName( )  const   
     {  
         return _Nick ;   

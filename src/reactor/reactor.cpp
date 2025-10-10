@@ -41,7 +41,9 @@ void    Reactor::Run()
           while(1)
           {
                try {
-                    Demultiplexer();    
+                    Demultiplexer();
+                    // Clean up disconnected clients after processing events
+                    Server::getInstance().cleanupDisconnectedClients();
                } catch (std::exception &e) {
                     std::cerr << e.what() << "\n";
                     break;

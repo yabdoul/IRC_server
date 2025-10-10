@@ -1,7 +1,7 @@
 001=:{server} 001 {nick} :Welcome to IRC, {nick}
-002=:{server} 002 {nick} :Your host is{server}, running version {version}
+002=:{server} 002 {nick} :Your host is {server}, running version {version}
 003=:{server} 003 {nick} :This server was created on {date}
-004=:{server} 004 {nick}{server} {version} {userModes} {channelModes}
+004=:{server} 004 {nick} {server} {version} {userModes} {channelModes}
 251=:{server} 251 {nick} :There are {users} users and {invisible} invisible on {servers} servers
 252=:{server} 252 {nick} {ops} :IRC Operators online
 253=:{server} 253 {nick} {unknown} :Unknown connections

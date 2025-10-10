@@ -6,6 +6,7 @@
 #include <algorithm>  
 #include <memory>
 #include "commandFactory.hpp"
+#include <fcntl.h>
 /**
  * @brief Constructor for the Server class.
  * 
@@ -16,56 +17,110 @@ const std::vector<Channel *  >&  Server::getChannelList() const
     return ChannelList ;
 }
 
-Server::Server() : IEventHandler(), _port(6667), _password("")
+Server::Server() : IEventHandler(), listen_fd(-1), _serverName(SERVER_NAME), _port(0), _password("")
 {     
 	_ready2Send = false  ;   
-	_serverName= SERVER_NAME ;   
-	listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
-	(listen_fd == -1) ? std::cout << "socket init problem" << std::endl : std::cout << "Socket inited Succefully\n";
-	struct sockaddr_in address;
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(_port);
-	int opt =1  ;  
-	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-	if (bind(listen_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
-		close(listen_fd);
-		throw std::runtime_error("Failed to bind socket");
-	}
-	if (listen(listen_fd, 100) == -1) {
-		close(listen_fd);
-		throw std::runtime_error("Failed to listen on socket");
-	}
-	try
-	{
-		struct epoll_event ev;
-		ev.events = EPOLLIN; 
-		ev.data.fd = listen_fd;
-		Reactor::getInstance().registre(ev, this);  
-	}
-	catch (std::exception &e)
-	{
-		close(listen_fd);
-		std::cerr << e.what() << std::endl;
-		throw;
-	}
+	// Socket initialization will be done in initServer() with proper parameters
 }  
 
 void Server::initServer(int port, const std::string& password) {
 	Server& server = getInstance();
 	server._port = port;
 	server._password = password;
+	
+	// Initialize socket with the provided port
+	server.listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
+	if (server.listen_fd == -1) {
+		throw std::runtime_error("Socket initialization failed");
+	}
+	std::cout << "Socket inited Successfully\n";
+	
+	// Set server socket to non-blocking mode (MANDATORY requirement)
+	if (fcntl(server.listen_fd, F_SETFL, O_NONBLOCK) == -1) {
+		close(server.listen_fd);
+		throw std::runtime_error("Failed to set server socket to non-blocking mode");
+	}
+	
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(port);
+	int opt = 1;  
+	setsockopt(server.listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	if (bind(server.listen_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
+		close(server.listen_fd);
+		throw std::runtime_error("Failed to bind socket");
+	}
+	if (listen(server.listen_fd, 100) == -1) {
+		close(server.listen_fd);
+		throw std::runtime_error("Failed to listen on socket");
+	}
+	
+	// Register server with reactor
+	try {
+		struct epoll_event ev;
+		ev.events = EPOLLIN;
+		ev.data.fd = server.listen_fd;
+		Reactor::getInstance().registre(ev, &server);
+	} catch (std::exception &e) {
+		close(server.listen_fd);
+		throw std::runtime_error("Failed to register server with reactor");
+	}
 }
 
 const std::string& Server::getPassword() const {
 	return _password;
+}
+
+void Server::removeClient(Client* client) {
+    if (!client) return;
+    
+    // Remove from client list
+    for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+        if(*it == client) {
+            _clientList.erase(it);
+            break;
+        }
+    }
+    
+    // Unregister from reactor
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = client->getClientFd();
+    try {
+        Reactor::getInstance().unregistre(ev);
+    } catch (...) {
+        // Ignore errors during cleanup
+    }
+    
+    // Delete the client object
+    delete client;
+}
+
+void Server::cleanupDisconnectedClients() {
+    std::vector<Client*> toDelete;
+    
+    // Find disconnected clients
+    for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+        if((*it)->isDisconnected()) {
+            toDelete.push_back(*it);
+        }
+    }
+    
+    // Remove disconnected clients
+    for(std::vector<Client*>::iterator it = toDelete.begin(); it != toDelete.end(); ++it) {
+        removeClient(*it);
+    }
 }  
 void Server::delUser(Client &cl  ) 
 { 
 	for(std::vector<Client *>::iterator  it =  _clientList.begin() ;  it != _clientList.end()   ;  it++ )  
 	{    
 		if(cl.getClientFd() ==  (**it).getClientFd() )   
-			 _clientList.erase(it)  ;  
+		{
+			 _clientList.erase(it);  
+			 return; // Successfully found and removed user
+		}
  	}  
 	throw std::runtime_error("[DELUSER]: user Not Found") ;   
 }
@@ -109,6 +164,12 @@ void Server::handle_event(epoll_event ev)
     if (client_fd == -1)
         throw std::runtime_error("fatal : Accept() ");
 
+    // Set client socket to non-blocking mode (MANDATORY requirement)
+    if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+        close(client_fd);
+        throw std::runtime_error("Failed to set client socket to non-blocking mode");
+    }
+
     Client *client = new Client(client_fd);
     try
     {
@@ -116,9 +177,8 @@ void Server::handle_event(epoll_event ev)
         ev.events = EPOLLIN ;
         ev.data.fd = client_fd;
         Reactor::getInstance().registre(ev, client);  
-        // Store the pointer instead of copying the object
-        // Remove this line that causes the copy:
-        // this->_clientList.push_back(*client);   
+        // Add client to the client list for tracking
+        this->_clientList.push_back(client);   
     } catch (std::exception &e) {
         delete client;  // Clean up on error
         throw e;
@@ -214,29 +274,34 @@ void  Server::UnsubscribeChannel(std::string &ChName )
 
 void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& params, Client& sender) 
 {    
-
     Command* Cmd = commandFactory::makeCommand(cmd) ;  
 	if(Cmd) 
 	{ 
-      if(dynamic_cast<ChannelCommand  *> (Cmd) )   
-	  { 
-		  Channel  *  target = sender.getChannel(params.at("channel"))     ;         
-		  if(!target  &&     cmd  == "JOIN")  
-		  { 
-			  target = Server::getInstance().AddChannel(params.at("channel") , sender) ;     
-			  sender.subscribe2channel(*target) ;   
-			}         
-			if( target)    
-			   target->ExecuteCommand(*Cmd , sender  , params) ;  
-			
-		}    
-		else {  
-			sender.userCommand(*Cmd  , params  ) ;   
-		}  
-		Server::getInstance().beReady2Send() ;      
-	delete Cmd ;   
+        try {
+            if(dynamic_cast<ChannelCommand  *> (Cmd) )   
+            { 
+                if (params.find("channel") != params.end()) {
+                    Channel  *  target = sender.getChannel(params["channel"])     ;         
+                    if(!target  &&     cmd  == "JOIN")  
+                    { 
+                        target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+                        sender.subscribe2channel(*target) ;   
+                    }         
+                    if( target)    
+                       target->ExecuteCommand(*Cmd , sender  , params) ;  
+                }
+            }    
+            else {  
+                sender.userCommand(*Cmd  , params  ) ;   
+            }  
+            Server::getInstance().beReady2Send() ;
+        } catch (const std::exception& e) {
+            delete Cmd;
+            throw; // Re-throw the exception after cleanup
+        }
+        delete Cmd ;   
 	}
-	}  ;      
+}  ;      
 
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        

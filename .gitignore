@@ -1,3 +1,9 @@
 app
 ircserv
 *.o
+
+# Documentation files
+PROJECT_BRIEF*.md
+IRC_Server_Brief*.pdf
+IRC_Server_Brief*.html
+IRC_Server_Project_Brief.pdf

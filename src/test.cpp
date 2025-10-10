@@ -7,6 +7,8 @@
 #include "inviteCommand.hpp"  
 #include "Parser.hpp"
 #include <cstdlib>
+#include <typeinfo>
+#include <iostream>
 
 int main(int argc, char **argv) 
 {         
@@ -32,8 +34,13 @@ int main(int argc, char **argv)
                 Server::initServer(port, password);
                 Reactor::getInstance().Run();   
         }  
-        catch(std::exception &e) {
+        catch(const std::exception &e) {
                 std::cerr << "Fatal error: " << e.what() << std::endl;
+                std::cerr << "Exception type: " << typeid(e).name() << std::endl;
+                return 1;
+        }
+        catch(...) {
+                std::cerr << "Unknown fatal error occurred!" << std::endl;
                 return 1;
         }
 

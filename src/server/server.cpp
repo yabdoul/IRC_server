@@ -7,6 +7,7 @@
 #include <memory>
 #include "commandFactory.hpp"
 #include <fcntl.h>
+#include <new>
 /**
  * @brief Constructor for the Server class.
  * 
@@ -75,6 +76,17 @@ const std::string& Server::getPassword() const {
 void Server::removeClient(Client* client) {
     if (!client) return;
     
+    // Remove client from all channels before deletion
+    for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
+        if(*chIt) {
+            try {
+                (*chIt)->removeUser(*client);
+            } catch (...) {
+                // Ignore errors if client not in this channel
+            }
+        }
+    }
+    
     // Remove from client list
     for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
         if(*it == client) {
@@ -100,16 +112,23 @@ void Server::removeClient(Client* client) {
 void Server::cleanupDisconnectedClients() {
     std::vector<Client*> toDelete;
     
-    // Find disconnected clients
-    for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
-        if((*it)->isDisconnected()) {
-            toDelete.push_back(*it);
+    try {
+        // Find disconnected clients
+        for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+            if(*it && (*it)->isDisconnected()) {
+                toDelete.push_back(*it);
+            }
         }
-    }
-    
-    // Remove disconnected clients
-    for(std::vector<Client*>::iterator it = toDelete.begin(); it != toDelete.end(); ++it) {
-        removeClient(*it);
+        
+        // Remove disconnected clients
+        for(std::vector<Client*>::iterator it = toDelete.begin(); it != toDelete.end(); ++it) {
+            if(*it) {
+                removeClient(*it);
+            }
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Error during client cleanup: " << e.what() << std::endl;
+        // Continue operation, don't rethrow
     }
 }  
 void Server::delUser(Client &cl  ) 
@@ -170,18 +189,25 @@ void Server::handle_event(epoll_event ev)
         throw std::runtime_error("Failed to set client socket to non-blocking mode");
     }
 
-    Client *client = new Client(client_fd);
-    try
-    {
+    Client *client = NULL;
+    try {
+        client = new Client(client_fd);
         struct epoll_event ev;
         ev.events = EPOLLIN ;
         ev.data.fd = client_fd;
         Reactor::getInstance().registre(ev, client);  
         // Add client to the client list for tracking
         this->_clientList.push_back(client);   
-    } catch (std::exception &e) {
-        delete client;  // Clean up on error
-        throw e;
+    } catch (const std::bad_alloc &e) {
+        std::cerr << "Memory allocation failed: " << e.what() << std::endl;
+        if (client) delete client;
+        close(client_fd);
+        throw std::runtime_error("Failed to allocate memory for new client");
+    } catch (const std::exception &e) {
+        std::cerr << "Client registration failed: " << e.what() << std::endl;
+        if (client) delete client;
+        close(client_fd);
+        throw;
     }
 }   
 

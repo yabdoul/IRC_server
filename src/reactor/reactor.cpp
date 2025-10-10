@@ -2,6 +2,8 @@
 #include "Server.hpp"  
 #include "Demultiplexer.hpp"
 #include <algorithm>
+#include <typeinfo>
+#include <iostream>
 
 
 class ReactorException : public std::exception {
@@ -44,8 +46,12 @@ void    Reactor::Run()
                     Demultiplexer();
                     // Clean up disconnected clients after processing events
                     Server::getInstance().cleanupDisconnectedClients();
-               } catch (std::exception &e) {
-                    std::cerr << e.what() << "\n";
+               } catch (const std::exception &e) {
+                    std::cerr << "Reactor Exception: " << e.what() << std::endl;
+                    std::cerr << "Exception type: " << typeid(e).name() << std::endl;
+                    break;
+               } catch (...) {
+                    std::cerr << "Unknown exception in reactor loop!" << std::endl;
                     break;
                }
           }
@@ -77,9 +83,18 @@ void Reactor::registre(epoll_event ev, IEventHandler* e) {
         _registred.insert(std::make_pair(fd, e));
     } else {
         if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
-            throw ReactorException("Fatal: epoll_ctl() MOD failed");
+            // If MOD fails, the fd might be closed. Try to remove and re-add
+            epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+            _registred.erase(it);
+            if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+                // If both MOD and ADD fail, the fd is likely invalid
+                std::cerr << "Warning: Cannot modify epoll for fd " << fd << " (socket may be closed)" << std::endl;
+                return;
+            }
+            _registred.insert(std::make_pair(fd, e));
+        } else {
+            it->second = e;
         }
-        it->second = e;
     }
 }
 
@@ -97,9 +112,14 @@ void Reactor::registre(epoll_event ev, IEventHandler* e) {
 void   Reactor::unregistre(epoll_event ev) 
 {   
      std::map<int  , IEventHandler *>::iterator it = _registred.find(ev.data.fd  ) ;    
-     if (it  == _registred.end())
-          throw ReactorException("fd dont exists")  ;   
-     epoll_ctl(_epoll_fd ,  EPOLL_CTL_DEL , ev.data.fd , &ev )  ;    
+     if (it  == _registred.end()) {
+          std::cerr << "Warning: Trying to unregister non-existent fd " << ev.data.fd << std::endl;
+          return;  // Don't throw, just warn and return
+     }
+     if (epoll_ctl(_epoll_fd ,  EPOLL_CTL_DEL , ev.data.fd , &ev ) == -1) {
+          std::cerr << "Warning: epoll_ctl DEL failed for fd " << ev.data.fd << " (socket may already be closed)" << std::endl;
+          // Continue anyway - remove from our registry
+     }
      _registred.erase(ev.data.fd ) ;  
 } 
 

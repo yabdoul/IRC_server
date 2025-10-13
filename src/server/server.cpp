@@ -95,10 +95,13 @@ void Server::removeClient(Client* client) {
         }
     }
     
+    // Get client fd before unregistering
+    int client_fd = client->getClientFd();
+    
     // Unregister from reactor
     struct epoll_event ev;
     ev.events = EPOLLIN;
-    ev.data.fd = client->getClientFd();
+    ev.data.fd = client_fd;
     try {
         Reactor::getInstance().unregistre(ev);
     } catch (...) {
@@ -157,7 +160,81 @@ int Server::getListenFd()
 }
 Server::~Server()
 {
-	// close listening Here ---- & destory socket
+	// Clean up all clients first (this will remove them from channels)
+	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+		if(*it) {
+			removeClient(*it);
+		}
+	}
+	_clientList.clear();
+	
+	// Clean up all channels
+	for(std::vector<Channel *>::iterator it = ChannelList.begin(); it != ChannelList.end(); ++it) {
+		if(*it) {
+			delete *it;
+		}
+	}
+	ChannelList.clear();
+	
+	// Close listening socket
+	if(listen_fd != -1) {
+		close(listen_fd);
+		listen_fd = -1;
+	}
+}
+
+void Server::shutdown() {
+	// Send QUIT messages to all clients before shutdown
+	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+		if(*it) {
+			try {
+				(*it)->addMsg("ERROR :Server shutting down\r\n");
+			} catch (...) {
+				// Ignore errors during shutdown
+			}
+		}
+	}
+	
+	// Clean up all resources (avoid iterator invalidation)
+	while(!_clientList.empty()) {
+		Client* client = _clientList.back();
+		_clientList.pop_back();
+		if(client) {
+			// Remove from channels manually
+			for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
+				if(*chIt) {
+					try {
+						(*chIt)->removeUser(*client);
+					} catch (...) {
+						// Ignore errors during cleanup
+					}
+				}
+			}
+			
+			// Get client fd before cleanup
+			int client_fd = client->getClientFd();
+			
+			// Unregister from reactor
+			struct epoll_event ev;
+			ev.events = EPOLLIN;
+			ev.data.fd = client_fd;
+			try {
+				Reactor::getInstance().unregistre(ev);
+			} catch (...) {
+				// Ignore errors during cleanup
+			}
+			
+			// Delete client
+			delete client;
+		}
+	}
+	
+	for(std::vector<Channel *>::iterator it = ChannelList.begin(); it != ChannelList.end(); ++it) {
+		if(*it) {
+			delete *it;
+		}
+	}
+	ChannelList.clear();
 }
 
 /**

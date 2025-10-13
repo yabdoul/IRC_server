@@ -50,7 +50,21 @@ Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING), _disco
 {}
 
 Client::~Client()
-{   if(_client_fd) close(_client_fd);
+{   
+    // Close file descriptor if open
+    if(_client_fd != -1) {
+        close(_client_fd);
+        _client_fd = -1;
+    }
+    
+    // Clear message queue to free vector memory
+    _msgQue.clear();
+    
+    // Clear subscribed channels vector
+    _subscribed2Channel.clear();
+    
+    // Clear message buffer
+    _messageBuffer.clear();
 }
 
 Client::Client(const Client &other):IEventHandler(other)

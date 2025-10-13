@@ -17,7 +17,10 @@ Channel::Channel(){
       _userLimit = 0;
       _topicTimestamp = 0;
 }  
-Channel::~Channel(){}    
+Channel::~Channel() {
+    // Clear the invite list to free std::map memory
+    _inviteList.clear();
+}    
 
 
 

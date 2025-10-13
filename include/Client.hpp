@@ -37,7 +37,6 @@ public:
     Client(int client_fd, const std::string& Nick, const std::string& User, const std::string& Pass );
     Client(int client_fd);  
     Client(std::string Nick ):_Nick(Nick){} ;    
-    Client(const Client &other)  ;   
  
     bool operator<(const   Client & other   )   const  
     { 

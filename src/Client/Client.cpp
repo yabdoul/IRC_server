@@ -2,12 +2,9 @@
 #include <fcntl.h>
 #include <unistd.h>  
 #include "Parser.hpp"  
-#include <cstdlib>  
 #include <sstream>
 #include "Channel.hpp"
 #include "Server.hpp"
-#include <errno.h>
-#include <cstring>
 #include "commandFactory.hpp"  
 #include "Reactor.hpp"
 
@@ -66,18 +63,6 @@ Client::~Client()
     // Clear message buffer
     _messageBuffer.clear();
 }
-
-Client::Client(const Client &other):IEventHandler(other)
-{    
-     _client_fd = -1; 
-     _Nick = other._Nick;   
-     _Pass = other._Pass;
-     _User = other._User;
-     _state = other._state;
-     _realName = other._realName;
-     // Don't copy _msgQue or _subscribed2Channel - they should be unique per client
-}    
-  
 
 void Client::rcvMsg(std::string &Msg)   const 
 { 

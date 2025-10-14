@@ -250,9 +250,7 @@ void Client::informAll(std::string msg  )
     } ;    
 }  ;   
 
-void Client::setUser(const std::string& user) {
-    _User = user;
-}
+
 
 void Client::setAuthenticated(bool authenticated) {
     if (authenticated) {

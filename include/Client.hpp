@@ -70,7 +70,6 @@ public:
     }
     int getClientFd() const;   
     void setNickName(std::string&  nick ) ;     
-    void setUser(const std::string& user);
     void setAuthenticated(bool authenticated);
     bool isDisconnected() const { return _disconnected; }
     void markDisconnected() { _disconnected = true; }

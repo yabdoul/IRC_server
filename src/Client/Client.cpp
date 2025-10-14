@@ -221,3 +221,16 @@ const std::string& Client::getRealName() const {
 int Client::getClientFd() const {
     return _client_fd;
 }
+   
+void Client::informAll(std::string msg  ) 
+{   
+    if(_subscribed2Channel.empty() )  
+    {   
+         addMsg(msg) ;   
+         return ;            
+    }   
+    for(std::vector<Channel *>::iterator it  = _subscribed2Channel.begin() ;  it  !=  _subscribed2Channel.end() ;  it++ )   
+    { 
+        (*it)->broadcastMessage(*this ,  msg )   ;      
+    } ;    
+}  ;   

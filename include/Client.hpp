@@ -61,7 +61,8 @@ public:
     void setState(ClientState state);
     const std::string& getNickname() const;
     const std::string& getUsername() const;
-    const std::string& getRealName() const  ; 
+    const std::string& getRealName() const  ;   
+    void  informAll(std::string msg  )  ;     
     void addMsg(std::string msg);     
     void setUser(std::string user)   
     { 

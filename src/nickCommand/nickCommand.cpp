@@ -41,9 +41,9 @@ void nickCommand::execute(Client &cl,   std::map<std::string, std::string> &para
         return;
     }
 
+std::string resp = ":" + cl.getNickName() + "!" + cl.getUsername() + "@" +
+                   std::string(SERVER_NAME) + " NICK :" + newNick + "\r\n";
     cl.setNickName(newNick);   
-std::string resp = ":" + std::string(SERVER_NAME) + " NICK " + newNick ;
- 
-    cl.addMsg( resp  )  ;   
-
-}
+    cl.addMsg(resp) ;             
+    cl.informAll(resp) ;   
+ }

@@ -115,7 +115,8 @@ void Server::handle_event(epoll_event ev)
         struct epoll_event ev;
         ev.events = EPOLLIN ;
         ev.data.fd = client_fd;
-        Reactor::getInstance().registre(ev, client);  
+        Reactor::getInstance().registre(ev, client) ;      
+		client->addMsg(serverResponseFactory::getResp(002 ,  *client   ,   *   new  std::map<std::string  , std::string> () ) )   ;   
         // Store the pointer instead of copying the object
         // Remove this line that causes the copy:
         // this->_clientList.push_back(*client);   

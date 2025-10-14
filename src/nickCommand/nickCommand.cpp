@@ -41,6 +41,9 @@ void nickCommand::execute(Client &cl,   std::map<std::string, std::string> &para
         return;
     }
 
-    cl.setNickName(newNick);
+    cl.setNickName(newNick);   
+std::string resp = ":" + std::string(SERVER_NAME) + " NICK " + newNick ;
+ 
+    cl.addMsg( resp  )  ;   
 
 }

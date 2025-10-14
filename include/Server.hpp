@@ -14,7 +14,7 @@
 #include <exception>    
 #include <map>   
 
-#define SERVER_NAME "irc_server_ysf"   
+#define SERVER_NAME "irc.42server.com"   
 
 class ServerException : public std::exception
 {

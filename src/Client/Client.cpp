@@ -141,7 +141,8 @@ void Client::handle_event(epoll_event e)
         std::vector<char> buffer(1024, '\0');    
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);      
         if (n > 0) {  
-            _messageBuffer.append(buffer.data(), n);   
+            _messageBuffer.append(buffer.data(), n);     
+            std::cout<<_messageBuffer<<std::endl ;   
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);

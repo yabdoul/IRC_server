@@ -6,7 +6,7 @@ void   ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, st
     if (!cl.getChannel(ch->getName())) {   
         cl.addMsg(serverResponseFactory::getResp(442 ,  cl   , params  )) ;  
     }
-    
+                         
     if (params.find("mode") == params.end()) {
         cl.addMsg(serverResponseFactory::getResp(324 , cl ,  params )) ;  
     } 

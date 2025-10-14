@@ -141,7 +141,8 @@ void Client::handle_event(epoll_event e)
         std::vector<char> buffer(1024, '\0');    
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);      
         if (n > 0) {  
-            _messageBuffer.append(buffer.data(), n);   
+            _messageBuffer.append(buffer.data(), n);     
+            std::cout<<_messageBuffer<<std::endl ;   
             size_t pos;
             // First try \r\n, then fall back to \n
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
@@ -235,6 +236,19 @@ const std::string& Client::getRealName() const {
 int Client::getClientFd() const {
     return _client_fd;
 }
+   
+void Client::informAll(std::string msg  ) 
+{   
+    if(_subscribed2Channel.empty() )  
+    {   
+         addMsg(msg) ;   
+         return ;            
+    }   
+    for(std::vector<Channel *>::iterator it  = _subscribed2Channel.begin() ;  it  !=  _subscribed2Channel.end() ;  it++ )   
+    { 
+        (*it)->broadcastMessage(*this ,  msg )   ;      
+    } ;    
+}  ;   
 
 void Client::setUser(const std::string& user) {
     _User = user;

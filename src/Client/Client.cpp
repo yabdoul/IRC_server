@@ -2,12 +2,9 @@
 #include <fcntl.h>
 #include <unistd.h>  
 #include "Parser.hpp"  
-#include <cstdlib>  
 #include <sstream>
 #include "Channel.hpp"
 #include "Server.hpp"
-#include <errno.h>
-#include <cstring>
 #include "commandFactory.hpp"  
 #include "Reactor.hpp"
 
@@ -43,26 +40,29 @@ Client::Client(int client_fd, const std::string& Nick, const std::string& User, 
          _User = User  ;  
          _Pass = Pass ;
          _state = CONNECTING;
+         _disconnected = false;
     }
 
-Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING)
+Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING), _disconnected(false)
 {}
 
 Client::~Client()
-{   if(_client_fd) close(_client_fd);
+{   
+    // Close file descriptor if open
+    if(_client_fd != -1) {
+        close(_client_fd);
+        _client_fd = -1;
+    }
+    
+    // Clear message queue to free vector memory
+    _msgQue.clear();
+    
+    // Clear subscribed channels vector
+    _subscribed2Channel.clear();
+    
+    // Clear message buffer
+    _messageBuffer.clear();
 }
-
-Client::Client(const Client &other):IEventHandler(other)
-{    
-     _client_fd = -1; 
-     _Nick = other._Nick;   
-     _Pass = other._Pass;
-     _User = other._User;
-     _state = other._state;
-     _realName = other._realName;
-     // Don't copy _msgQue or _subscribed2Channel - they should be unique per client
-}    
-  
 
 void Client::rcvMsg(std::string &Msg)   const 
 { 
@@ -144,24 +144,43 @@ void Client::handle_event(epoll_event e)
             _messageBuffer.append(buffer.data(), n);     
             std::cout<<_messageBuffer<<std::endl ;   
             size_t pos;
+            // First try \r\n, then fall back to \n
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
-                Parser::getInstance().parse(command) ;   
-                Server::getInstance().callCommand(Parser::getInstance().getCommand() ,  Parser::getInstance().getParams() , *this     ) ;   
+                
+                // Parse command and get results immediately to avoid singleton overwrites
+                if (Parser::getInstance().parse(command)) {
+                    std::string cmd = Parser::getInstance().getCommand();
+                    std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                    Server::getInstance().callCommand(cmd, params, *this);
+                }
+            }
+            
+            // Handle plain \n (Unix line endings)
+            while ((pos = _messageBuffer.find("\n")) != std::string::npos) {
+                std::string command = _messageBuffer.substr(0, pos);
+                _messageBuffer.erase(0, pos + 1);
+                
+                // Parse command and get results immediately to avoid singleton overwrites
+                if (Parser::getInstance().parse(command)) {
+                    std::string cmd = Parser::getInstance().getCommand();
+                    std::map<std::string, std::string> params = Parser::getInstance().getParams();
+                    Server::getInstance().callCommand(cmd, params, *this);
+                }
             }
         } else if (n == 0) {
+            // Client disconnected normally
             close(_client_fd);
             _client_fd = -1;
+            _disconnected = true;
             return;
         } else {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                return;
-            } else {
-                close(_client_fd);
-                _client_fd = -1;
-                return;
-            }
+            // Error occurred
+            close(_client_fd);
+            _client_fd = -1;
+            _disconnected = true;
+            return;
         }
     } 
       
@@ -171,11 +190,7 @@ void Client::handle_event(epoll_event e)
             std::cout<<this->_client_fd<<"received"<<*it<<std::endl  ;   
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    break;
-                } else {
-                    break;
-                }
+                break;
             } else if (bytes_sent < static_cast<ssize_t>(it->size())) {
                 *it = it->substr(bytes_sent);
                 break;
@@ -234,3 +249,13 @@ void Client::informAll(std::string msg  )
         (*it)->broadcastMessage(*this ,  msg )   ;      
     } ;    
 }  ;   
+
+void Client::setUser(const std::string& user) {
+    _User = user;
+}
+
+void Client::setAuthenticated(bool authenticated) {
+    if (authenticated) {
+        _state = PASSWORD_SET;
+    }
+}

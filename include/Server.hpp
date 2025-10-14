@@ -63,6 +63,9 @@ class  Server: public IEventHandler
           void saveUser(Client  * c  ) ;  
           void callCommand(std::string& Command , std::map<std::string , std::string> & params  ,  Client &sender    )  ;       
           void Respond2User(int Client_fd ,  std::string resp )  ;
-          const std::string& getPassword() const;      
+          const std::string& getPassword() const;
+          void removeClient(Client* client);
+          void cleanupDisconnectedClients();
+          void shutdown();  // Graceful shutdown function
      //--->ac         
 }  ;          

@@ -17,7 +17,10 @@ Channel::Channel(){
       _userLimit = 0;
       _topicTimestamp = 0;
 }  
-Channel::~Channel(){}    
+Channel::~Channel() {
+    // Clear the invite list to free std::map memory
+    _inviteList.clear();
+}    
 
 
 
@@ -181,12 +184,14 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
 }
 
 void Channel::broadcastMessage(Client  &sender  ,  const std::string& message, Client* exclude) {   
+    (void)sender; // Suppress unused parameter warning
 
     for (std::map<Client*, int>::iterator it = _inviteList.begin();   
          it != _inviteList.end() ; it++  ) {    
         if (exclude == NULL || it->first != exclude) {
-            std::string msg = message;
-            it->first->addMsg( ":" + sender.getNickName() + "!" + sender.getUsername() + "@" +"irc_server_ysf"+ " PRIVMSG " + "#"+getName() + " :" + message) ;    
+            // Send the message as-is without wrapping in PRIVMSG format
+            // The caller should format the message appropriately
+            it->first->addMsg(message);    
         }
     }
 }

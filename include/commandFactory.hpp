@@ -9,6 +9,8 @@
 #include "nickCommand.hpp"
 #include "PongCommand.hpp"
 #include "ListCommand.hpp"
+#include "UserCommand.hpp"
+#include "PassCommand.hpp"
 
 class commandFactory {  
     public:

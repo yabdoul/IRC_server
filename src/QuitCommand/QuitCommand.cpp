@@ -1,5 +1,6 @@
 #include "QuitCommand.hpp"
 #include "Server.hpp"
+#include <unistd.h>
 
 QuitCommand::QuitCommand()
 {
@@ -19,5 +20,9 @@ void QuitCommand::execute(Client& sender, std::map<std::string, std::string>& pa
     std::string quitMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 
                          "@localhost QUIT :" + quitMessage + "\r\n";
     sender.addMsg(quitMsg);  
-    Server::getInstance().delUser(sender) ;   
+    
+    // Mark client as disconnected and close socket
+    // Cleanup will happen later in the main loop
+    close(sender.getClientFd());
+    sender.markDisconnected();
 }

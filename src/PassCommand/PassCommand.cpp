@@ -7,26 +7,21 @@ PassCommand::PassCommand() {}
 
 PassCommand::~PassCommand() {}
 
-void PassCommand::execute(Client &cl, std::map<std::string, std::string> &params) {
-    // Check if password parameter exists
+void PassCommand::execute(Client &cl, std::map<std::string, std::string> &params) {  
     if (!params.count("password") || params["password"].empty()) {
-        cl.addMsg(serverResponseFactory::getResp(461, cl, params)); // Not enough parameters
+        cl.addMsg(serverResponseFactory::getResp(461, cl, params));
         return;
     }
 
-    // Check if client is already registered
     if (!cl.getNickName().empty() || !cl.getUsername().empty()) {
-        cl.addMsg(serverResponseFactory::getResp(462, cl, params)); // Already registered
+        cl.addMsg(serverResponseFactory::getResp(462, cl, params));
         return;
     }
 
-    // Verify password against server password
     const std::string& serverPassword = Server::getInstance().getPassword();
     if (!serverPassword.empty() && params["password"] != serverPassword) {
-        cl.addMsg(serverResponseFactory::getResp(464, cl, params)); // Password incorrect
+        cl.addMsg(serverResponseFactory::getResp(464, cl, params));
         return;
     }
-
-    // Password accepted - client is now authenticated
     cl.setAuthenticated(true);
 }

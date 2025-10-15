@@ -86,7 +86,11 @@ void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::s
         sender.addMsg(serverResponseFactory::getResp(403 ,  sender , params , ch )) ;     
         return ;     
     }  
-    else{ 
-        ch->broadcastMessage(sender ,   params.at("message")   , &sender   )  ;           
+    else{   
+        //:alice!alice@host PRIVMSG #chatroom :Hello everyone!  
+        //:<nick>!<user>@<host> PRIVMSG <#channel> :<message>
+
+        std::string msg = ":" + sender.getNickName() + "!" + sender.getUsername() + "@" + SERVER_NAME + " PRIVMSG #" + params["channel"] + " :" + params["message"];   
+        ch->broadcastMessage(sender , msg  , &sender   )  ;           
     }
 }

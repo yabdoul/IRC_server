@@ -12,6 +12,17 @@
             "detail": "Build the project using the Makefile"
         },
         {
+            "label": "Build IRC Project (Debug)",
+            "type": "shell",
+            "command": "make",
+            "args": ["debug"],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the project with debug symbols and no optimization"
+        },
+        {
             "type": "cppbuild",
             "label": "C/C++: g++ build active file",
             "command": "/usr/bin/g++",

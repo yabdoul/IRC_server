@@ -77,7 +77,6 @@ void Channel::lockChannel(Client &sender)
 }
 void Channel::enterChannel(Client *cl  ) 
 {      
-    std::cout<<cl->getNickName()<<"entred Channel"<<std::endl ;   
       if(!_invitOnly || _inviteList.count(cl) > 0)   
       {
         _inviteList.insert(std::make_pair( cl ,  INV )) ;       
@@ -225,4 +224,5 @@ bool Channel::isTopicRestricted() const {
 bool Channel::isUserInvited(const Client& user) const {
     std::map<Client*, int>::const_iterator it = _inviteList.find(const_cast<Client*>(&user));
     return (it != _inviteList.end() && it->second == INV);
-}
+}  
+

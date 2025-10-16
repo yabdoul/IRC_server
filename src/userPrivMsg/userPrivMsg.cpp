@@ -4,7 +4,6 @@
 
 void userPrivMsg::execute(Client& sender, std::map<std::string, std::string>& params)
 {
-    std::cout << "Entered the user-to-user privmsg function" << std::endl;
 
     // Check required fields
     if (params.find("message") == params.end()) {
@@ -21,7 +20,6 @@ void userPrivMsg::execute(Client& sender, std::map<std::string, std::string>& pa
     std::string targetNick = params["nickname"];
 
     try {
-        std::cout << "Target nick is " << targetNick << std::endl;
         Client& targetUser = Server::getInstance().getUser(targetNick);
 
         std::string privmsgMsg = ":" + sender.getNickname() + "!" + sender.getUsername() + 

@@ -298,10 +298,10 @@ bool Server::isNickAvai(std::string  nick   )
 	return true  ;   
 } 
 Client&  Server::getUser(std::string nickname )   
-{  
+{    
 	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
-	{ 
-		  if((*it)->userData()["nickname"] == nickname)  
+	{   
+		  if((*it)->getNickName() == nickname)  
 			 return *(*it);   
 	}  ;      
 	throw std::runtime_error("User Not found") ;   

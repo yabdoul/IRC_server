@@ -1,6 +1,6 @@
 #include "commandFactory.hpp"  
 #include "UserCommand.hpp"  
-
+#include "userPrivMsg.hpp"
 
 commandFactory::commandFactory(){} ;   
 
@@ -17,7 +17,9 @@ Command* commandFactory::makeCommand(std::string  command )
         else if(command == "TOPIC")
             return new TopicCommand() ;
         else if(command == "PRIVMSG")
-            return new PrivmsgCommand() ;
+            return new PrivmsgCommand() ;  
+        else if(command == "USERPRIV")    
+            return  new  userPrivMsg() ;    
         else if(command == "QUIT")
             return new QuitCommand() ;
         else if(command == "PING")

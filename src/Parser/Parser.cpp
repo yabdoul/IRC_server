@@ -266,14 +266,52 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
     else if (cmd == "PRIVMSG" || cmd == "NOTICE") {
         if (parameters.size() >= 2) {
             std::string target = parameters[0];
-            if (target[0] == '#' || target[0] == '&') {
-                params["channel"] = target.substr(1);
-                params["target_type"] = "channel";
-            } else {
-                params["nickname"] = target;
-                params["target_type"] = "user";
+            // strip leading ':' if present (robustness for malformed input)
+            if (!target.empty() && target[0] == ':') {
+                target = target.substr(1);
             }
-            params["message"] = parameters[1];
+
+            if (!target.empty()) {
+                if (target[0] == '#' || target[0] == '&') {
+                    params["channel"] = target.substr(1);
+                    params["target_type"] = "channel";
+                } else {
+                    params["nickname"] = target;
+                    params["target_type"] = "user";
+                    command = "USERPRIV";
+                }
+            } else {
+                // fallback: no explicit target provided, try to use prefix as nickname
+                if (!prefix.empty()) {
+                    params["nickname"] = prefix;
+                    params["target_type"] = "user";
+                    command = "USERPRIV";
+                } else {
+                    lastError = "Missing target for PRIVMSG/NOTICE";
+                }
+            }
+
+            std::string msg = parameters[1];
+            if (!msg.empty() && msg[0] == ':') {
+                msg = msg.substr(1);
+            }
+            params["message"] = msg;
+        }
+        else if (parameters.size() == 1) {
+            // Only message provided — treat as user-directed if we have a prefix
+            std::string msg = parameters[0];
+            if (!msg.empty() && msg[0] == ':') {
+                msg = msg.substr(1);
+            }
+            params["message"] = msg;
+
+            if (!prefix.empty()) {
+                params["nickname"] = prefix;
+                params["target_type"] = "user";
+                command = "USERPRIV";
+            } else {
+                lastError = "Missing target for PRIVMSG/NOTICE";
+            }
         }
     }
     else if (cmd == "KICK") {
@@ -290,7 +328,7 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
     }
     else if (cmd == "INVITE") {
         if (parameters.size() >= 2) {
-            params["nickname"] = parameters[0]; // User to invite
+            params["nickname"] = parameters[0]; 
             std::string channel = parameters[1];
             if (channel[0] == '#' || channel[0] == '&') {
                 params["channel"] = channel.substr(1);

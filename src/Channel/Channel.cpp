@@ -77,7 +77,7 @@ void Channel::lockChannel(Client &sender)
 }
 void Channel::enterChannel(Client *cl  ) 
 {      
-      if(!_invitOnly || _inviteList.count(cl) > 0)   
+      if(!_invitOnly || _inviteList.count(cl) > 0 )   
       {
         _inviteList.insert(std::make_pair( cl ,  INV )) ;       
           return;

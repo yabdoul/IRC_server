@@ -381,14 +381,20 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
             if(dynamic_cast<ChannelCommand  *> (Cmd) )   
             { 
                 if (params.find("channel") != params.end()) {
-                    Channel  *  target = sender.getChannel(params["channel"])     ;         
+                    Channel  *  target = sender.getChannel(params["channel"])      ;       
+					if(!target &&   cmd !=  "JOIN" )   
+						 { 
+							  std::cout<<"target is empty"<<std::endl ;   
+						 } ;         
                     if(!target  &&     cmd  == "JOIN")  
                     { 
                         target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
                         sender.subscribe2channel(*target) ;   
                     }         
                     if( target)    
-                       target->ExecuteCommand(*Cmd , sender  , params) ;  
+                      {   
+						 target->ExecuteCommand(*Cmd , sender  , params) ;      
+						}
                 }
             }    
             else {  

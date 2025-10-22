@@ -7,8 +7,9 @@ KickCommand::KickCommand()
 }
 
 void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)
-{    
-    if(params.count("channel")  !=   0  || params.count("user") !=  0   )
+{      
+    std::cout<<"entred the kick command scoop to kick"<<params["nickname"]<<std::endl  ;    
+    if(params.count("channel")  !=    0  || params.count("nickname") !=  0   )
     {  
         cl.addMsg(serverResponseFactory::getResp(461  ,  cl   , params ))  ;    
         return ;       
@@ -32,5 +33,6 @@ void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     std::string resp = ":" + cl.getNickName() + "!" + cl.getUsername() + "@" + SERVER_NAME +
                    " KICK #" + params["channel"] + " " + target.getNickName() + " :" + "You have been kicked";
     ch->broadcastMessage(cl  , resp  ) ;   
-    ch->kickUser(cl  ,Server::getInstance().getUser(params["target"])  ,  "empty" )  ;   
+    ch->kickUser(cl  ,Server::getInstance().getUser(params["target"])  ,  "empty" )  ;    
+    std::cout<<"user kicked"<<std::endl ;    
 }  

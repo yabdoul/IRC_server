@@ -150,7 +150,6 @@ void Client::handle_event(epoll_event e)
                 
                 if (Parser::getInstance().parse(command)) {
                     std::string cmd = Parser::getInstance().getCommand() ;  
-                    std::cout<<"command is "<<cmd<<std::endl    ;   
                     std::map<std::string, std::string> params = Parser::getInstance().getParams();
                     Server::getInstance().callCommand(cmd, params, *this);
                 }
@@ -164,6 +163,7 @@ void Client::handle_event(epoll_event e)
                 // Parse command and get results immediately to avoid singleton overwrites
                 if (Parser::getInstance().parse(command)) {
                     std::string cmd = Parser::getInstance().getCommand();
+                    std::cout<<"command is "<<cmd<<std::endl ;     
                     std::map<std::string, std::string> params = Parser::getInstance().getParams();
                     Server::getInstance().callCommand(cmd, params, *this);
                 }
@@ -186,7 +186,6 @@ void Client::handle_event(epoll_event e)
     if ((e.events & EPOLLOUT) && !_msgQue.empty()) {       
         for(std::vector<std::string>::iterator it = _msgQue.begin(); it != _msgQue.end(); )  
         {   
-            std::cout<<this->_client_fd<<"received"<<*it<<std::endl  ;   
             ssize_t bytes_sent = send(_client_fd, it->c_str(), it->size(), MSG_DONTWAIT);
             if (bytes_sent < 0) {
                 break;

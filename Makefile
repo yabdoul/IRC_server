@@ -4,7 +4,8 @@ SRC_FILES := $(shell find ./src -name "*.cpp")
 INCLUDE_DIR := -I./include
 OBJ_FILES := $(SRC_FILES:.cpp=.o)
 CXX := g++
-CXXFLAGS := -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address $(INCLUDE_DIR)
+CXXFLAGS := -Wall -Wextra -Werror -std=c++98 -g $(INCLUDE_DIR)
+DEBUG_FLAGS := -Wall -Wextra -Werror -std=c++98 -g -O0 -DDEBUG $(INCLUDE_DIR)
 
 # Target to build the executable
 TARGET := ircserv
@@ -25,4 +26,8 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+# Debug target (no optimization, no address sanitizer for better debugging)
+debug: CXXFLAGS := $(DEBUG_FLAGS)
+debug: fclean $(TARGET)
+
+.PHONY: all clean fclean re debug

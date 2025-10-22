@@ -49,7 +49,7 @@ class Channel  {
                 void getClients()   const ;    
                 std::string getName() {  
                     return  _channelName ;   
-                };    
+                };     
                 bool isUserInvited(const Client& user) const;
                 std::vector<Client*> getChannelMembers() const;
                 const std::string& getName() const;   

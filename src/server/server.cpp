@@ -29,14 +29,11 @@ void Server::initServer(int port, const std::string& password) {
 	server._port = port;
 	server._password = password;
 	
-	// Initialize socket with the provided port
 	server.listen_fd = socket(AF_INET, SOCK_STREAM, 0);  
 	if (server.listen_fd == -1) {
 		throw std::runtime_error("Socket initialization failed");
 	}
-	std::cout << "Socket inited Successfully\n";
 	
-	// Set server socket to non-blocking mode (MANDATORY requirement)
 	if (fcntl(server.listen_fd, F_SETFL, O_NONBLOCK) == -1) {
 		close(server.listen_fd);
 		throw std::runtime_error("Failed to set server socket to non-blocking mode");
@@ -384,14 +381,20 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
             if(dynamic_cast<ChannelCommand  *> (Cmd) )   
             { 
                 if (params.find("channel") != params.end()) {
-                    Channel  *  target = sender.getChannel(params["channel"])     ;         
+                    Channel  *  target = sender.getChannel(params["channel"])      ;       
+					if(!target &&   cmd !=  "JOIN" )   
+						 { 
+							  std::cout<<"target is empty"<<std::endl ;   
+						 } ;         
                     if(!target  &&     cmd  == "JOIN")  
                     { 
                         target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
                         sender.subscribe2channel(*target) ;   
                     }         
                     if( target)    
-                       target->ExecuteCommand(*Cmd , sender  , params) ;  
+                      {   
+						 target->ExecuteCommand(*Cmd , sender  , params) ;      
+						}
                 }
             }    
             else {  

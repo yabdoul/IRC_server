@@ -32,6 +32,7 @@ Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channe
       _topicRestricted = false;
       _userLimit = 0;
       _topicTimestamp = 0;
+      locked = false ;   
 }
 std::vector<Client *> Channel::getUsers()
 {
@@ -59,7 +60,9 @@ void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string
 }  ;   
 
 bool Channel::isOp(Client & sender )  {
-     return((_inviteList[&sender] ==OP)?(true):(false)) ;}  
+ 
+    return((_inviteList[&sender] ==OP)?(true):(false)) ;   
+    }  
 
 void Channel::inviteUser(Client &sender ,  Client  &target )    
 {    
@@ -149,10 +152,12 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
             break;
         case 'k': // Channel key (password)
             if (adding) {
-                _key = param;
+                _key = param;   
+                locked = true ;   
             } else {
-                _key.clear();
-            }
+                _key.clear();  
+                locked = false  ;    
+              }
             break;
         case 'o': // Give/take operator privilege
             if (!param.empty()) {
@@ -226,3 +231,8 @@ bool Channel::isUserInvited(const Client& user) const {
     return (it != _inviteList.end() && it->second == INV);
 }  
 
+  
+std::string  Channel::getKey() const  
+{ 
+      return  _key ;   
+}  

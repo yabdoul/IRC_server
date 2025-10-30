@@ -383,7 +383,10 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
                 if (params.find("channel") != params.end()) {
                     Channel  *  target = sender.getChannel(params["channel"])      ;       
 					if(!target &&   cmd !=  "JOIN" )   
-						 { 
+						 {   
+							/*  
+								was solving mode  +k  in mode command
+							*/
 							  std::cout<<"target is empty"<<std::endl ;   
 						 } ;         
                     if(!target  &&     cmd  == "JOIN")  

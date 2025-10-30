@@ -335,24 +335,32 @@ void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std:
             }
         }
     }
-    else if (cmd == "MODE") {
-        if (!parameters.empty()) {
-            std::string target = parameters[0];
-            if (target[0] == '#' || target[0] == '&') {
-                params["channel"] = target.substr(1);
-                params["target_type"] = "channel";
-            } else {
-                params["nickname"] = target;
-                params["target_type"] = "user";
-            }
-            if (parameters.size() > 1) {
-                params["mode"] = parameters[1];
-            }
-            if (parameters.size() > 2) {
-                params["mode_param"] = parameters[2];
+else if (cmd == "MODE") {
+    if (!parameters.empty()) {
+        std::string target = parameters[0];
+
+        if (target[0] == '#' || target[0] == '&') {
+            params["channel"] = target;      
+            params["target_type"] = "channel";
+        } else {
+            params["nickname"] = target;
+            params["target_type"] = "user";
+        }
+
+        if (parameters.size() > 1) {
+            params["mode"] = parameters[1];
+        }
+
+        if (parameters.size() > 2) {
+            params["mode_param"] = parameters[2];
+
+            if (params["mode"][0] == '+' && params["mode"].find('k') != std::string::npos) {
+                params["key"] = parameters[2]; 
             }
         }
     }
+}
+
     else if (cmd == "TOPIC") {
         if (!parameters.empty()) {
             std::string channel = parameters[0];

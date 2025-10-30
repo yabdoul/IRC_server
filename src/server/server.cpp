@@ -353,6 +353,7 @@ Channel *    Server::IsChannelExist(std::string &ChName   )
 	  return NULL ;    
 } 
 
+
 /**
  * @brief Unsubscribes the server from a specified channel by removing it from the channel list.
  * 
@@ -379,27 +380,25 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 	{ 
         try {
             if(dynamic_cast<ChannelCommand  *> (Cmd) )   
-            {     
-				std::cout<<"count"<<atoi(params["channel_count"].c_str())<<std::endl;   
-				for(int i  =  0  ;  i  <   atoi(params["channel_count"].c_str()) ;  i++ )   
-				{ 
-					std::cout<<"count"<<std::endl ;   
-					if (params.find("channel") != params.end()) {
-						Channel  *  target = sender.getChannel(params["channel"])      ;       
-						if(!target &&   cmd !=  "JOIN" )   
-						{   
-							std::cout<<"target "" is empty"<<std::endl ;   
-						} ;         
+            {         
+				for(int i  =  0  ;  i  <   atoi(params["count"].c_str()) ;  i++ )   
+				{   
+					 	if (params.find("channel_"+i) != params.end()) {
+						Channel  *  target = sender.getChannel(params["channel_"+i])      ;     
+						params["channel"]  =  params["channel_"+i]  ;   
+						std::cout<<"ww"<<params["channel"]<<std::endl ;   
 						if(!target  &&     cmd  == "JOIN")  
-						{ 
-							target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+						{   
+							target = Server::getInstance().AddChannel(params["channel_"+i] , sender) ;     
+							std::cout<<"entred the not found channel scoop"<<target->getName()<<std::endl ;   
 							sender.subscribe2channel(*target) ;   
 						}         
 						if( target)    
 						{   
 							target->ExecuteCommand(*Cmd , sender  , params) ;      
+							std::cout<<"entred the exeeeec scoop"<<std::endl;      
 						}
-					}
+					}  
 				}
             }    
             else {  

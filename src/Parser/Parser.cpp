@@ -4,6 +4,7 @@
 #include <vector>
 #include <cctype>
 #include <iostream>
+#include <cstring> 
 
 Parser::Parser() : isValid(false) {}
 
@@ -11,7 +12,11 @@ Parser& Parser::getInstance() {
     static Parser instance;
     return instance;
 }
-
+std::string toString(int value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
 bool Parser::parse(const std::string& rawCommand) {
     prefix.clear();
     command.clear();
@@ -238,15 +243,18 @@ if (cmd == "JOIN") {
         std::string channelList = parameters[0];
         size_t pos = 0;
         while ((pos = channelList.find(',')) != std::string::npos) {
-            std::string channel = channelList.substr(0, pos);
-            if (!channel.empty() && (channel[0] == '#' || channel[0] == '&')) {
-                channels.push_back(channel.substr(1)); // remove # or &
+            std::string channel = channelList.substr(0, pos);    
+            std::cout<<channel<<std::endl ;   
+            if (!channel.empty() && (channel[0] == '#' || channel[0] == '&')) {  
+                channels.push_back(channel.substr(1));
             }
             channelList.erase(0, pos + 1);
-        }
-        if (!channelList.empty() && (channelList[0] == '#' || channelList[0] == '&')) {
-            channels.push_back(channelList.substr(1));
-        }
+        } 
+    if (!channelList.empty() && (channelList[0] == '#' || channelList[0] == '&')) {
+    std::cout << channelList << std::endl;
+    channels.push_back(channelList.substr(1));
+}
+
         if (parameters.size() > 1) {
             std::string keyList = parameters[1];
             pos = 0;
@@ -258,7 +266,7 @@ if (cmd == "JOIN") {
                 keys.push_back(keyList);
             }
         }
-        params["channels_count"]  = channels.size() ;    
+        params["count"]  = toString (channels.size())      ;     
         for (size_t i = 0; i < channels.size(); ++i) {
             params["channel_" + i ] = channels[i];
             if (i < keys.size()) {

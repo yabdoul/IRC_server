@@ -45,11 +45,10 @@ std::vector<Client *> Channel::getUsers()
     return _v;
 }
 void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string, std::string>params)      
-{         
-    std::cerr<<"called the excute"<<std::endl ;  
+{           
     if(dynamic_cast<ChannelCommand *> (&cmd))  
     { 
-        ChannelCommand * tmp = dynamic_cast<ChannelCommand *>(&cmd);      
+        ChannelCommand * tmp = dynamic_cast<ChannelCommand *>(&cmd);           
         if(!tmp)  
             { 
                 std::cerr<<"tmp is NULL"<<std::endl ;   

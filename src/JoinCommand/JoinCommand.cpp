@@ -6,16 +6,14 @@
 
 void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)     
 {            
-    (void )params ;           
+    (void )params ;   
     try {    
-
         if (ch->isInviteOnly() && !ch->isUserInvited(cl)) {       
             cl.addMsg(serverResponseFactory::getResp(473 ,  cl   , params  ,  ch    )) ;    
             return  ;     
         }   
        if (ch->isLocked())  
         {  
-            std::cout<<"channel is locked"<<std::endl ;    
             if (params.count("key") == 0 || params["key"].empty())
             {
                 cl.addMsg(serverResponseFactory::getResp(475, cl, params, ch)); 

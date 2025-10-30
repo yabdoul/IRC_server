@@ -113,9 +113,9 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
    Channel*  Client::getChannel(std::string chName)  
 {     
      for(std::vector<Channel * >::iterator it = _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++)   
-    {   
+    {    
        if( (*it)->getName() == chName)     
-        return  *it ;      
+            return  *it ;      
     }       
     return NULL ;   
 }   
@@ -163,7 +163,6 @@ void Client::handle_event(epoll_event e)
                 // Parse command and get results immediately to avoid singleton overwrites
                 if (Parser::getInstance().parse(command)) {
                     std::string cmd = Parser::getInstance().getCommand();
-                    std::cout<<"command is "<<cmd<<std::endl ;     
                     std::map<std::string, std::string> params = Parser::getInstance().getParams();
                     Server::getInstance().callCommand(cmd, params, *this);
                 }

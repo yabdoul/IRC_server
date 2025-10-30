@@ -379,26 +379,28 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 	{ 
         try {
             if(dynamic_cast<ChannelCommand  *> (Cmd) )   
-            { 
-                if (params.find("channel") != params.end()) {
-                    Channel  *  target = sender.getChannel(params["channel"])      ;       
-					if(!target &&   cmd !=  "JOIN" )   
-						 {   
-							/*  
-								was solving mode  +k  in mode command
-							*/
-							  std::cout<<"target is empty"<<std::endl ;   
-						 } ;         
-                    if(!target  &&     cmd  == "JOIN")  
-                    { 
-                        target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
-                        sender.subscribe2channel(*target) ;   
-                    }         
-                    if( target)    
-                      {   
-						 target->ExecuteCommand(*Cmd , sender  , params) ;      
+            {     
+				std::cout<<"count"<<atoi(params["channel_count"].c_str())<<std::endl;   
+				for(int i  =  0  ;  i  <   atoi(params["channel_count"].c_str()) ;  i++ )   
+				{ 
+					std::cout<<"count"<<std::endl ;   
+					if (params.find("channel") != params.end()) {
+						Channel  *  target = sender.getChannel(params["channel"])      ;       
+						if(!target &&   cmd !=  "JOIN" )   
+						{   
+							std::cout<<"target "" is empty"<<std::endl ;   
+						} ;         
+						if(!target  &&     cmd  == "JOIN")  
+						{ 
+							target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+							sender.subscribe2channel(*target) ;   
+						}         
+						if( target)    
+						{   
+							target->ExecuteCommand(*Cmd , sender  , params) ;      
 						}
-                }
+					}
+				}
             }    
             else {  
                 sender.userCommand(*Cmd  , params  ) ;   

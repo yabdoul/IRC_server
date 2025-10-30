@@ -231,27 +231,43 @@ std::string Parser::parsePartialBuffer(std::string& buffer) {
 }
 
 void Parser::mapCommandParameters(const std::string& cmd, const std::vector<std::string>& parameters) {
-    if (cmd == "JOIN") {
-        if (!parameters.empty()) {
-            std::string channels = parameters[0];
-            size_t pos = 0;
-            std::string channel;
-            while ((pos = channels.find(',')) != std::string::npos) {
-                channel = channels.substr(0, pos);
-                if (channel[0] == '#' || channel[0] == '&') {
-                    params["channel"] = channel.substr(1); 
-                    break;
-                }
-                channels.erase(0, pos + 1);
+if (cmd == "JOIN") {
+    if (!parameters.empty()) {
+        std::vector<std::string> channels;
+        std::vector<std::string> keys;
+        std::string channelList = parameters[0];
+        size_t pos = 0;
+        while ((pos = channelList.find(',')) != std::string::npos) {
+            std::string channel = channelList.substr(0, pos);
+            if (!channel.empty() && (channel[0] == '#' || channel[0] == '&')) {
+                channels.push_back(channel.substr(1)); // remove # or &
             }
-            if (!channels.empty() && (channels[0] == '#' || channels[0] == '&')) {
-                params["channel"] = channels.substr(1);
+            channelList.erase(0, pos + 1);
+        }
+        if (!channelList.empty() && (channelList[0] == '#' || channelList[0] == '&')) {
+            channels.push_back(channelList.substr(1));
+        }
+        if (parameters.size() > 1) {
+            std::string keyList = parameters[1];
+            pos = 0;
+            while ((pos = keyList.find(',')) != std::string::npos) {
+                keys.push_back(keyList.substr(0, pos));
+                keyList.erase(0, pos + 1);
             }
-            if (parameters.size() > 1) {
-                params["password"] = parameters[1];
+            if (!keyList.empty()) {
+                keys.push_back(keyList);
+            }
+        }
+        params["channels_count"]  = channels.size() ;    
+        for (size_t i = 0; i < channels.size(); ++i) {
+            params["channel_" + i ] = channels[i];
+            if (i < keys.size()) {
+                params["password_" + i ] = keys[i];
             }
         }
     }
+}
+
     else if (cmd == "PART") {
         if (!parameters.empty()) {
             std::string channel = parameters[0];
@@ -340,7 +356,7 @@ else if (cmd == "MODE") {
         std::string target = parameters[0];
 
         if (target[0] == '#' || target[0] == '&') {
-            params["channel"] = target;      
+            params["channel"] = target.substr(1);      
             params["target_type"] = "channel";
         } else {
             params["nickname"] = target;
@@ -356,6 +372,7 @@ else if (cmd == "MODE") {
 
             if (params["mode"][0] == '+' && params["mode"].find('k') != std::string::npos) {
                 params["key"] = parameters[2]; 
+                std::cout<<"key is"<<params["key"]<<std::endl ;   
             }
         }
     }

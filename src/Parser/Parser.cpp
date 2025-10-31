@@ -268,10 +268,15 @@ if (cmd == "JOIN") {
         }
         params["count"]  = toString (channels.size())      ;     
         for (size_t i = 0; i < channels.size(); ++i) {
-            params["channel_" + i ] = channels[i];
+            params["channel_" + toString(i)] = channels[i];
             if (i < keys.size()) {
                 params["key_" + i ] = keys[i];
             }
+        }
+        
+        // Also store the first key as "key" for backward compatibility
+        if (!keys.empty()) {
+            params["key"] = keys[0];
         }
     }
 }

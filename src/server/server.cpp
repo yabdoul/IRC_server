@@ -385,7 +385,8 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 				{  
 				for(int i  =  0  ;  i  <   atoi(params["count"].c_str()) ;  i++ )   
 					{   
-						params["channel"]  =  params["channel_"+i]  ;   
+						params["channel"]  =  params["channel_"+i]  ;     
+						params["key"]  = params["key_"+i] ;   
 						if (params.find("channel") != params.end()) {
 							Channel  *  target = sender.getChannel(params["channel"])      ;     
 							if(!target  &&     cmd  == "JOIN")  

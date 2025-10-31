@@ -270,7 +270,7 @@ if (cmd == "JOIN") {
         for (size_t i = 0; i < channels.size(); ++i) {
             params["channel_" + i ] = channels[i];
             if (i < keys.size()) {
-                params["password_" + i ] = keys[i];
+                params["key_" + i ] = keys[i];
             }
         }
     }

@@ -353,6 +353,7 @@ Channel *    Server::IsChannelExist(std::string &ChName   )
 	  return NULL ;    
 } 
 
+
 /**
  * @brief Unsubscribes the server from a specified channel by removing it from the channel list.
  * 
@@ -379,24 +380,44 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 	{ 
         try {
             if(dynamic_cast<ChannelCommand  *> (Cmd) )   
-            { 
-                if (params.find("channel") != params.end()) {
-                    Channel  *  target = sender.getChannel(params["channel"])      ;       
-					if(!target &&   cmd !=  "JOIN" )   
-						 { 
-							  std::cout<<"target is empty"<<std::endl ;   
-						 } ;         
-                    if(!target  &&     cmd  == "JOIN")  
-                    { 
-                        target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
-                        sender.subscribe2channel(*target) ;   
-                    }         
-                    if( target)    
-                      {   
-						 target->ExecuteCommand(*Cmd , sender  , params) ;      
-						}
-                }
-            }    
+            {   
+				if(params.count("count") > 0 ) 
+				{  
+				for(int i  =  0  ;  i  <   atoi(params["count"].c_str()) ;  i++ )   
+					{   
+						params["channel"]  =  params["channel_"+i]  ;   
+						if (params.find("channel") != params.end()) {
+							Channel  *  target = sender.getChannel(params["channel"])      ;     
+							if(!target  &&     cmd  == "JOIN")  
+							{   
+								target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+								sender.subscribe2channel(*target) ;   
+							}         
+							if( target)    
+							{      
+								target->ExecuteCommand(*Cmd , sender  , params) ;      
+							} 
+						}  
+					}
+				}  
+				else{
+				if (params.find("channel") != params.end()) {
+							Channel  *  target = sender.getChannel(params["channel"])      ;     
+							if(!target  &&     cmd  == "JOIN")  
+							{   
+								target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
+								std::cout<<"entred the not found channel scoop"<<target->getName()<<std::endl ;   
+								sender.subscribe2channel(*target) ;   
+							}         
+							if( target)    
+							{      
+								target->ExecuteCommand(*Cmd , sender  , params) ;      
+								std::cout<<"entred the exeeeec scoop"<<std::endl;      
+							} 
+						}  
+				}
+				
+			}
             else {  
                 sender.userCommand(*Cmd  , params  ) ;   
             }  

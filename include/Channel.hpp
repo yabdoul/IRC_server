@@ -18,7 +18,8 @@ class Channel  {
                  std::string _topic;
                  std::string _topicSetter;    
                  time_t _topicTimestamp;     
-                 std::string _key; 
+                 std::string _key  ; 
+                 bool locked ;    
                  int _userLimit;   
         public :   
                 Channel() ;  
@@ -29,9 +30,13 @@ class Channel  {
                 {    
                     return((_channelName == other._channelName)?(true):(false)) ;   
                 }
-                bool isOp(Client &sender )   ;        
+                bool isOp(Client &sender )   ;          
+                bool isLocked() const { 
+                    return locked ;  
+                }
                 std::vector<Client  *>  getUsers() ;    
-                void rcvMsg(std::string  &msg  )  ; 
+                void rcvMsg(std::string  &msg  )  ;   
+                std::string getKey() const  ;    
                 void lockChannel(Client & sender )  ;         
                 void ExecuteCommand(Command  &  cmd  , Client&  Client  , std::map<std::string , std::string>  params  )     ;     
                 void inviteUser(Client &sender ,  Client &target )  ;      
@@ -42,7 +47,7 @@ class Channel  {
                 const std::string& getTopic() const;
                 const std::string& getTopicSetter() const;
                 time_t getTopicTimestamp() const;
-                void setMode(Client &sender, const std::string& mode, const std::string& param);
+                void setMode(Client &sender, const std::string& mode, const std::string& param);   
                 void broadcastMessage(Client &sender  ,   const std::string& message, Client* exclude = NULL);
                 bool isInviteOnly() const;
                 bool isTopicRestricted() const;     

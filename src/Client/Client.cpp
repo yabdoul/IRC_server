@@ -113,9 +113,9 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
    Channel*  Client::getChannel(std::string chName)  
 {     
      for(std::vector<Channel * >::iterator it = _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++)   
-    {   
+    {    
        if( (*it)->getName() == chName)     
-        return  *it ;      
+            return  *it ;      
     }       
     return NULL ;   
 }   
@@ -124,7 +124,7 @@ void Client::setNickName(std::string &   nick  )
  { 
     _Nick = nick ;        
  }
-void Client::addMsg(std::string msg) {   
+void Client::addMsg(std::string msg) {     
     if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
@@ -132,7 +132,8 @@ void Client::addMsg(std::string msg) {
     struct epoll_event ev;
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = getClientFd();
-    Reactor::getInstance().registre(ev, this)   ;
+    Reactor::getInstance().registre(ev, this)   ; 
+    std::cout<<"we sent-----------------"<<msg<<std::endl  ;    
 }
 
 void Client::handle_event(epoll_event e)
@@ -163,7 +164,6 @@ void Client::handle_event(epoll_event e)
                 // Parse command and get results immediately to avoid singleton overwrites
                 if (Parser::getInstance().parse(command)) {
                     std::string cmd = Parser::getInstance().getCommand();
-                    std::cout<<"command is "<<cmd<<std::endl ;     
                     std::map<std::string, std::string> params = Parser::getInstance().getParams();
                     Server::getInstance().callCommand(cmd, params, *this);
                 }

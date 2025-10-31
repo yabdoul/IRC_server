@@ -1,7 +1,7 @@
 #include "commandFactory.hpp"  
 #include "UserCommand.hpp"  
 #include "userPrivMsg.hpp"
-
+#include "ModeCommand.hpp"  
 commandFactory::commandFactory(){} ;   
 
 Command* commandFactory::makeCommand(std::string  command )  
@@ -33,6 +33,11 @@ Command* commandFactory::makeCommand(std::string  command )
         else if(command == "USER")
             return new UserCommand() ;
         else if(command == "PASS")
-            return new PassCommand() ;
-       return NULL ;    
+            return new PassCommand()  ;  
+        else if(command == "MODE") 
+          {      
+            std::cout<<"factory scoop"<<std::endl ;   
+            return new ModeCommand( ) ;  
+          }
+        return NULL ;    
 } ;  

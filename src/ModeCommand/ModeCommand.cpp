@@ -1,7 +1,8 @@
 #include "ModeCommand.hpp"   
 
 void ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)
-{
+{  
+    std::cout<<"00000000000000000000000entred Mode execute"<<std::endl  ;   
     if (!cl.getChannel(ch->getName()))
     {
         cl.addMsg(serverResponseFactory::getResp(442, cl, params));

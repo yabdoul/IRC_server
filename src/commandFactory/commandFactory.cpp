@@ -36,7 +36,6 @@ Command* commandFactory::makeCommand(std::string  command )
             return new PassCommand()  ;  
         else if(command == "MODE") 
           {      
-            std::cout<<"factory scoop"<<std::endl ;   
             return new ModeCommand( ) ;  
           }
         return NULL ;    

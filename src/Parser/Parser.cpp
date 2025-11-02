@@ -118,7 +118,7 @@ bool Parser::sanitizeInput(std::string& input) {
     
     return true;
 }
-
+ 
 // Validate IRC command names
 bool Parser::validateCommand(const std::string& cmd) {
     if (cmd.empty()) {

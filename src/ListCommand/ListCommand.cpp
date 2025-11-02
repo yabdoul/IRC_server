@@ -2,6 +2,7 @@
 #include "Server.hpp"
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 ListCommand::ListCommand()
 {
 }
@@ -113,9 +114,25 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
         if (topic.empty()) {
             topic = "";
         }
-        
-        std::string userCount = "1";  // Placeholder
-        std::string listMsg = serverResponseFactory::getResp(322, sender, params);
+
+        // Attempt to produce a useful user count if channel tracks members
+        std::string userCount = "0";
+        try {
+            std::ostringstream oss;
+            oss << (*it)->getChannelMembers().size();
+            userCount = oss.str();
+        } catch (...) {
+            userCount = "0";
+        }
+
+        // Prepare a temporary params map with channel-specific data so
+        // response factory can build a proper RPL_LIST (322)
+        std::map<std::string, std::string> localParams = params;
+        localParams["channel"] = (*it)->getName();
+        localParams["users"] = userCount;
+        localParams["topic"] = topic;
+
+        std::string listMsg = serverResponseFactory::getResp(322, sender, localParams);
         sender.addMsg(listMsg);
     }
     sender.addMsg(serverResponseFactory::getResp(323, sender, params));

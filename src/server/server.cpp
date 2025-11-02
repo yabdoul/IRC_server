@@ -295,7 +295,8 @@ bool Server::isNickAvai(std::string  nick   )
 	return true  ;   
 } 
 Client&  Server::getUser(std::string nickname )   
-{    
+{     
+	std::cout<<"nickname"<<nickname<<std::endl ;    
 	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
 	{   
 		  if((*it)->getNickName() == nickname)  

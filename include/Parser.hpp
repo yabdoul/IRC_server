@@ -34,9 +34,9 @@ public:
      std::string& getLastError() const;
     bool isValidParse() const;
     
-    // Static validation helpers
+    
     static bool isValidIRCMessage(const std::string& message);
     static std::string sanitizeMessage(const std::string& message);
 };
 
-#endif // PARSER_HPP
+#endif 

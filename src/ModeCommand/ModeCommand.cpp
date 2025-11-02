@@ -2,7 +2,6 @@
 
 void ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)
 {  
-    std::cout<<"00000000000000000000000entred Mode execute"<<std::endl  ;   
     if (!cl.getChannel(ch->getName()))
     {
         cl.addMsg(serverResponseFactory::getResp(442, cl, params));
@@ -17,7 +16,6 @@ void ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     if (!ch->isOp(cl))
     {
         cl.addMsg(serverResponseFactory::getResp(482, cl, params));      
-        std::cout<<"sent"<<serverResponseFactory::getResp(482 ,  cl , params) <<std::endl ;   
     }
 
     std::string mode = params["mode"];
@@ -37,7 +35,6 @@ void ModeCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     }
     catch (const std::exception &e)
     {
-        std::cerr << "MODE exception: " << e.what() << std::endl;
         cl.addMsg(serverResponseFactory::getResp(501, cl, params)); 
     }
 }

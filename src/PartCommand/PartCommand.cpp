@@ -5,12 +5,12 @@ void PartCommand::exeChannel(Client& cl, Channel *   ch, std::map<std::string, s
 {
     try {
         if (!cl.getChannel(ch->getName())) {
-            // 442 ERR_NOTONCHANNEL
+            
             cl.addMsg(serverResponseFactory::getResp(442, cl , params  ));
             return;
         }
         
-        // Get optional part message
+        
         std::string partMessage = "Leaving";
         if (params.find("message") != params.end()) {
             partMessage = params["message"];

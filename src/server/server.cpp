@@ -8,10 +8,7 @@
 #include "commandFactory.hpp"
 #include <fcntl.h>
 #include <new>
-/**
- * @brief Constructor for the Server class.
- * 
-*/
+
 
 const std::vector<Channel *  >&  Server::getChannelList() const
 {
@@ -21,7 +18,7 @@ const std::vector<Channel *  >&  Server::getChannelList() const
 Server::Server() : IEventHandler(), listen_fd(-1), _serverName(SERVER_NAME), _port(0), _password("")
 {     
 	_ready2Send = false  ;   
-	// Socket initialization will be done in initServer() with proper parameters
+	
 }  
 
 void Server::initServer(int port, const std::string& password) {
@@ -54,7 +51,7 @@ void Server::initServer(int port, const std::string& password) {
 		throw std::runtime_error("Failed to listen on socket");
 	}
 	
-	// Register server with reactor
+	
 	try {
 		struct epoll_event ev;
 		ev.events = EPOLLIN;
@@ -73,18 +70,18 @@ const std::string& Server::getPassword() const {
 void Server::removeClient(Client* client) {
     if (!client) return;
     
-    // Remove client from all channels before deletion
+    
     for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
         if(*chIt) {
             try {
                 (*chIt)->removeUser(*client);
             } catch (...) {
-                // Ignore errors if client not in this channel
+                
             }
         }
     }
     
-    // Remove from client list
+    
     for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
         if(*it == client) {
             _clientList.erase(it);
@@ -92,20 +89,20 @@ void Server::removeClient(Client* client) {
         }
     }
     
-    // Get client fd before unregistering
+    
     int client_fd = client->getClientFd();
     
-    // Unregister from reactor
+    
     struct epoll_event ev;
     ev.events = EPOLLIN;
     ev.data.fd = client_fd;
     try {
         Reactor::getInstance().unregistre(ev);
     } catch (...) {
-        // Ignore errors during cleanup
+        
     }
     
-    // Delete the client object
+    
     delete client;
 }
 
@@ -113,22 +110,21 @@ void Server::cleanupDisconnectedClients() {
     std::vector<Client*> toDelete;
     
     try {
-        // Find disconnected clients
+        
         for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
             if(*it && (*it)->isDisconnected()) {
                 toDelete.push_back(*it);
             }
         }
         
-        // Remove disconnected clients
+        
         for(std::vector<Client*>::iterator it = toDelete.begin(); it != toDelete.end(); ++it) {
             if(*it) {
                 removeClient(*it);
             }
         }
     } catch (const std::exception &e) {
-        std::cerr << "Error during client cleanup: " << e.what() << std::endl;
-        // Continue operation, don't rethrow
+        
     }
 }  
 void Server::delUser(Client &cl  ) 
@@ -138,7 +134,7 @@ void Server::delUser(Client &cl  )
 		if(cl.getClientFd() ==  (**it).getClientFd() )   
 		{
 			 _clientList.erase(it);  
-			 return; // Successfully found and removed user
+			 return; 
 		}
  	}  
 	throw std::runtime_error("[DELUSER]: user Not Found") ;   
@@ -157,71 +153,94 @@ int Server::getListenFd()
 }
 Server::~Server()
 {
-	// Clean up all clients first (this will remove them from channels)
-	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
-		if(*it) {
-			removeClient(*it);
-		}
-	}
-	_clientList.clear();
 	
-	// Clean up all channels
-	for(std::vector<Channel *>::iterator it = ChannelList.begin(); it != ChannelList.end(); ++it) {
-		if(*it) {
-			delete *it;
-		}
-	}
-	ChannelList.clear();
-	
-	// Close listening socket
-	if(listen_fd != -1) {
-		close(listen_fd);
-		listen_fd = -1;
-	}
-}
-
-void Server::shutdown() {
-	// Send QUIT messages to all clients before shutdown
-	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
-		if(*it) {
-			try {
-				(*it)->addMsg("ERROR :Server shutting down\r\n");
-			} catch (...) {
-				// Ignore errors during shutdown
-			}
-		}
-	}
-	
-	// Clean up all resources (avoid iterator invalidation)
-	while(!_clientList.empty()) {
+	while (!_clientList.empty()) {
 		Client* client = _clientList.back();
 		_clientList.pop_back();
-		if(client) {
-			// Remove from channels manually
-			for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
-				if(*chIt) {
+		if (client) {
+			
+			for (std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
+				if (*chIt) {
 					try {
 						(*chIt)->removeUser(*client);
 					} catch (...) {
-						// Ignore errors during cleanup
+						
 					}
 				}
 			}
+
 			
-			// Get client fd before cleanup
 			int client_fd = client->getClientFd();
-			
-			// Unregister from reactor
 			struct epoll_event ev;
 			ev.events = EPOLLIN;
 			ev.data.fd = client_fd;
 			try {
 				Reactor::getInstance().unregistre(ev);
 			} catch (...) {
-				// Ignore errors during cleanup
+				
+			}
+
+			
+			delete client;
+		}
+	}
+
+	
+	while (!ChannelList.empty()) {
+		Channel* ch = ChannelList.back();
+		ChannelList.pop_back();
+		if (ch) delete ch;
+	}
+
+	
+	if (listen_fd != -1) {
+		close(listen_fd);
+		listen_fd = -1;
+	}
+}
+
+void Server::shutdown() {
+	
+	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
+		if(*it) {
+			try {
+				(*it)->addMsg("ERROR :Server shutting down\r\n");
+			} catch (...) {
+				
+			}
+		}
+	}
+	
+	
+	while(!_clientList.empty()) {
+		Client* client = _clientList.back();
+		_clientList.pop_back();
+		if(client) {
+			
+			for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
+				if(*chIt) {
+					try {
+						(*chIt)->removeUser(*client);
+					} catch (...) {
+						
+					}
+				}
 			}
 			
-			// Delete client
+			
+			int client_fd = client->getClientFd();
+			
+			
+			struct epoll_event ev;
+			ev.events = EPOLLIN;
+			ev.data.fd = client_fd;
+			try {
+				Reactor::getInstance().unregistre(ev);
+			} catch (...) {
+				
+			}
+			
+			
 			delete client;
 		}
 	}
@@ -234,19 +253,7 @@ void Server::shutdown() {
 	ChannelList.clear();
 }
 
-/**
- * @brief Handles an incoming event on the server's listening socket.
- * 
- * This function is responsible for accepting a new client connection,
- * creating a Client object for the connection, and registering the client
- * with the Reactor for event handling.
- * 
- * @param ev The epoll_event structure containing information about the event.
- *           Currently unused in this implementation.
- * 
- * @throws std::runtime_error If the accept() system call fails.
- * @throws std::exception If an error occurs during client registration with the Reactor.
- */
+
 void Server::handle_event(epoll_event ev)
 {
     (void)ev;
@@ -257,7 +264,7 @@ void Server::handle_event(epoll_event ev)
     if (client_fd == -1)
         throw std::runtime_error("fatal : Accept() ");
 
-    // Set client socket to non-blocking mode (MANDATORY requirement)
+    
     if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
         close(client_fd);
         throw std::runtime_error("Failed to set client socket to non-blocking mode");
@@ -270,15 +277,13 @@ void Server::handle_event(epoll_event ev)
         ev.events = EPOLLIN ;
         ev.data.fd = client_fd;
         Reactor::getInstance().registre(ev, client);  
-        // Add client to the client list for tracking
+        
         this->_clientList.push_back(client);   
     } catch (const std::bad_alloc &e) {
-        std::cerr << "Memory allocation failed: " << e.what() << std::endl;
         if (client) delete client;
         close(client_fd);
         throw std::runtime_error("Failed to allocate memory for new client");
     } catch (const std::exception &e) {
-        std::cerr << "Client registration failed: " << e.what() << std::endl;
         if (client) delete client;
         close(client_fd);
         throw;
@@ -296,7 +301,6 @@ bool Server::isNickAvai(std::string  nick   )
 } 
 Client&  Server::getUser(std::string nickname )   
 {     
-	std::cout<<"nickname"<<nickname<<std::endl ;    
 	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); it++)  
 	{   
 		  if((*it)->getNickName() == nickname)  
@@ -310,15 +314,7 @@ Server &Server::getInstance()
 	return instance;
 }
   
-/**
- * @brief Adds a new channel to the server's channel list.
- * 
- * This function creates a new channel and associates it with the given
- * channel name. The channel is then added to the server's ChannelList.
- * 
- * @param CnName Reference to the name of the channel to be added.
- *               This name will be used as the key in the ChannelList map.
- */  
+  
 
 Channel*   Server::AddChannel(std::string  &ChName ,  Client  &owner    ) 
 {              
@@ -332,18 +328,7 @@ Channel*   Server::AddChannel(std::string  &ChName ,  Client  &owner    )
 	  return  newChannel ;      
 }  
 
-/**
- * @brief Checks if a channel exists in the server's channel list.
- * 
- * This function searches for a channel by its name in the server's channel list.
- * If the channel exists, it returns a pointer to the channel object. If the channel
- * does not exist, it throws a ServerException and logs the error message to the standard error stream.
- * 
- * @param ChName The name of the channel to search for.
- * @return Channel* Pointer to the channel object if found, otherwise NULL.
- * 
- * @throws ServerException If the channel is not found in the channel list.
- */
+
 Channel *    Server::IsChannelExist(std::string &ChName   )  
 {  
 	  for(std::vector<Channel *>::iterator it  =  ChannelList.begin() ;  it !=  ChannelList.end() ;  it++ )  
@@ -355,22 +340,19 @@ Channel *    Server::IsChannelExist(std::string &ChName   )
 } 
 
 
-/**
- * @brief Unsubscribes the server from a specified channel by removing it from the channel list.
- * 
- * @param CName A reference to the name of the channel to unsubscribe from.
- * 
- * This function checks if the specified channel exists in the server's channel list.
- * If the channel exists, it removes the channel from the list.
- */
+
 void  Server::UnsubscribeChannel(std::string &ChName )   
 {  
-	  for(std::vector<Channel *>::iterator it =  ChannelList.begin()  ;  it != ChannelList.end() ;  it++  )  
-	  {    
-		  if(ChName == (*it)->getName())  
-		   	ChannelList.erase(it) ; 
-	  }    ;   
-	  throw std::runtime_error("Channel doesn't Exist") ;   
+	for (std::vector<Channel *>::iterator it = ChannelList.begin(); it != ChannelList.end(); ++it) {
+		if (ChName == (*it)->getName()) {
+			Channel* ch = *it;
+			
+			delete ch;
+			ChannelList.erase(it);
+			return;
+		}
+	}
+	throw std::runtime_error("Channel doesn't Exist");
 }      
 
 
@@ -408,13 +390,11 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 							if(!target  &&     cmd  == "JOIN")  
 							{   
 								target = Server::getInstance().AddChannel(params["channel"] , sender) ;     
-								std::cout<<"entred the not found channel scoop"<<target->getName()<<std::endl ;   
 								sender.subscribe2channel(*target) ;   
 							}         
 							if( target)    
 							{      
 								target->ExecuteCommand(*Cmd , sender  , params) ;      
-								std::cout<<"entred the exeeeec scoop"<<std::endl;      
 							} 
 						}  
 				}
@@ -426,7 +406,7 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
             Server::getInstance().beReady2Send() ;
         } catch (const std::exception& e) {
             delete Cmd;
-            throw; // Re-throw the exception after cleanup
+            throw; 
         }
         delete Cmd ;   
 	}
@@ -439,8 +419,5 @@ void  Server::Respond2User(int Client_fd , std::string resp  )
 	    { 
 			throw std::runtime_error("[Response] :  Problem in send mechanisme") ;   
 		}  
-		/* 
-		  
-			[todo]  Implement  send logic here
-		*/
+		
 } ;

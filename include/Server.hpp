@@ -1,5 +1,5 @@
 #include <sys/types.h>       
-#include <sys/socket.h>      // socket(), bind(), listen(), accept(), etc.
+#include <sys/socket.h>      
 #include <netinet/in.h>   
 #include <arpa/inet.h>  
 #include <unistd.h>      
@@ -66,6 +66,6 @@ class  Server: public IEventHandler
           const std::string& getPassword() const;
           void removeClient(Client* client);
           void cleanupDisconnectedClients();
-          void shutdown();  // Graceful shutdown function
-     //--->ac         
+          void shutdown();  
+     
 }  ;          

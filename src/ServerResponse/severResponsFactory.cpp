@@ -9,7 +9,7 @@ std::string serverResponseFactory::replacePlaceholders(std::string tmpl, std::ma
 {
     std::string result = tmpl;
 
-    // Handle the special {nicklist} placeholder
+    
     const std::string nicklistKey = "{nicklist}";
     size_t nicklistPos = result.find(nicklistKey);
     if (nicklistPos != std::string::npos)
@@ -25,7 +25,7 @@ std::string serverResponseFactory::replacePlaceholders(std::string tmpl, std::ma
         result.replace(nicklistPos, nicklistKey.length(), nicklist);
     }
 
-    // Replace other placeholders
+    
     for (std::map<std::string, std::string>::const_iterator it = values.begin(); it != values.end(); ++it)
     {
         std::string key = "{" + it->first + "}";

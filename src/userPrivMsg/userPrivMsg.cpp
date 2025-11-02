@@ -5,7 +5,7 @@
 void userPrivMsg::execute(Client& sender, std::map<std::string, std::string>& params)
 {
 
-    // Check required fields
+    
     if (params.find("message") == params.end()) {
         sender.addMsg(serverResponseFactory::getResp(412, sender, params));
         return;

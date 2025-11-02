@@ -48,19 +48,19 @@ Client::Client(int client_fd) :_client_fd(client_fd), _state(CONNECTING), _disco
 
 Client::~Client()
 {   
-    // Close file descriptor if open
+    
     if(_client_fd != -1) {
         close(_client_fd);
         _client_fd = -1;
     }
     
-    // Clear message queue to free vector memory
+    
     _msgQue.clear();
     
-    // Clear subscribed channels vector
+    
     _subscribed2Channel.clear();
     
-    // Clear message buffer
+    
     _messageBuffer.clear();
 }
 
@@ -70,13 +70,13 @@ void Client::rcvMsg(std::string &Msg)   const
         return;
     }
     
-    // Ensure message ends with \r\n for IRC protocol
+    
     if (!Msg.empty() && Msg.substr(Msg.length() >= 2 ? Msg.length() - 2 : 0) != "\r\n") {
         Msg += "\r\n";
     }
     
-    // Use the queue system for proper async sending
-    // addMsg(Msg);
+    
+    
 }  ;   
 
   std::map<std::string ,  std::string> Client::userData () const   
@@ -107,7 +107,6 @@ void  Client::userCommand(Command  & cmd  , std::map<std::string ,  std::string 
     }  
     catch(std::exception &e  ) 
     { 
-         std::cerr<<e.what()<<std::endl ;    
     }
 }  ;   
    Channel*  Client::getChannel(std::string chName)  
@@ -133,7 +132,6 @@ void Client::addMsg(std::string msg) {
     ev.events = EPOLLIN | EPOLLOUT;
     ev.data.fd = getClientFd();
     Reactor::getInstance().registre(ev, this)   ; 
-    std::cout<<"we sent-----------------"<<msg<<std::endl  ;    
 }
 
 void Client::handle_event(epoll_event e)
@@ -143,7 +141,6 @@ void Client::handle_event(epoll_event e)
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);      
         if (n > 0) {  
             _messageBuffer.append(buffer.data(), n);     
-            std::cout<<_messageBuffer<<std::endl ;   
             size_t pos;
             while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
@@ -156,12 +153,12 @@ void Client::handle_event(epoll_event e)
                 }
             }
             
-            // Handle plain \n (Unix line endings)
+            
             while ((pos = _messageBuffer.find("\n")) != std::string::npos) {
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 1);
                 
-                // Parse command and get results immediately to avoid singleton overwrites
+                
                 if (Parser::getInstance().parse(command)) {
                     std::string cmd = Parser::getInstance().getCommand();
                     std::map<std::string, std::string> params = Parser::getInstance().getParams();
@@ -169,13 +166,13 @@ void Client::handle_event(epoll_event e)
                 }
             }
         } else if (n == 0) {
-            // Client disconnected normally
+            
             close(_client_fd);
             _client_fd = -1;
             _disconnected = true;
             return;
         } else {
-            // Error occurred
+            
             close(_client_fd);
             _client_fd = -1;
             _disconnected = true;
@@ -199,14 +196,14 @@ void Client::handle_event(epoll_event e)
         
         if (_msgQue.empty()) {
             struct epoll_event ev;
-            ev.events = EPOLLIN;  // Only listen for input
+            ev.events = EPOLLIN;  
             ev.data.fd = getClientFd();
             Reactor::getInstance().registre(ev, this);
         }
     }
 }
 
-// Authentication
+
 bool Client::isRegistered() const {
     return _state == REGISTERED;
 }

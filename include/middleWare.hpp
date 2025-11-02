@@ -3,13 +3,13 @@
    
 class middleWare{  
     private:
-        middleWare() ;   
-        std::map<std::string  ,std::string> _perms  ;  
-        middleWare * _instance    ;    
+        middleWare();
+        std::map<std::string, std::string> _perms;
+        static middleWare* _instance;
     public :
         ~middleWare()  ;      
         void addPerm(std::string cmd ,  std::string perms ) ;  
         bool isExist(std::string &cmd ) const ;    
         bool  checkPerm(std::string cmd  ,std::string role   )  ;      
-        middleWare& getInstance() ;     
+        static middleWare& getInstance();
     } ;  

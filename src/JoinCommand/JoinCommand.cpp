@@ -1,8 +1,6 @@
 #include "JoinCommand.hpp"
   
-/* 
-    Implement an Execute Command in  Channel Class 
-*/
+
 
 void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std::string> &params)     
 {            
@@ -13,13 +11,13 @@ void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
             return;
         }
 
-        // Invite only check
+        
         if (ch->isInviteOnly() && !ch->isUserInvited(cl)) {
             cl.addMsg(serverResponseFactory::getResp(473, cl, params, ch));
             return;
         }
 
-        // Key protected channel
+        
         if (ch->isLocked()) {
             if (params.count("key") == 0 || params.at("key").empty()) {
                 cl.addMsg(serverResponseFactory::getResp(475, cl, params, ch));
@@ -32,7 +30,7 @@ void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
             }
         }
 
-        // Finally attempt to enter the channel
+        
         ch->enterChannel(&cl);
         cl.addMsg(serverResponseFactory::getResp(1001, cl, params, ch));
         cl.addMsg(serverResponseFactory::getResp(353, cl, params, ch));
@@ -41,7 +39,7 @@ void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
             cl.addMsg(serverResponseFactory::getResp(332, cl, params, ch));
         }
     } catch (std::exception &e) {
-        // Generic failure when channel operations throw
+        
         cl.addMsg(serverResponseFactory::getResp(403, cl, params, ch));
         return;
     }

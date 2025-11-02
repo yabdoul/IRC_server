@@ -34,7 +34,7 @@ bool Parser::parse(const std::string& rawCommand) {
         return false;
     }
     
-    // Remove trailing \r\n if present
+    
     if (cleanCommand.size() >= 2 && cleanCommand.substr(cleanCommand.size() - 2) == "\r\n") {
         cleanCommand = cleanCommand.substr(0, cleanCommand.size() - 2);
     }
@@ -43,64 +43,64 @@ bool Parser::parse(const std::string& rawCommand) {
     std::string token;
     std::vector<std::string> tokens;
     
-    // Parse prefix if present
+    
     if (!cleanCommand.empty() && cleanCommand[0] == ':') {
         iss >> token;
-        prefix = token.substr(1); // Remove the ':' prefix
+        prefix = token.substr(1); 
     }
     
-    // Parse command
+    
     if (iss >> token) {
         command = token;
-        // Convert to uppercase for consistency
+        
         std::transform(command.begin(), command.end(), command.begin(), ::toupper);
     }
     
-    // Parse remaining parameters
+    
     std::vector<std::string> parameters;
     std::string remaining;
     
-    // Check for trailing parameter (starts with ':')
+    
     std::getline(iss, remaining);
     if (!remaining.empty() && remaining[0] == ' ') {
-        remaining = remaining.substr(1); // Remove leading space
+        remaining = remaining.substr(1); 
     }
     
     size_t colonPos = remaining.find(" :");
     std::string trailingParam;
     
     if (colonPos != std::string::npos) {
-        trailingParam = remaining.substr(colonPos + 2); // +2 to skip " :"
+        trailingParam = remaining.substr(colonPos + 2); 
         remaining = remaining.substr(0, colonPos);
     }
     
-    // Parse space-separated parameters
+    
     std::istringstream paramStream(remaining);
     std::string param;
     while (paramStream >> param) {
         parameters.push_back(param);
     }
     
-    // Add trailing parameter if it exists
+    
     if (!trailingParam.empty()) {
         parameters.push_back(trailingParam);
     }
     
-    // Validate command
+    
     if (!validateCommand(command)) {
         return false;
     }
     
-    // Map parameters to appropriate keys based on command
+    
     mapCommandParameters(command, parameters);
     
     isValid = true;
     return true;
 }
 
-// Input sanitization to prevent injection attacks
+
 bool Parser::sanitizeInput(std::string& input) {
-    // Remove null bytes and dangerous control characters
+    
     for (size_t i = 0; i < input.length(); ++i) {
         unsigned char c = input[i];
         if (c == 0 || (c < 32 && c != '\r' && c != '\n')) {
@@ -109,7 +109,7 @@ bool Parser::sanitizeInput(std::string& input) {
         }
     }
     
-    // RFC 2812: Max message length is 512 characters including CRLF
+    
     if (input.length() > 510) {
         input = input.substr(0, 510);
         lastError = "Message truncated: exceeds maximum length";
@@ -119,14 +119,14 @@ bool Parser::sanitizeInput(std::string& input) {
     return true;
 }
  
-// Validate IRC command names
+
 bool Parser::validateCommand(const std::string& cmd) {
     if (cmd.empty()) {
         lastError = "Empty command";
         return false;
     }
     
-    // Check if it's a numeric command (001, 002, etc.)
+    
     bool isNumeric = true;
     for (size_t i = 0; i < cmd.length(); ++i) {
         if (!std::isdigit(cmd[i])) {
@@ -136,10 +136,10 @@ bool Parser::validateCommand(const std::string& cmd) {
     }
     
     if (isNumeric && cmd.length() == 3) {
-        return true; // Valid numeric command
+        return true; 
     }
     
-    // List of valid IRC commands
+    
     if (cmd == "PASS" || cmd == "NICK" || cmd == "USER" || cmd == "JOIN" ||
         cmd == "PART" || cmd == "PRIVMSG" || cmd == "NOTICE" || cmd == "KICK" ||
         cmd == "INVITE" || cmd == "MODE" || cmd == "TOPIC" || cmd == "QUIT" ||
@@ -152,13 +152,13 @@ bool Parser::validateCommand(const std::string& cmd) {
     return false;
 }
 
-// Validate IRC nickname format
+
 bool Parser::validateNickname(const std::string& nick) {
     if (nick.empty() || nick.length() > 9) {
         return false;
     }
     
-    // First character must be letter or special char
+    
     char first = nick[0];
     if (!std::isalpha(first) && first != '[' && first != ']' && 
         first != '\\' && first != '`' && first != '_' && 
@@ -166,7 +166,7 @@ bool Parser::validateNickname(const std::string& nick) {
         return false;
     }
     
-    // Remaining chars: letters, digits, or special chars
+    
     for (size_t i = 1; i < nick.length(); ++i) {
         char c = nick[i];
         if (!std::isalnum(c) && c != '[' && c != ']' && c != '\\' && 
@@ -178,7 +178,7 @@ bool Parser::validateNickname(const std::string& nick) {
     return true;
 }
 
-// Validate IRC channel name format
+
 bool Parser::validateChannelName(const std::string& channel) {
     if (channel.empty() || channel.length() > 50) {
         return false;
@@ -188,7 +188,7 @@ bool Parser::validateChannelName(const std::string& channel) {
         return false;
     }
     
-    // No spaces, commas, or control characters
+    
     for (size_t i = 1; i < channel.length(); ++i) {
         char c = channel[i];
         if (c == ' ' || c == ',' || c == '\0' || c == '\r' || c == '\n' || c == 7) {
@@ -198,7 +198,7 @@ bool Parser::validateChannelName(const std::string& channel) {
     return true;
 }
 
-// Handle multiple commands in one buffer
+
 std::vector<std::string> Parser::parseMultiple(const std::string& buffer) {
     std::vector<std::string> commands;
     std::string tempBuffer = buffer;
@@ -215,7 +215,7 @@ std::vector<std::string> Parser::parseMultiple(const std::string& buffer) {
     return commands;
 }
 
-// Handle partial messages in buffer
+
 std::string Parser::parsePartialBuffer(std::string& buffer) {
     size_t pos = 0;
     
@@ -225,13 +225,12 @@ std::string Parser::parsePartialBuffer(std::string& buffer) {
         
         if (!command.empty()) {
             if (!parse(command)) {
-                // Log parsing error but continue
-                std::cerr << "Parse error: " << lastError << std::endl;
+                
             }
         }
     }
     
-    // Return remaining partial message
+    
     return buffer;
 }
 
@@ -244,14 +243,12 @@ if (cmd == "JOIN") {
         size_t pos = 0;
         while ((pos = channelList.find(',')) != std::string::npos) {
             std::string channel = channelList.substr(0, pos);    
-            std::cout<<channel<<std::endl ;   
             if (!channel.empty() && (channel[0] == '#' || channel[0] == '&')) {  
                 channels.push_back(channel.substr(1));
             }
             channelList.erase(0, pos + 1);
         } 
     if (!channelList.empty() && (channelList[0] == '#' || channelList[0] == '&')) {
-    std::cout << channelList << std::endl;
     channels.push_back(channelList.substr(1));
 }
 
@@ -290,7 +287,7 @@ if (cmd == "JOIN") {
     else if (cmd == "PRIVMSG" || cmd == "NOTICE") {
         if (parameters.size() >= 2) {
             std::string target = parameters[0];
-            // strip leading ':' if present (robustness for malformed input)
+            
             if (!target.empty() && target[0] == ':') {
                 target = target.substr(1);
             }
@@ -305,7 +302,7 @@ if (cmd == "JOIN") {
                     command = "USERPRIV";
                 }
             } else {
-                // fallback: no explicit target provided, try to use prefix as nickname
+                
                 if (!prefix.empty()) {
                     params["nickname"] = prefix;
                     params["target_type"] = "user";
@@ -322,7 +319,7 @@ if (cmd == "JOIN") {
             params["message"] = msg;
         }
         else if (parameters.size() == 1) {
-            // Only message provided — treat as user-directed if we have a prefix
+            
             std::string msg = parameters[0];
             if (!msg.empty() && msg[0] == ':') {
                 msg = msg.substr(1);
@@ -344,7 +341,7 @@ if (cmd == "JOIN") {
             if (channel[0] == '#' || channel[0] == '&') {
                 params["channel"] = channel.substr(1);
             }
-            params["target"] = parameters[1]; // Users to kick (comma-separated)
+            params["target"] = parameters[1]; 
             if (parameters.size() > 2) {
                 params["reason"] = parameters[2];
             }
@@ -380,7 +377,6 @@ else if (cmd == "MODE") {
 
             if (params["mode"][0] == '+' && params["mode"].find('k') != std::string::npos) {
                 params["key"] = parameters[2]; 
-                std::cout<<"key is"<<params["key"]<<std::endl ;   
             }
         }
     }
@@ -482,13 +478,13 @@ bool Parser::isValidParse()  const  {
     return isValid;
 }
 
-// Static validation helpers
+
 bool Parser::isValidIRCMessage(const std::string& message) {
     if (message.empty() || message.length() > 512) {
         return false;
     }
     
-    // Check for proper CRLF ending
+    
     if (message.length() >= 2) {
         std::string ending = message.substr(message.length() - 2);
         if (ending != "\r\n") {
@@ -502,7 +498,7 @@ bool Parser::isValidIRCMessage(const std::string& message) {
 std::string Parser::sanitizeMessage(const std::string& message) {
     std::string result = message;
     
-    // Remove dangerous characters
+    
     for (size_t i = 0; i < result.length(); ++i) {
         unsigned char c = result[i];
         if (c == 0 || (c < 32 && c != '\r' && c != '\n')) {

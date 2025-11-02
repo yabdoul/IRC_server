@@ -14,7 +14,6 @@ void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     }
 
     if (!ch) {  
-        std::cout<<"channel null"<<std::endl ;   
         cl.addMsg(serverResponseFactory::getResp(403, cl, params));
         return;
     }
@@ -25,7 +24,6 @@ void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     }
 
     if (!Server::getInstance().IsChannelExist(params.at("channel"))) {  
-        std::cout<<"channel doenst  exist"<<std::endl  ;    
         cl.addMsg(serverResponseFactory::getResp(403, cl, params));
         return;
     }
@@ -33,7 +31,7 @@ void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
     try {
         Client &target = Server::getInstance().getUser(params.at("target"));
         if (!target.getChannel(params.at("channel"))) {
-            cl.addMsg(serverResponseFactory::getResp(441, cl, params)); // ERR_USERNOTINCHANNEL
+            cl.addMsg(serverResponseFactory::getResp(441, cl, params)); 
             return;
         }
 
@@ -41,7 +39,6 @@ void KickCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
                            " KICK #" + params.at("channel") + " " + target.getNickName() + " :You have been kicked";
         ch->broadcastMessage(cl, resp);
         ch->kickUser(cl, target, "kicked");
-        std::cout << "user kicked" << std::endl;
     } catch (std::exception &e) {
         cl.addMsg(serverResponseFactory::getResp(401, cl, params));
         return;

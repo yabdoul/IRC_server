@@ -20,7 +20,7 @@ private:
     Logger();
     ~Logger();
     
-    // Delete copy constructor and assignment operator
+    
     Logger(const Logger&);
     Logger& operator=(const Logger&);
     
@@ -41,7 +41,7 @@ public:
     void error(const std::string& message);
 };
 
-// Convenience macros
+
 #define LOG_DEBUG(msg) Logger::getInstance().debug(msg)
 #define LOG_INFO(msg) Logger::getInstance().info(msg)
 #define LOG_WARNING(msg) Logger::getInstance().warning(msg)

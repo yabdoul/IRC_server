@@ -13,9 +13,9 @@ ListCommand::~ListCommand()
 
 bool ListCommand::matchesPattern(const std::string& channelName, const std::string& pattern)
 {
-    // Simple pattern matching with wildcards * and ?
-    // * matches any sequence of characters
-    // ? matches any single character
+    
+    
+    
     
     size_t i = 0, j = 0;
     size_t starIdx = std::string::npos, match = 0;
@@ -46,16 +46,16 @@ bool ListCommand::matchesPattern(const std::string& channelName, const std::stri
 
 bool ListCommand::isChannelVisible( Channel& channel,  Client& client)
 {
-    // Check if channel is visible to the client
-    // For now, we'll implement basic visibility:
-    // - All channels are visible unless they have special modes
-    // - In a full implementation, this would check for +s (secret) and +p (private) modes
     
-    (void)channel;  // Suppress unused parameter warning
-    (void)client;   // Suppress unused parameter warning
     
-    // For basic implementation, all channels are visible
-    // TODO: Implement channel mode checking (+s secret, +p private)
+    
+    
+    
+    (void)channel;  
+    (void)client;   
+    
+    
+    
     return true;
 }
 
@@ -115,7 +115,7 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
             topic = "";
         }
 
-        // Attempt to produce a useful user count if channel tracks members
+        
         std::string userCount = "0";
         try {
             std::ostringstream oss;
@@ -125,8 +125,8 @@ void ListCommand::execute(Client& sender, std::map<std::string, std::string>& pa
             userCount = "0";
         }
 
-        // Prepare a temporary params map with channel-specific data so
-        // response factory can build a proper RPL_LIST (322)
+        
+        
         std::map<std::string, std::string> localParams = params;
         localParams["channel"] = (*it)->getName();
         localParams["users"] = userCount;

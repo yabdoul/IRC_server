@@ -18,13 +18,13 @@ Channel::Channel(){
       _topicTimestamp = 0;
 }  
 Channel::~Channel() {
-    // Clear the invite list to free std::map memory
+    
     _inviteList.clear();
 }    
 
 
 
-// Channel::Channel(Channel &copy){ _inviteList =  copy._inviteList ;}    
+
 Channel::Channel(std::string channelName  ,  Client & owner):_channelName(channelName)
 { 
       _inviteList[&owner] = OP;
@@ -51,7 +51,6 @@ void Channel::ExecuteCommand(Command & cmd, Client& client, std::map<std::string
         ChannelCommand * tmp = dynamic_cast<ChannelCommand *>(&cmd);           
         if(!tmp)  
             { 
-                std::cerr<<"tmp is NULL"<<std::endl ;   
                 return ;   
             }
         tmp->exeChannel(client, this, params);   
@@ -69,7 +68,7 @@ void Channel::inviteUser(Client &sender ,  Client  &target )
       if(_inviteList.count(&target) != 0 )  
             throw std::runtime_error("User already in channel or invite list") ;    
       
-      // (invited but not yet joined)
+      
       _inviteList[&target] =  INV ;      
 }  ;   
  
@@ -143,13 +142,13 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
     char modeChar = mode[1];
     
     switch (modeChar) {
-        case 'i': // Invite-only
+        case 'i': 
             _invitOnly = adding;
             break;
-        case 't': // Topic restricted
+        case 't': 
             _topicRestricted = adding;
             break;
-        case 'k': // Channel key (password)
+        case 'k': 
             if (adding) {
                 _key = param;   
                 locked = true ;   
@@ -158,7 +157,7 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
                 locked = false  ;    
               }
             break;
-        case 'o': // Give/take operator privilege
+        case 'o': 
             if (!param.empty()) {
                 for (std::map<Client*, int>::iterator it = _inviteList.begin(); 
                      it != _inviteList.end(); ++it) {
@@ -169,7 +168,7 @@ void Channel::setMode(Client &sender, const std::string& mode, const std::string
                 }
             }
             break;
-        case 'l': // User limit
+        case 'l': 
             if (adding) {
                 _userLimit = std::atoi(param.c_str());
             } else {
@@ -201,7 +200,6 @@ void Channel::getClients() const
                  { 
                      for(std::map<Client  * , int>::const_iterator  it  = _inviteList.begin() ;  it !=   _inviteList.end( )  ; it++  )
                     { 
-                            std::cout<<it->first->getNickName()<<std::endl ;   
                     }
                     }
 std::vector<Client*> Channel::getChannelMembers() const {

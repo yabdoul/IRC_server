@@ -13,7 +13,6 @@ bool NumericTemplateParser::loadFile(const std::string& filePath)
     std::ifstream file(filePath.c_str());
     if (!file.is_open())
     {
-        std::cerr << "Failed to open numeric template file: " << filePath << std::endl;
         return false;
     }
 

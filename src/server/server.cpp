@@ -388,10 +388,9 @@ void Server::callCommand(std::string& cmd, std::map<std::string, std::string>& p
 
 void  Server::Respond2User(int Client_fd , std::string resp  )  
 {        
-		size_t len =  0 ;   
-	    if(send(Client_fd ,resp.c_str() ,len ,   0 ) == -1)
-	    { 
-			throw std::runtime_error("[Response] :  Problem in send mechanisme") ;   
-		}  
-		
-} ;
+       size_t len = resp.size();
+       ssize_t sent = send(Client_fd, resp.c_str(), len, 0);
+      if (sent == -1 || static_cast<size_t>(sent) != len) {
+          throw std::runtime_error("[Response] : Problem in send mechanism");
+       }  
+}   

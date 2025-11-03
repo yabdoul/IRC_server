@@ -41,7 +41,6 @@ std::string serverResponseFactory::replacePlaceholders(std::string tmpl, std::ma
 
 std::string    serverResponseFactory::getResp(int code  ,   Client & cl   , std::map<std::string , std::string>& params ,  Channel *c     )   
 {     
-    // NumericTemplateParser is a Meyers singleton and ensures templates are loaded once.
     std::string response;
     if (code == 1001)
         response = replacePlaceholders(":{nick}!{user}@{host} JOIN :#{channel}", respData::getRespData(cl, params), c);

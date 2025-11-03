@@ -13,7 +13,6 @@ private:
     NumericTemplateParser& operator=( NumericTemplateParser&);
 
 public:
-    // Meyers' singleton: returns a reference to a function-local static instance.
     static NumericTemplateParser& getInstance();
 
     bool loadFile(const std::string& filePath);

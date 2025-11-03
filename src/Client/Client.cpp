@@ -124,7 +124,6 @@ void Client::setNickName(std::string &   nick  )
     _Nick = nick ;        
  }
 void Client::addMsg(std::string msg) {  
-    std::cout<<"sent"<<msg<<std::endl;        
     if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
@@ -141,9 +140,12 @@ void Client::handle_event(epoll_event e)
         std::vector<char> buffer(1024, '\0');    
         ssize_t n = recv(_client_fd, (void *)buffer.data(), buffer.size(), 0);      
         if (n > 0) {  
-            _messageBuffer.append(buffer.data(), n);     
+            _messageBuffer.append(buffer.data(), n);    
+                std::cout<<"text"<<_messageBuffer.data()<<std::endl ;   
             size_t pos;
-            while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {
+            
+            while ((pos = _messageBuffer.find("\r\n")) != std::string::npos) {    
+                std::cout<<"entre the new lines scoop"<<std::endl  ;   
                 std::string command = _messageBuffer.substr(0, pos);
                 _messageBuffer.erase(0, pos + 2);
                 

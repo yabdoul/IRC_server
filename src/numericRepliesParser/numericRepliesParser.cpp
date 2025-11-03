@@ -4,10 +4,6 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>  
-
-
-NumericTemplateParser* NumericTemplateParser::_instance = 0;
-
 bool NumericTemplateParser::loadFile(const std::string& filePath)
 {
     std::ifstream file(filePath.c_str());
@@ -15,6 +11,8 @@ bool NumericTemplateParser::loadFile(const std::string& filePath)
     {
         return false;
     }
+    // Clear existing templates before loading to make loadFile idempotent.
+    _templates.clear();
 
     std::string line;
     while (std::getline(file, line))
@@ -43,4 +41,15 @@ std::string NumericTemplateParser::getTemplate(int code)
     if (it != _templates.end())
         return it->second;
     return ""; 
+}
+
+NumericTemplateParser& NumericTemplateParser::getInstance()
+{
+    static NumericTemplateParser instance;
+    // Ensure templates are loaded once when the singleton is first used.
+    if (instance._templates.empty())
+    {
+        instance.loadFile("config/numericReplies.txt");
+    }
+    return instance;
 }

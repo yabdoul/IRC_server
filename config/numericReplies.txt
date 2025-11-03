@@ -47,3 +47,5 @@
 474=:{server} 474 {nick} {channel} :Cannot join channel (+b)
 475=:{server} 475 {nick} {channel} :Cannot join channel (+k)
 482=:{server} 482 {nick} {channel} :You're not channel operator
+341=:{server} 341 {nick} {nickname} :{channel}
+

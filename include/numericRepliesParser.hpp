@@ -7,19 +7,14 @@
 class NumericTemplateParser
 {
 private:
-    static NumericTemplateParser* _instance;
     std::map<int, std::string> _templates;
     NumericTemplateParser() {}
     NumericTemplateParser( NumericTemplateParser&);
     NumericTemplateParser& operator=( NumericTemplateParser&);
 
 public:
-    static NumericTemplateParser* getInstance()
-    {
-        if (!_instance)
-            _instance = new NumericTemplateParser();
-        return _instance;
-    }
+    // Meyers' singleton: returns a reference to a function-local static instance.
+    static NumericTemplateParser& getInstance();
 
     bool loadFile(const std::string& filePath);
     std::string getTemplate(int code) ;

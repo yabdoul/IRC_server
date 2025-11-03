@@ -66,6 +66,6 @@ class  Server: public IEventHandler
           const std::string& getPassword() const;
           void removeClient(Client* client);
           void cleanupDisconnectedClients();
-          void shutdown();  
+          void terminate() ;  
      
 }  ;          

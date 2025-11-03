@@ -31,7 +31,7 @@ void  inviteCommand::exeChannel(Client &cl , Channel *ch  , std::map<std::string
 
         
         ch->inviteUser(cl, targetClient);
-        cl.addMsg(serverResponseFactory::getResp(341, cl, params, ch)); 
+        targetClient.addMsg(serverResponseFactory::getResp(341, cl, params, ch)); 
     } catch (std::exception &e) {
         
         cl.addMsg(serverResponseFactory::getResp(401, cl, params));

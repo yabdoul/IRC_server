@@ -15,13 +15,13 @@ class Reactor
         void    unregistre(epoll_event ev)  ;
         int Dispatch()  ;     
         void notify(epoll_event  event ) ;        
-        
-        int   getFd()   ;     
+        bool isUp  ;   
+        int   getFd()   ;       
+        void Shutdown() ;   
     private: 
         Reactor();  
         ~Reactor();
     private: 
-
-        int _epoll_fd;
+        int _epoll_fd; 
         std::map<int , IEventHandler *   >  _registred   ;       
 }   ;  

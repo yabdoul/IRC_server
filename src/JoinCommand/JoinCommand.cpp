@@ -39,7 +39,12 @@ void JoinCommand::exeChannel(Client &cl, Channel *ch, std::map<std::string, std:
             cl.addMsg(serverResponseFactory::getResp(332, cl, params, ch));
         }
     } catch (std::exception &e) {
-        
+        std::string err = e.what();
+        if (err.find("full") != std::string::npos) {
+            cl.addMsg(serverResponseFactory::getResp(471, cl, params, ch));
+            return;
+        }
+
         cl.addMsg(serverResponseFactory::getResp(403, cl, params, ch));
         return;
     }

@@ -23,7 +23,7 @@ class ReactorException : public std::exception {
 
 
 Reactor::Reactor() : _epoll_fd(epoll_create(MAX_HANDLE_SZ)) {
-
+     isUp =  false  ;   
 } 
 
 Reactor::~Reactor() {
@@ -36,15 +36,18 @@ Reactor::~Reactor() {
      return Reactor ;     
 }   
         
-
+void Reactor::Shutdown() 
+{ 
+      Server::getInstance().terminate() ;   
+      
+}
 void    Reactor::Run() 
-{     
+{         isUp = true ;   
           Server::getInstance() ;   
-          while(1)
+          while(isUp)
           {
                try {
-                    Demultiplexer();
-                    
+                    Demultiplexer() ;
                     Server::getInstance().cleanupDisconnectedClients();
                } catch (const std::exception &e) {
                     break;
@@ -52,7 +55,7 @@ void    Reactor::Run()
                     break;
                }
           }
-          
+          Reactor::getInstance().Shutdown() ;    
 }  
 
 

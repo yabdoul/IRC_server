@@ -17,11 +17,9 @@ void PrivmsgCommand:: exeChannel(Client &sender , Channel *ch  , std::map<std::s
 {       
     
     if (!ch) {
-        sender.addMsg(serverResponseFactory::getResp(403, sender, params));
+        sender.addMsg(serverResponseFactory::getResp(403, sender, params)) ;
         return;
     }
-
-    
     if (!sender.getChannel(ch->getName())) {
         sender.addMsg(serverResponseFactory::getResp(442, sender, params, ch)); 
         return;

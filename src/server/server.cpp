@@ -199,58 +199,32 @@ Server::~Server()
 	}
 }
 
-void Server::shutdown() {
-	
-	for(std::vector<Client *>::iterator it = _clientList.begin(); it != _clientList.end(); ++it) {
-		if(*it) {
-			try {
-				(*it)->addMsg("ERROR :Server shutting down\r\n");
-			} catch (...) {
-				
-			}
-		}
-	}
-	
-	
+void Server::terminate() {
 	while(!_clientList.empty()) {
 		Client* client = _clientList.back();
 		_clientList.pop_back();
 		if(client) {
-			
-			for(std::vector<Channel *>::iterator chIt = ChannelList.begin(); chIt != ChannelList.end(); ++chIt) {
-				if(*chIt) {
-					try {
-						(*chIt)->removeUser(*client);
-					} catch (...) {
-						
-					}
-				}
-			}
-			
-			
-			int client_fd = client->getClientFd();
-			
-			
+			client->terminate() ;  
 			struct epoll_event ev;
 			ev.events = EPOLLIN;
-			ev.data.fd = client_fd;
+			ev.data.fd = client->getClientFd() ;
 			try {
 				Reactor::getInstance().unregistre(ev);
 			} catch (...) {
-				
 			}
-			
-			
 			delete client;
 		}
 	}
-	
 	for(std::vector<Channel *>::iterator it = ChannelList.begin(); it != ChannelList.end(); ++it) {
 		if(*it) {
 			delete *it;
 		}
 	}
-	ChannelList.clear();
+	struct  epoll_event  ev  ;   
+	ev.events  =  EPOLLIN  ;    
+	ev.data.fd  = this->listen_fd ;       
+	Reactor::getInstance().unregistre(ev) ;   
+	ChannelList.clear();    
 }
 
 

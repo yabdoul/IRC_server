@@ -12,11 +12,10 @@
 #include <signal.h>
 
 
-volatile sig_atomic_t shutdown_requested = 0;
 
 void signal_handler(int signal) {
     (void)signal; 
-    shutdown_requested = 1;
+    Reactor::getInstance().isUp = false  ;
 }
 
 int main(int argc, char **argv) 
@@ -39,12 +38,8 @@ int main(int argc, char **argv)
                 
                 signal(SIGINT, signal_handler);   
                 signal(SIGTERM, signal_handler);  
-                
                 Server::initServer(port, password);
                 Reactor::getInstance().Run();   
-                
-                
-                Server::getInstance().shutdown();
         }  
         catch(const std::exception &e) {
                 return 1;

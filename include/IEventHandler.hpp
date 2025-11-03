@@ -12,6 +12,7 @@ class  IEventHandler
         ~IEventHandler() {} ;  
         IEventHandler(const IEventHandler &copy  )  { (void)copy; }   ;  
         IEventHandler& operator=(IEventHandler  & e )   ;   
-       virtual void handle_event ( epoll_event e)  = 0 ;    
+       virtual void handle_event ( epoll_event e)  = 0 ;      
+       virtual void terminate() =0  ;    
 } ;    
 #endif

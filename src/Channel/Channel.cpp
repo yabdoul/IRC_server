@@ -78,13 +78,16 @@ void Channel::lockChannel(Client &sender)
 }
 void Channel::enterChannel(Client *cl  ) 
 {      
-      if(!_invitOnly || _inviteList.count(cl) > 0 )   
-      {
-        _inviteList.insert(std::make_pair( cl ,  INV )) ;       
-          return;
-      }
-      
-      throw std::runtime_error("Cannot join channel (+i)");   
+    if (_userLimit > 0 && static_cast<int>(_inviteList.size()) >= _userLimit) {
+        throw std::runtime_error("Channel is full");
+    }
+
+    if (!_invitOnly || _inviteList.count(cl) > 0) {
+        _inviteList.insert(std::make_pair(cl, INV));
+        return;
+    }
+
+    throw std::runtime_error("Cannot join channel (+i)");
 }
 
 void Channel::kickUser(Client &sender, Client &target, const std::string& reason) {

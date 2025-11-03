@@ -123,7 +123,8 @@ void Client::setNickName(std::string &   nick  )
  { 
     _Nick = nick ;        
  }
-void Client::addMsg(std::string msg) {     
+void Client::addMsg(std::string msg) {  
+    std::cout<<"sent"<<msg<<std::endl;        
     if (msg.length() < 2 || msg.compare(msg.length() - 2, 2, "\r\n") != 0) {
     msg += "\r\n";
 } 
@@ -252,3 +253,11 @@ void Client::setAuthenticated(bool authenticated) {
         _state = PASSWORD_SET;
     }
 }
+ 
+void Client::terminate()  
+{ 
+    for(std::vector<Channel *>::iterator it =  _subscribed2Channel.begin()  ;  it != _subscribed2Channel.end() ; it++ ) 
+    { 
+        (*it)->removeUser(*this) ;   
+    }
+}  

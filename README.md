@@ -4,19 +4,6 @@ A custom implementation of an Internet Relay Chat (IRC) server written in C++.
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Building](#building)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Supported IRC Commands](#supported-irc-commands)
-- [Architecture](#architecture)
-- [Development](#development)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## 🎯 Overview
 
@@ -24,14 +11,11 @@ This IRC server is designed to handle multiple client connections simultaneously
 
 ## ✨ Features
 
-- **Multi-client Support**: Handle multiple simultaneous connections with epoll-based I/O
-- **Standard IRC Protocol**: Full implementation of core IRC commands and RFC-compliant responses
-- **Real-time Communication**: Instant message delivery and channel broadcasting
-- **Channel Management**: Create, join, leave, and manage chat channels with proper IRC responses
-- **User Authentication**: Complete PASS/USER/NICK registration sequence
-- **Cross-platform Compatibility**: Support for both CRLF and LF line endings
-- **Memory Safe**: AddressSanitizer tested with no memory leaks
-- **Production Ready**: Fully functional IRC server ready for evaluation
+
+## Changelog (2025-11-02)
+
+
+These changes were applied to improve runtime stability and reduce noisy logging during normal operation. If you are developing on the project and prefer to keep comments or debug prints, restore them from your VCS history or re-run the tool with modifications.
 
 ## 📁 Project Structure
 
@@ -70,9 +54,6 @@ IRC_server/
 
 ## 🔧 Prerequisites
 
-- **Compiler**: GCC or Clang with C++98 support
-- **Operating System**: Linux/Unix-based system
-- **Make**: Build automation tool
 
 ## 🛠️ Building
 
@@ -101,8 +82,6 @@ IRC_server/
 ```
 
 **Parameters**:
-- `<port>`: Port number for the server to listen on (e.g., 6667)
-- `<password>`: Server password for client authentication
 
 **Example**:
 ```bash
@@ -137,40 +116,16 @@ Edit `config/numericReplies.txt` to customize server responses:
 ```
 
 **Available Placeholders**:
-- `{nick}`: Client nickname
-- `{user}`: Username
-- `{host}`: Client hostname
-- `{channel}`: Channel name
-- `{servername}`: Server name
-- `{network}`: Network name
-- `{version}`: Server version
-- `{datetime}`: Current date/time
 
 ## 📡 Supported IRC Commands
 
 ### User Commands
-- `NICK <nickname>` - Set or change nickname
-- `USER <username> <hostname> <servername> <realname>` - User registration  
-- `PASS <password>` - Server password authentication
-- `QUIT [message]` - Disconnect from server
 
 ### Channel Commands
-- `JOIN <channel>` - Join a channel (creates if doesn't exist)
-- `PART <channel> [message]` - Leave a channel
-- `PRIVMSG <target> <message>` - Send message to user or channel
-- `LIST` - List all available channels
-- `KICK <channel> <user> [reason]` - Kick user from channel
-- `INVITE <user> <channel>` - Invite user to channel
 
 ### Server Commands
-- `PING <server>` - Ping server (responds with PONG)
-- `PONG <server>` - Pong response
 
 ### Standard IRC Numeric Replies
-- `001-004` - Welcome sequence after successful registration
-- `353` - Channel member names list
-- `366` - End of names list
-- `321-323` - Channel list responses
 
 ## 🏗️ Architecture
 
@@ -185,11 +140,6 @@ Edit `config/numericReplies.txt` to customize server responses:
 
 ### Design Patterns Used
 
-- **Reactor Pattern**: Event-driven architecture for handling multiple clients
-- **Singleton Pattern**: Server and Parser instances for global state management
-- **Command Pattern**: Modular IRC command processing and execution
-- **Factory Pattern**: Dynamic command creation and response generation
-- **Observer Pattern**: Event notification system for client/channel updates
 
 ### Key Classes
 
@@ -213,10 +163,6 @@ class Client : public IEventHandler {
 ```
 
 ### Performance Features
-- **Non-blocking I/O**: All sockets configured with fcntl() for optimal performance
-- **Epoll Multiplexing**: Efficient handling of thousands of concurrent connections
-- **Message Buffering**: Smart buffering system for partial message handling
-- **Memory Management**: AddressSanitizer validated, zero memory leaks
 
 ## 🔧 Development
 
@@ -229,11 +175,6 @@ class Client : public IEventHandler {
 
 ### Code Style Guidelines
 
-- Use consistent spacing and formatting
-- Follow C++98 standard
-- Document public methods
-- Use meaningful variable names
-- Implement proper error handling
 
 ## 🧪 Testing
 
@@ -285,32 +226,12 @@ EOF
 ```
 
 ### Expected Responses
-- Welcome messages (001-004) after authentication
-- Channel join confirmations with member lists
-- Real-time message broadcasting
-- Proper IRC protocol formatting
 
 ## � Current Status: PRODUCTION READY
 
 **Fully Implemented & Tested**:
-- ✅ Complete IRC server with epoll-based event handling
-- ✅ Multi-client simultaneous connections (stress tested)
-- ✅ Full authentication sequence (PASS/USER/NICK)
-- ✅ Channel operations (JOIN/PART/LIST/PRIVMSG)
-- ✅ Real-time message broadcasting between clients
-- ✅ Standard IRC protocol compliance (RFC compliant responses)
-- ✅ Cross-platform line ending support (CRLF/LF)
-- ✅ Memory leak free (AddressSanitizer validated)
-- ✅ Non-blocking socket I/O with fcntl() configuration
-- ✅ Singleton pattern implementation for core components
-- ✅ Command factory pattern for extensibility
 
 **Evaluation Ready**:
-- ✅ All mandatory requirements implemented
-- ✅ Error handling and edge cases covered  
-- ✅ Multi-client communication working flawlessly
-- ✅ Compatible with standard IRC clients (HexChat, irssi, etc.)
-- ✅ Comprehensive testing completed
 
 ## 🤝 Contributing
 
@@ -329,14 +250,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ### Common Issues
 
 **Build Errors**:
-- Ensure all header files are properly included
-- Check for missing dependencies
-- Verify C++98 compatibility
 
 **Runtime Issues**:
-- Verify port is not already in use
-- Check file permissions for config files
-- Ensure proper network configuration
 
 ### Debug Mode
 

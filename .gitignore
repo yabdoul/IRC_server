@@ -7,7 +7,6 @@ PROJECT_BRIEF*.md
 IRC_Server_Brief*.pdf
 IRC_Server_Brief*.html
 IRC_Server_Project_Brief.pdf
-README.md
 
 # Test and debug scripts
 test_*.sh

@@ -39,13 +39,8 @@ void nickCommand::execute(Client &cl,   std::map<std::string, std::string> &para
         cl.addMsg(serverResponseFactory::getResp(432, cl, params));
         return;
     }
-    
-    std::string oldNick = cl.getNickName();
-    cl.setNickName(newNick);
-    
-    if (cl.isRegistered() && !oldNick.empty()) {
-        std::string resp = ":" + oldNick + "!" + cl.getUsername() + "@" +
-                           std::string(SERVER_NAME) + " NICK :" + newNick + "\r\n";
-        cl.informAll(resp);
-    }
+std::string resp = ":" + cl.getNickName() + "!" + cl.getUsername() + "@" +
+                   std::string(SERVER_NAME) + " NICK :" + newNick + "\r\n";
+    cl.setNickName(newNick);   
+    cl.informAll(resp) ;   
  }
